@@ -1,0 +1,2205 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+be7791c7,R84b,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R84b_1,Create delivery record when delivery method is selected,"Feature: Delivery Lifecycle Management
+  Scenario: Create delivery record for delivery method selection
+    Given an authenticated user has created a rent request for an available rentable item
+    And the user selects delivery as the fulfillment method
+    And delivery scheduling and time-window validation passes
+    When the system processes the delivery method selection
+    Then a delivery record shall be created and associated with the rent record
+    And the delivery record shall be initialized with status Scheduled","Validates that delivery records are created only when delivery method is explicitly selected, and that the record is properly associated with the rent request and initialized with the correct initial status.",E1|E2|E3|E8,"The system shall create a delivery record associated with the rent record when delivery is selected.|Delivery scheduling and time-window validation must occur before delivery record creation.|The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.",2eee991de900fd57|D81|G81b|I81|I82|I83|R21|R25|R62|R81c|R83b|R84b|R87b|R91c,Delivery lifecycle management rule,Delivery lifecycle management rule,"[1] source=R84b type=Requirement/SrcChunk hops=0 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[2] source=R84b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[3] source=R84b type=Requirement hops=0 rel=TARGET
+Delivery lifecycle management rule
+
+[4] source=I83 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=IMPLEMENTS
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=I83 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[6] source=G81b type=Gap hops=1 rel=AFFECTS
+Delivery and rent lifecycle synchronization ambiguity
+
+[7] source=I83 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery status lifecycle
+
+[8] source=R91c type=Requirement hops=1 rel=REFINES
+Delivery lifecycle synchronization
+
+[9] source=R91c type=Requirement/SrcChunk hops=1 chunk=ee9884fb945974bf doc=JIRA-Notifications.md rel=REFINES
+[
+  {
+    ""ticket_id"": ""JIRA-NOTIF-501"",
+    ""summary"": ""Lifecycle Event Notification Triggers"",
+    ""description"": ""Implement notification triggers for the key rental lifecycle changes defined in the current notification specification, ensuring that user-facing and process-facing transitions both emit the expected events."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-502"",
+    ""summary"": ""Email Delivery Reliability"",
+    ""description"": ""Implement the email delivery service with failure handling and retry support so message delivery remains dependable under transient delivery issues."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-25T09:00:00Z"",
+        ""text"": ""The retry flow is now limited to a small number of repeated attempts before the failure is escalated into the operational logging path. Please confirm whether that threshold should stay configurable or remain fixed for beta.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configura
+
+[10] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[11] source=R81c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery method selection rule
+
+[12] source=R83b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling rule
+
+[13] source=R87b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery fee calculation rule
+
+[14] source=D81 type=Specification hops=1 rel=DEFINED_IN
+Delivery Spec
+
+[15] source=G81b type=Gap/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[16] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection
+
+[18] source=I82 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R25 type=Requirement hops=2 rel=REFINES > AFFECTS
+End-of-rent lifecycle transition
+
+[21] source=R62 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rental cost calculation rule","R84b targets delivery lifecycle management for rent requests. The system must support creation of delivery records when delivery is explicitly selected, track delivery status through defined states (Scheduled, In Transit, Delivered, Failed), restrict status updates to authorized users, and notify users of status changes. Delivery records are only created for delivery method selections, not for pickup orders. These tests validate core lifecycle operations, authorization controls, status transitions, notifications, and the distinction between delivery and pickup workflows.","## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item. || The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed. || The system shall create a delivery record associated with the rent record when delivery is selected. || Delivery scheduling and time-window validation must occur before delivery record creation. || The system shall allow authorized users to update delivery status. || The system shall notify the user when delivery status changes.",Delivery status updates are restricted to authorized users only. || Delivery records are only created when delivery method is explicitly selected; pickup orders do not trigger delivery lifecycle management.,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15|E16|E17,"R84b targets delivery lifecycle management. PRIMARY evidence (E1–E12) establishes core delivery lifecycle rules from TOOLCHAIN-CONF-DELIVERY-01 Section 8.3: delivery record creation, status tracking (Scheduled, In Transit, Delivered, Failed), authorized status updates, and user notifications. E4–E6 confirm implementation of delivery status lifecycle. E8–E10 identify related requirements (delivery method selection, scheduling, fee calculation) as prerequisites or companions. CONTEXT evidence (E13–E17) identifies synchronization ambiguities with rent lifecycle and unresolved questions about status exposure and validation semantics. No direct conflicts detected; gaps center on lifecycle synchronization and internal vs. external status visibility."" Filtered provenance/meta statements from operative_context: Delivery lifecycle is defined in TOOLCHAIN-CONF-DELIVERY-01 Section 8.3. Filtered abstract or low-relevance operative statements: Delivery method selection (pickup vs. delivery) is a prerequisite for delivery lifecycle management. | Delivery fee calculation is associated with the delivery lifecycle.",1,0,0,0
+be7791c7,R84b,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R84b_2,No delivery record created for pickup method selection,"Feature: Delivery Lifecycle Management
+  Scenario: Pickup method does not trigger delivery lifecycle
+    Given an authenticated user has created a rent request for an available rentable item
+    And the user selects pickup as the fulfillment method
+    When the system processes the pickup method selection
+    Then no delivery record shall be created
+    And delivery lifecycle management shall not be initiated","Confirms that delivery records are only created for delivery method selections and that pickup orders do not trigger delivery lifecycle management, as specified in the exception.",E8|E10,Delivery records are only created when delivery method is explicitly selected; pickup orders do not trigger delivery lifecycle management.,2eee991de900fd57|D81|G81b|I81|I82|I83|R21|R25|R62|R81c|R83b|R84b|R87b|R91c,Delivery lifecycle management rule,Delivery lifecycle management rule,"[1] source=R84b type=Requirement/SrcChunk hops=0 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[2] source=R84b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[3] source=R84b type=Requirement hops=0 rel=TARGET
+Delivery lifecycle management rule
+
+[4] source=I83 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=IMPLEMENTS
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=I83 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[6] source=G81b type=Gap hops=1 rel=AFFECTS
+Delivery and rent lifecycle synchronization ambiguity
+
+[7] source=I83 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery status lifecycle
+
+[8] source=R91c type=Requirement hops=1 rel=REFINES
+Delivery lifecycle synchronization
+
+[9] source=R91c type=Requirement/SrcChunk hops=1 chunk=ee9884fb945974bf doc=JIRA-Notifications.md rel=REFINES
+[
+  {
+    ""ticket_id"": ""JIRA-NOTIF-501"",
+    ""summary"": ""Lifecycle Event Notification Triggers"",
+    ""description"": ""Implement notification triggers for the key rental lifecycle changes defined in the current notification specification, ensuring that user-facing and process-facing transitions both emit the expected events."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-502"",
+    ""summary"": ""Email Delivery Reliability"",
+    ""description"": ""Implement the email delivery service with failure handling and retry support so message delivery remains dependable under transient delivery issues."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-25T09:00:00Z"",
+        ""text"": ""The retry flow is now limited to a small number of repeated attempts before the failure is escalated into the operational logging path. Please confirm whether that threshold should stay configurable or remain fixed for beta.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configura
+
+[10] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[11] source=R81c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery method selection rule
+
+[12] source=R83b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling rule
+
+[13] source=R87b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery fee calculation rule
+
+[14] source=D81 type=Specification hops=1 rel=DEFINED_IN
+Delivery Spec
+
+[15] source=G81b type=Gap/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[16] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection
+
+[18] source=I82 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R25 type=Requirement hops=2 rel=REFINES > AFFECTS
+End-of-rent lifecycle transition
+
+[21] source=R62 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rental cost calculation rule","R84b targets delivery lifecycle management for rent requests. The system must support creation of delivery records when delivery is explicitly selected, track delivery status through defined states (Scheduled, In Transit, Delivered, Failed), restrict status updates to authorized users, and notify users of status changes. Delivery records are only created for delivery method selections, not for pickup orders. These tests validate core lifecycle operations, authorization controls, status transitions, notifications, and the distinction between delivery and pickup workflows.","## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item. || The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed. || The system shall create a delivery record associated with the rent record when delivery is selected. || Delivery scheduling and time-window validation must occur before delivery record creation. || The system shall allow authorized users to update delivery status. || The system shall notify the user when delivery status changes.",Delivery status updates are restricted to authorized users only. || Delivery records are only created when delivery method is explicitly selected; pickup orders do not trigger delivery lifecycle management.,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15|E16|E17,"R84b targets delivery lifecycle management. PRIMARY evidence (E1–E12) establishes core delivery lifecycle rules from TOOLCHAIN-CONF-DELIVERY-01 Section 8.3: delivery record creation, status tracking (Scheduled, In Transit, Delivered, Failed), authorized status updates, and user notifications. E4–E6 confirm implementation of delivery status lifecycle. E8–E10 identify related requirements (delivery method selection, scheduling, fee calculation) as prerequisites or companions. CONTEXT evidence (E13–E17) identifies synchronization ambiguities with rent lifecycle and unresolved questions about status exposure and validation semantics. No direct conflicts detected; gaps center on lifecycle synchronization and internal vs. external status visibility."" Filtered provenance/meta statements from operative_context: Delivery lifecycle is defined in TOOLCHAIN-CONF-DELIVERY-01 Section 8.3. Filtered abstract or low-relevance operative statements: Delivery method selection (pickup vs. delivery) is a prerequisite for delivery lifecycle management. | Delivery fee calculation is associated with the delivery lifecycle.",1,0,0,0
+be7791c7,R84b,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R84b_3,Delivery status transitions through valid lifecycle states,"Feature: Delivery Lifecycle Management
+  Scenario: Delivery status progresses through valid states
+    Given a delivery record exists with status Scheduled
+    And the user is authorized to update delivery status
+    When the system updates the delivery status to In Transit
+    Then the delivery record status shall change to In Transit
+    And when the system updates the delivery status to Delivered
+    Then the delivery record status shall change to Delivered",Validates that delivery status can transition through the defined lifecycle states (Scheduled → In Transit → Delivered) and that status updates are properly persisted.,E4|E5|E6,"The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.|The system shall allow authorized users to update delivery status.",2eee991de900fd57|D81|G81b|I81|I82|I83|R21|R25|R62|R81c|R83b|R84b|R87b|R91c,Delivery lifecycle management rule,Delivery lifecycle management rule,"[1] source=R84b type=Requirement/SrcChunk hops=0 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[2] source=R84b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[3] source=R84b type=Requirement hops=0 rel=TARGET
+Delivery lifecycle management rule
+
+[4] source=I83 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=IMPLEMENTS
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=I83 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[6] source=G81b type=Gap hops=1 rel=AFFECTS
+Delivery and rent lifecycle synchronization ambiguity
+
+[7] source=I83 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery status lifecycle
+
+[8] source=R91c type=Requirement hops=1 rel=REFINES
+Delivery lifecycle synchronization
+
+[9] source=R91c type=Requirement/SrcChunk hops=1 chunk=ee9884fb945974bf doc=JIRA-Notifications.md rel=REFINES
+[
+  {
+    ""ticket_id"": ""JIRA-NOTIF-501"",
+    ""summary"": ""Lifecycle Event Notification Triggers"",
+    ""description"": ""Implement notification triggers for the key rental lifecycle changes defined in the current notification specification, ensuring that user-facing and process-facing transitions both emit the expected events."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-502"",
+    ""summary"": ""Email Delivery Reliability"",
+    ""description"": ""Implement the email delivery service with failure handling and retry support so message delivery remains dependable under transient delivery issues."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-25T09:00:00Z"",
+        ""text"": ""The retry flow is now limited to a small number of repeated attempts before the failure is escalated into the operational logging path. Please confirm whether that threshold should stay configurable or remain fixed for beta.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configura
+
+[10] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[11] source=R81c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery method selection rule
+
+[12] source=R83b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling rule
+
+[13] source=R87b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery fee calculation rule
+
+[14] source=D81 type=Specification hops=1 rel=DEFINED_IN
+Delivery Spec
+
+[15] source=G81b type=Gap/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[16] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection
+
+[18] source=I82 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R25 type=Requirement hops=2 rel=REFINES > AFFECTS
+End-of-rent lifecycle transition
+
+[21] source=R62 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rental cost calculation rule","R84b targets delivery lifecycle management for rent requests. The system must support creation of delivery records when delivery is explicitly selected, track delivery status through defined states (Scheduled, In Transit, Delivered, Failed), restrict status updates to authorized users, and notify users of status changes. Delivery records are only created for delivery method selections, not for pickup orders. These tests validate core lifecycle operations, authorization controls, status transitions, notifications, and the distinction between delivery and pickup workflows.","## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item. || The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed. || The system shall create a delivery record associated with the rent record when delivery is selected. || Delivery scheduling and time-window validation must occur before delivery record creation. || The system shall allow authorized users to update delivery status. || The system shall notify the user when delivery status changes.",Delivery status updates are restricted to authorized users only. || Delivery records are only created when delivery method is explicitly selected; pickup orders do not trigger delivery lifecycle management.,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15|E16|E17,"R84b targets delivery lifecycle management. PRIMARY evidence (E1–E12) establishes core delivery lifecycle rules from TOOLCHAIN-CONF-DELIVERY-01 Section 8.3: delivery record creation, status tracking (Scheduled, In Transit, Delivered, Failed), authorized status updates, and user notifications. E4–E6 confirm implementation of delivery status lifecycle. E8–E10 identify related requirements (delivery method selection, scheduling, fee calculation) as prerequisites or companions. CONTEXT evidence (E13–E17) identifies synchronization ambiguities with rent lifecycle and unresolved questions about status exposure and validation semantics. No direct conflicts detected; gaps center on lifecycle synchronization and internal vs. external status visibility."" Filtered provenance/meta statements from operative_context: Delivery lifecycle is defined in TOOLCHAIN-CONF-DELIVERY-01 Section 8.3. Filtered abstract or low-relevance operative statements: Delivery method selection (pickup vs. delivery) is a prerequisite for delivery lifecycle management. | Delivery fee calculation is associated with the delivery lifecycle.",1,0,0,0
+be7791c7,R84b,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R84b_4,Delivery status update restricted to authorized users,"Feature: Delivery Lifecycle Management
+  Scenario: Unauthorized user cannot update delivery status
+    Given a delivery record exists with status Scheduled
+    And a user without delivery status update authorization
+    When the user attempts to update the delivery status to In Transit
+    Then the status update shall be rejected
+    And the delivery record status shall remain Scheduled
+    And an authorization error shall be returned","Confirms that delivery status updates are restricted to authorized users only, enforcing the authorization exception specified in the requirement.",E5|E6,Delivery status updates are restricted to authorized users only.|The system shall allow authorized users to update delivery status.,2eee991de900fd57|D81|G81b|I81|I82|I83|R21|R25|R62|R81c|R83b|R84b|R87b|R91c,Delivery lifecycle management rule,Delivery lifecycle management rule,"[1] source=R84b type=Requirement/SrcChunk hops=0 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[2] source=R84b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[3] source=R84b type=Requirement hops=0 rel=TARGET
+Delivery lifecycle management rule
+
+[4] source=I83 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=IMPLEMENTS
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=I83 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[6] source=G81b type=Gap hops=1 rel=AFFECTS
+Delivery and rent lifecycle synchronization ambiguity
+
+[7] source=I83 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery status lifecycle
+
+[8] source=R91c type=Requirement hops=1 rel=REFINES
+Delivery lifecycle synchronization
+
+[9] source=R91c type=Requirement/SrcChunk hops=1 chunk=ee9884fb945974bf doc=JIRA-Notifications.md rel=REFINES
+[
+  {
+    ""ticket_id"": ""JIRA-NOTIF-501"",
+    ""summary"": ""Lifecycle Event Notification Triggers"",
+    ""description"": ""Implement notification triggers for the key rental lifecycle changes defined in the current notification specification, ensuring that user-facing and process-facing transitions both emit the expected events."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-502"",
+    ""summary"": ""Email Delivery Reliability"",
+    ""description"": ""Implement the email delivery service with failure handling and retry support so message delivery remains dependable under transient delivery issues."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-25T09:00:00Z"",
+        ""text"": ""The retry flow is now limited to a small number of repeated attempts before the failure is escalated into the operational logging path. Please confirm whether that threshold should stay configurable or remain fixed for beta.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configura
+
+[10] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[11] source=R81c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery method selection rule
+
+[12] source=R83b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling rule
+
+[13] source=R87b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery fee calculation rule
+
+[14] source=D81 type=Specification hops=1 rel=DEFINED_IN
+Delivery Spec
+
+[15] source=G81b type=Gap/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[16] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection
+
+[18] source=I82 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R25 type=Requirement hops=2 rel=REFINES > AFFECTS
+End-of-rent lifecycle transition
+
+[21] source=R62 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rental cost calculation rule","R84b targets delivery lifecycle management for rent requests. The system must support creation of delivery records when delivery is explicitly selected, track delivery status through defined states (Scheduled, In Transit, Delivered, Failed), restrict status updates to authorized users, and notify users of status changes. Delivery records are only created for delivery method selections, not for pickup orders. These tests validate core lifecycle operations, authorization controls, status transitions, notifications, and the distinction between delivery and pickup workflows.","## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item. || The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed. || The system shall create a delivery record associated with the rent record when delivery is selected. || Delivery scheduling and time-window validation must occur before delivery record creation. || The system shall allow authorized users to update delivery status. || The system shall notify the user when delivery status changes.",Delivery status updates are restricted to authorized users only. || Delivery records are only created when delivery method is explicitly selected; pickup orders do not trigger delivery lifecycle management.,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15|E16|E17,"R84b targets delivery lifecycle management. PRIMARY evidence (E1–E12) establishes core delivery lifecycle rules from TOOLCHAIN-CONF-DELIVERY-01 Section 8.3: delivery record creation, status tracking (Scheduled, In Transit, Delivered, Failed), authorized status updates, and user notifications. E4–E6 confirm implementation of delivery status lifecycle. E8–E10 identify related requirements (delivery method selection, scheduling, fee calculation) as prerequisites or companions. CONTEXT evidence (E13–E17) identifies synchronization ambiguities with rent lifecycle and unresolved questions about status exposure and validation semantics. No direct conflicts detected; gaps center on lifecycle synchronization and internal vs. external status visibility."" Filtered provenance/meta statements from operative_context: Delivery lifecycle is defined in TOOLCHAIN-CONF-DELIVERY-01 Section 8.3. Filtered abstract or low-relevance operative statements: Delivery method selection (pickup vs. delivery) is a prerequisite for delivery lifecycle management. | Delivery fee calculation is associated with the delivery lifecycle.",1,0,0,0
+be7791c7,R84b,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R84b_5,User notification on delivery status change,"Feature: Delivery Lifecycle Management
+  Scenario: User receives notification when delivery status changes
+    Given a delivery record exists with status Scheduled
+    And the user is associated with the rent request
+    And the user is authorized to update delivery status
+    When the system updates the delivery status to In Transit
+    Then the user shall be notified of the status change
+    And the notification shall include the new status In Transit","Validates that users are notified when delivery status changes, ensuring visibility into delivery lifecycle progression.",E6|E7,The system shall notify the user when delivery status changes.|The system shall allow authorized users to update delivery status.,2eee991de900fd57|D81|G81b|I81|I82|I83|R21|R25|R62|R81c|R83b|R84b|R87b|R91c,Delivery lifecycle management rule,Delivery lifecycle management rule,"[1] source=R84b type=Requirement/SrcChunk hops=0 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[2] source=R84b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[3] source=R84b type=Requirement hops=0 rel=TARGET
+Delivery lifecycle management rule
+
+[4] source=I83 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=IMPLEMENTS
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=I83 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[6] source=G81b type=Gap hops=1 rel=AFFECTS
+Delivery and rent lifecycle synchronization ambiguity
+
+[7] source=I83 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery status lifecycle
+
+[8] source=R91c type=Requirement hops=1 rel=REFINES
+Delivery lifecycle synchronization
+
+[9] source=R91c type=Requirement/SrcChunk hops=1 chunk=ee9884fb945974bf doc=JIRA-Notifications.md rel=REFINES
+[
+  {
+    ""ticket_id"": ""JIRA-NOTIF-501"",
+    ""summary"": ""Lifecycle Event Notification Triggers"",
+    ""description"": ""Implement notification triggers for the key rental lifecycle changes defined in the current notification specification, ensuring that user-facing and process-facing transitions both emit the expected events."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-502"",
+    ""summary"": ""Email Delivery Reliability"",
+    ""description"": ""Implement the email delivery service with failure handling and retry support so message delivery remains dependable under transient delivery issues."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-25T09:00:00Z"",
+        ""text"": ""The retry flow is now limited to a small number of repeated attempts before the failure is escalated into the operational logging path. Please confirm whether that threshold should stay configurable or remain fixed for beta.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configura
+
+[10] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[11] source=R81c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery method selection rule
+
+[12] source=R83b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling rule
+
+[13] source=R87b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery fee calculation rule
+
+[14] source=D81 type=Specification hops=1 rel=DEFINED_IN
+Delivery Spec
+
+[15] source=G81b type=Gap/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[16] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection
+
+[18] source=I82 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R25 type=Requirement hops=2 rel=REFINES > AFFECTS
+End-of-rent lifecycle transition
+
+[21] source=R62 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rental cost calculation rule","R84b targets delivery lifecycle management for rent requests. The system must support creation of delivery records when delivery is explicitly selected, track delivery status through defined states (Scheduled, In Transit, Delivered, Failed), restrict status updates to authorized users, and notify users of status changes. Delivery records are only created for delivery method selections, not for pickup orders. These tests validate core lifecycle operations, authorization controls, status transitions, notifications, and the distinction between delivery and pickup workflows.","## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item. || The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed. || The system shall create a delivery record associated with the rent record when delivery is selected. || Delivery scheduling and time-window validation must occur before delivery record creation. || The system shall allow authorized users to update delivery status. || The system shall notify the user when delivery status changes.",Delivery status updates are restricted to authorized users only. || Delivery records are only created when delivery method is explicitly selected; pickup orders do not trigger delivery lifecycle management.,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15|E16|E17,"R84b targets delivery lifecycle management. PRIMARY evidence (E1–E12) establishes core delivery lifecycle rules from TOOLCHAIN-CONF-DELIVERY-01 Section 8.3: delivery record creation, status tracking (Scheduled, In Transit, Delivered, Failed), authorized status updates, and user notifications. E4–E6 confirm implementation of delivery status lifecycle. E8–E10 identify related requirements (delivery method selection, scheduling, fee calculation) as prerequisites or companions. CONTEXT evidence (E13–E17) identifies synchronization ambiguities with rent lifecycle and unresolved questions about status exposure and validation semantics. No direct conflicts detected; gaps center on lifecycle synchronization and internal vs. external status visibility."" Filtered provenance/meta statements from operative_context: Delivery lifecycle is defined in TOOLCHAIN-CONF-DELIVERY-01 Section 8.3. Filtered abstract or low-relevance operative statements: Delivery method selection (pickup vs. delivery) is a prerequisite for delivery lifecycle management. | Delivery fee calculation is associated with the delivery lifecycle.",1,0,0,0
+be7791c7,R84b,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R84b_6,Delivery status Failed state handling,"Feature: Delivery Lifecycle Management
+  Scenario: Delivery status transitions to Failed
+    Given a delivery record exists with status In Transit
+    And an authorized user
+    When the system updates the delivery status to Failed
+    Then the delivery record status shall change to Failed
+    And the user shall be notified of the Failed status
+    And the delivery lifecycle shall be marked as incomplete","Validates that the Failed status is supported and properly handled within the delivery lifecycle, including user notification and lifecycle completion marking.",E4|E6|E7,"The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.|The system shall notify the user when delivery status changes.|The system shall allow authorized users to update delivery status.",2eee991de900fd57|D81|G81b|I81|I82|I83|R21|R25|R62|R81c|R83b|R84b|R87b|R91c,Delivery lifecycle management rule,Delivery lifecycle management rule,"[1] source=R84b type=Requirement/SrcChunk hops=0 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[2] source=R84b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[3] source=R84b type=Requirement hops=0 rel=TARGET
+Delivery lifecycle management rule
+
+[4] source=I83 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=IMPLEMENTS
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=I83 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[6] source=G81b type=Gap hops=1 rel=AFFECTS
+Delivery and rent lifecycle synchronization ambiguity
+
+[7] source=I83 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery status lifecycle
+
+[8] source=R91c type=Requirement hops=1 rel=REFINES
+Delivery lifecycle synchronization
+
+[9] source=R91c type=Requirement/SrcChunk hops=1 chunk=ee9884fb945974bf doc=JIRA-Notifications.md rel=REFINES
+[
+  {
+    ""ticket_id"": ""JIRA-NOTIF-501"",
+    ""summary"": ""Lifecycle Event Notification Triggers"",
+    ""description"": ""Implement notification triggers for the key rental lifecycle changes defined in the current notification specification, ensuring that user-facing and process-facing transitions both emit the expected events."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-502"",
+    ""summary"": ""Email Delivery Reliability"",
+    ""description"": ""Implement the email delivery service with failure handling and retry support so message delivery remains dependable under transient delivery issues."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-25T09:00:00Z"",
+        ""text"": ""The retry flow is now limited to a small number of repeated attempts before the failure is escalated into the operational logging path. Please confirm whether that threshold should stay configurable or remain fixed for beta.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configura
+
+[10] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[11] source=R81c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery method selection rule
+
+[12] source=R83b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling rule
+
+[13] source=R87b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery fee calculation rule
+
+[14] source=D81 type=Specification hops=1 rel=DEFINED_IN
+Delivery Spec
+
+[15] source=G81b type=Gap/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[16] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection
+
+[18] source=I82 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R25 type=Requirement hops=2 rel=REFINES > AFFECTS
+End-of-rent lifecycle transition
+
+[21] source=R62 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rental cost calculation rule","R84b targets delivery lifecycle management for rent requests. The system must support creation of delivery records when delivery is explicitly selected, track delivery status through defined states (Scheduled, In Transit, Delivered, Failed), restrict status updates to authorized users, and notify users of status changes. Delivery records are only created for delivery method selections, not for pickup orders. These tests validate core lifecycle operations, authorization controls, status transitions, notifications, and the distinction between delivery and pickup workflows.","## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item. || The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed. || The system shall create a delivery record associated with the rent record when delivery is selected. || Delivery scheduling and time-window validation must occur before delivery record creation. || The system shall allow authorized users to update delivery status. || The system shall notify the user when delivery status changes.",Delivery status updates are restricted to authorized users only. || Delivery records are only created when delivery method is explicitly selected; pickup orders do not trigger delivery lifecycle management.,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15|E16|E17,"R84b targets delivery lifecycle management. PRIMARY evidence (E1–E12) establishes core delivery lifecycle rules from TOOLCHAIN-CONF-DELIVERY-01 Section 8.3: delivery record creation, status tracking (Scheduled, In Transit, Delivered, Failed), authorized status updates, and user notifications. E4–E6 confirm implementation of delivery status lifecycle. E8–E10 identify related requirements (delivery method selection, scheduling, fee calculation) as prerequisites or companions. CONTEXT evidence (E13–E17) identifies synchronization ambiguities with rent lifecycle and unresolved questions about status exposure and validation semantics. No direct conflicts detected; gaps center on lifecycle synchronization and internal vs. external status visibility."" Filtered provenance/meta statements from operative_context: Delivery lifecycle is defined in TOOLCHAIN-CONF-DELIVERY-01 Section 8.3. Filtered abstract or low-relevance operative statements: Delivery method selection (pickup vs. delivery) is a prerequisite for delivery lifecycle management. | Delivery fee calculation is associated with the delivery lifecycle.",1,0,0,0
+be7791c7,R84b,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R84b_7,Delivery scheduling validation before record creation,"Feature: Delivery Lifecycle Management
+  Scenario: Delivery scheduling validation prevents invalid record creation
+    Given an authenticated user has created a rent request for an available rentable item
+    And the user selects delivery as the fulfillment method
+    And the requested delivery time window is invalid or unavailable
+    When the system validates delivery scheduling and time-window
+    Then the delivery record creation shall be rejected
+    And an error message shall indicate the scheduling conflict
+    And the rent request shall remain in its previous state","Confirms that delivery scheduling and time-window validation occurs before delivery record creation, preventing invalid delivery records from being created.",E3|E8,Delivery scheduling and time-window validation must occur before delivery record creation.|The system shall create a delivery record associated with the rent record when delivery is selected.,2eee991de900fd57|D81|G81b|I81|I82|I83|R21|R25|R62|R81c|R83b|R84b|R87b|R91c,Delivery lifecycle management rule,Delivery lifecycle management rule,"[1] source=R84b type=Requirement/SrcChunk hops=0 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[2] source=R84b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[3] source=R84b type=Requirement hops=0 rel=TARGET
+Delivery lifecycle management rule
+
+[4] source=I83 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=IMPLEMENTS
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=I83 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[6] source=G81b type=Gap hops=1 rel=AFFECTS
+Delivery and rent lifecycle synchronization ambiguity
+
+[7] source=I83 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery status lifecycle
+
+[8] source=R91c type=Requirement hops=1 rel=REFINES
+Delivery lifecycle synchronization
+
+[9] source=R91c type=Requirement/SrcChunk hops=1 chunk=ee9884fb945974bf doc=JIRA-Notifications.md rel=REFINES
+[
+  {
+    ""ticket_id"": ""JIRA-NOTIF-501"",
+    ""summary"": ""Lifecycle Event Notification Triggers"",
+    ""description"": ""Implement notification triggers for the key rental lifecycle changes defined in the current notification specification, ensuring that user-facing and process-facing transitions both emit the expected events."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-502"",
+    ""summary"": ""Email Delivery Reliability"",
+    ""description"": ""Implement the email delivery service with failure handling and retry support so message delivery remains dependable under transient delivery issues."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-25T09:00:00Z"",
+        ""text"": ""The retry flow is now limited to a small number of repeated attempts before the failure is escalated into the operational logging path. Please confirm whether that threshold should stay configurable or remain fixed for beta.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configura
+
+[10] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[11] source=R81c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery method selection rule
+
+[12] source=R83b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling rule
+
+[13] source=R87b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery fee calculation rule
+
+[14] source=D81 type=Specification hops=1 rel=DEFINED_IN
+Delivery Spec
+
+[15] source=G81b type=Gap/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[16] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection
+
+[18] source=I82 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R25 type=Requirement hops=2 rel=REFINES > AFFECTS
+End-of-rent lifecycle transition
+
+[21] source=R62 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rental cost calculation rule","R84b targets delivery lifecycle management for rent requests. The system must support creation of delivery records when delivery is explicitly selected, track delivery status through defined states (Scheduled, In Transit, Delivered, Failed), restrict status updates to authorized users, and notify users of status changes. Delivery records are only created for delivery method selections, not for pickup orders. These tests validate core lifecycle operations, authorization controls, status transitions, notifications, and the distinction between delivery and pickup workflows.","## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item. || The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed. || The system shall create a delivery record associated with the rent record when delivery is selected. || Delivery scheduling and time-window validation must occur before delivery record creation. || The system shall allow authorized users to update delivery status. || The system shall notify the user when delivery status changes.",Delivery status updates are restricted to authorized users only. || Delivery records are only created when delivery method is explicitly selected; pickup orders do not trigger delivery lifecycle management.,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15|E16|E17,"R84b targets delivery lifecycle management. PRIMARY evidence (E1–E12) establishes core delivery lifecycle rules from TOOLCHAIN-CONF-DELIVERY-01 Section 8.3: delivery record creation, status tracking (Scheduled, In Transit, Delivered, Failed), authorized status updates, and user notifications. E4–E6 confirm implementation of delivery status lifecycle. E8–E10 identify related requirements (delivery method selection, scheduling, fee calculation) as prerequisites or companions. CONTEXT evidence (E13–E17) identifies synchronization ambiguities with rent lifecycle and unresolved questions about status exposure and validation semantics. No direct conflicts detected; gaps center on lifecycle synchronization and internal vs. external status visibility."" Filtered provenance/meta statements from operative_context: Delivery lifecycle is defined in TOOLCHAIN-CONF-DELIVERY-01 Section 8.3. Filtered abstract or low-relevance operative statements: Delivery method selection (pickup vs. delivery) is a prerequisite for delivery lifecycle management. | Delivery fee calculation is associated with the delivery lifecycle.",1,0,0,0
+be7791c7,R84b,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R84b_8,Delivery record association with rent record,"Feature: Delivery Lifecycle Management
+  Scenario: Delivery record maintains association with rent record
+    Given an authenticated user has created a rent request for an available rentable item
+    And the user selects delivery as the fulfillment method
+    And delivery scheduling and time-window validation passes
+    When the system creates the delivery record
+    Then the delivery record shall be associated with the rent record
+    And the rent record shall reference the delivery record
+    And querying the rent record shall return the associated delivery record",Validates that delivery records are properly associated with rent records and that the relationship is bidirectional and queryable.,E1|E2|E3,The system shall create a delivery record associated with the rent record when delivery is selected.|## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.,2eee991de900fd57|D81|G81b|I81|I82|I83|R21|R25|R62|R81c|R83b|R84b|R87b|R91c,Delivery lifecycle management rule,Delivery lifecycle management rule,"[1] source=R84b type=Requirement/SrcChunk hops=0 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[2] source=R84b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[3] source=R84b type=Requirement hops=0 rel=TARGET
+Delivery lifecycle management rule
+
+[4] source=I83 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=IMPLEMENTS
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=I83 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[6] source=G81b type=Gap hops=1 rel=AFFECTS
+Delivery and rent lifecycle synchronization ambiguity
+
+[7] source=I83 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery status lifecycle
+
+[8] source=R91c type=Requirement hops=1 rel=REFINES
+Delivery lifecycle synchronization
+
+[9] source=R91c type=Requirement/SrcChunk hops=1 chunk=ee9884fb945974bf doc=JIRA-Notifications.md rel=REFINES
+[
+  {
+    ""ticket_id"": ""JIRA-NOTIF-501"",
+    ""summary"": ""Lifecycle Event Notification Triggers"",
+    ""description"": ""Implement notification triggers for the key rental lifecycle changes defined in the current notification specification, ensuring that user-facing and process-facing transitions both emit the expected events."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-502"",
+    ""summary"": ""Email Delivery Reliability"",
+    ""description"": ""Implement the email delivery service with failure handling and retry support so message delivery remains dependable under transient delivery issues."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-25T09:00:00Z"",
+        ""text"": ""The retry flow is now limited to a small number of repeated attempts before the failure is escalated into the operational logging path. Please confirm whether that threshold should stay configurable or remain fixed for beta.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configura
+
+[10] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[11] source=R81c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery method selection rule
+
+[12] source=R83b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling rule
+
+[13] source=R87b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery fee calculation rule
+
+[14] source=D81 type=Specification hops=1 rel=DEFINED_IN
+Delivery Spec
+
+[15] source=G81b type=Gap/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[16] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection
+
+[18] source=I82 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R25 type=Requirement hops=2 rel=REFINES > AFFECTS
+End-of-rent lifecycle transition
+
+[21] source=R62 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rental cost calculation rule","R84b targets delivery lifecycle management for rent requests. The system must support creation of delivery records when delivery is explicitly selected, track delivery status through defined states (Scheduled, In Transit, Delivered, Failed), restrict status updates to authorized users, and notify users of status changes. Delivery records are only created for delivery method selections, not for pickup orders. These tests validate core lifecycle operations, authorization controls, status transitions, notifications, and the distinction between delivery and pickup workflows.","## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item. || The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed. || The system shall create a delivery record associated with the rent record when delivery is selected. || Delivery scheduling and time-window validation must occur before delivery record creation. || The system shall allow authorized users to update delivery status. || The system shall notify the user when delivery status changes.",Delivery status updates are restricted to authorized users only. || Delivery records are only created when delivery method is explicitly selected; pickup orders do not trigger delivery lifecycle management.,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15|E16|E17,"R84b targets delivery lifecycle management. PRIMARY evidence (E1–E12) establishes core delivery lifecycle rules from TOOLCHAIN-CONF-DELIVERY-01 Section 8.3: delivery record creation, status tracking (Scheduled, In Transit, Delivered, Failed), authorized status updates, and user notifications. E4–E6 confirm implementation of delivery status lifecycle. E8–E10 identify related requirements (delivery method selection, scheduling, fee calculation) as prerequisites or companions. CONTEXT evidence (E13–E17) identifies synchronization ambiguities with rent lifecycle and unresolved questions about status exposure and validation semantics. No direct conflicts detected; gaps center on lifecycle synchronization and internal vs. external status visibility."" Filtered provenance/meta statements from operative_context: Delivery lifecycle is defined in TOOLCHAIN-CONF-DELIVERY-01 Section 8.3. Filtered abstract or low-relevance operative statements: Delivery method selection (pickup vs. delivery) is a prerequisite for delivery lifecycle management. | Delivery fee calculation is associated with the delivery lifecycle.",1,0,0,0
+be7791c7,R84b,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R84b_9,Multiple status updates with notifications,"Feature: Delivery Lifecycle Management
+  Scenario: Sequential status updates generate sequential notifications
+    Given a delivery record exists with status Scheduled
+    And an authorized user
+    When the system updates the delivery status to In Transit
+    Then the user shall be notified with status In Transit
+    And when the system updates the delivery status to Delivered
+    Then the user shall be notified with status Delivered
+    And the user shall have received two notifications total","Validates that multiple sequential status updates each generate appropriate notifications, ensuring consistent user communication throughout the delivery lifecycle.",E5|E6|E7,"The system shall notify the user when delivery status changes.|The system shall allow authorized users to update delivery status.|The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.",2eee991de900fd57|D81|G81b|I81|I82|I83|R21|R25|R62|R81c|R83b|R84b|R87b|R91c,Delivery lifecycle management rule,Delivery lifecycle management rule,"[1] source=R84b type=Requirement/SrcChunk hops=0 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[2] source=R84b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[3] source=R84b type=Requirement hops=0 rel=TARGET
+Delivery lifecycle management rule
+
+[4] source=I83 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=IMPLEMENTS
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=I83 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[6] source=G81b type=Gap hops=1 rel=AFFECTS
+Delivery and rent lifecycle synchronization ambiguity
+
+[7] source=I83 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery status lifecycle
+
+[8] source=R91c type=Requirement hops=1 rel=REFINES
+Delivery lifecycle synchronization
+
+[9] source=R91c type=Requirement/SrcChunk hops=1 chunk=ee9884fb945974bf doc=JIRA-Notifications.md rel=REFINES
+[
+  {
+    ""ticket_id"": ""JIRA-NOTIF-501"",
+    ""summary"": ""Lifecycle Event Notification Triggers"",
+    ""description"": ""Implement notification triggers for the key rental lifecycle changes defined in the current notification specification, ensuring that user-facing and process-facing transitions both emit the expected events."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-502"",
+    ""summary"": ""Email Delivery Reliability"",
+    ""description"": ""Implement the email delivery service with failure handling and retry support so message delivery remains dependable under transient delivery issues."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-25T09:00:00Z"",
+        ""text"": ""The retry flow is now limited to a small number of repeated attempts before the failure is escalated into the operational logging path. Please confirm whether that threshold should stay configurable or remain fixed for beta.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configura
+
+[10] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[11] source=R81c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery method selection rule
+
+[12] source=R83b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling rule
+
+[13] source=R87b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery fee calculation rule
+
+[14] source=D81 type=Specification hops=1 rel=DEFINED_IN
+Delivery Spec
+
+[15] source=G81b type=Gap/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[16] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection
+
+[18] source=I82 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R25 type=Requirement hops=2 rel=REFINES > AFFECTS
+End-of-rent lifecycle transition
+
+[21] source=R62 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rental cost calculation rule","R84b targets delivery lifecycle management for rent requests. The system must support creation of delivery records when delivery is explicitly selected, track delivery status through defined states (Scheduled, In Transit, Delivered, Failed), restrict status updates to authorized users, and notify users of status changes. Delivery records are only created for delivery method selections, not for pickup orders. These tests validate core lifecycle operations, authorization controls, status transitions, notifications, and the distinction between delivery and pickup workflows.","## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item. || The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed. || The system shall create a delivery record associated with the rent record when delivery is selected. || Delivery scheduling and time-window validation must occur before delivery record creation. || The system shall allow authorized users to update delivery status. || The system shall notify the user when delivery status changes.",Delivery status updates are restricted to authorized users only. || Delivery records are only created when delivery method is explicitly selected; pickup orders do not trigger delivery lifecycle management.,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15|E16|E17,"R84b targets delivery lifecycle management. PRIMARY evidence (E1–E12) establishes core delivery lifecycle rules from TOOLCHAIN-CONF-DELIVERY-01 Section 8.3: delivery record creation, status tracking (Scheduled, In Transit, Delivered, Failed), authorized status updates, and user notifications. E4–E6 confirm implementation of delivery status lifecycle. E8–E10 identify related requirements (delivery method selection, scheduling, fee calculation) as prerequisites or companions. CONTEXT evidence (E13–E17) identifies synchronization ambiguities with rent lifecycle and unresolved questions about status exposure and validation semantics. No direct conflicts detected; gaps center on lifecycle synchronization and internal vs. external status visibility."" Filtered provenance/meta statements from operative_context: Delivery lifecycle is defined in TOOLCHAIN-CONF-DELIVERY-01 Section 8.3. Filtered abstract or low-relevance operative statements: Delivery method selection (pickup vs. delivery) is a prerequisite for delivery lifecycle management. | Delivery fee calculation is associated with the delivery lifecycle.",1,0,0,0
+be7791c7,R84b,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R84b_10,Delivery lifecycle initialization on record creation,"Feature: Delivery Lifecycle Management
+  Scenario: Delivery lifecycle is properly initialized
+    Given an authenticated user has created a rent request for an available rentable item
+    And the user selects delivery as the fulfillment method
+    And delivery scheduling and time-window validation passes
+    When the system creates the delivery record
+    Then the delivery record shall be initialized with status Scheduled
+    And the delivery record shall be ready to accept status updates
+    And the delivery record shall be associated with the rent record
+    And the delivery lifecycle shall be active","Validates that delivery records are properly initialized with all required attributes and states when created, establishing a valid starting point for the delivery lifecycle.",E1|E2|E3|E4,"The system shall create a delivery record associated with the rent record when delivery is selected.|The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.|Delivery scheduling and time-window validation must occur before delivery record creation.",2eee991de900fd57|D81|G81b|I81|I82|I83|R21|R25|R62|R81c|R83b|R84b|R87b|R91c,Delivery lifecycle management rule,Delivery lifecycle management rule,"[1] source=R84b type=Requirement/SrcChunk hops=0 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[2] source=R84b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[3] source=R84b type=Requirement hops=0 rel=TARGET
+Delivery lifecycle management rule
+
+[4] source=I83 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=IMPLEMENTS
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=I83 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[6] source=G81b type=Gap hops=1 rel=AFFECTS
+Delivery and rent lifecycle synchronization ambiguity
+
+[7] source=I83 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery status lifecycle
+
+[8] source=R91c type=Requirement hops=1 rel=REFINES
+Delivery lifecycle synchronization
+
+[9] source=R91c type=Requirement/SrcChunk hops=1 chunk=ee9884fb945974bf doc=JIRA-Notifications.md rel=REFINES
+[
+  {
+    ""ticket_id"": ""JIRA-NOTIF-501"",
+    ""summary"": ""Lifecycle Event Notification Triggers"",
+    ""description"": ""Implement notification triggers for the key rental lifecycle changes defined in the current notification specification, ensuring that user-facing and process-facing transitions both emit the expected events."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-502"",
+    ""summary"": ""Email Delivery Reliability"",
+    ""description"": ""Implement the email delivery service with failure handling and retry support so message delivery remains dependable under transient delivery issues."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-25T09:00:00Z"",
+        ""text"": ""The retry flow is now limited to a small number of repeated attempts before the failure is escalated into the operational logging path. Please confirm whether that threshold should stay configurable or remain fixed for beta.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configura
+
+[10] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[11] source=R81c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery method selection rule
+
+[12] source=R83b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling rule
+
+[13] source=R87b type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Delivery fee calculation rule
+
+[14] source=D81 type=Specification hops=1 rel=DEFINED_IN
+Delivery Spec
+
+[15] source=G81b type=Gap/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[16] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection
+
+[18] source=I82 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R25 type=Requirement hops=2 rel=REFINES > AFFECTS
+End-of-rent lifecycle transition
+
+[21] source=R62 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rental cost calculation rule","R84b targets delivery lifecycle management for rent requests. The system must support creation of delivery records when delivery is explicitly selected, track delivery status through defined states (Scheduled, In Transit, Delivered, Failed), restrict status updates to authorized users, and notify users of status changes. Delivery records are only created for delivery method selections, not for pickup orders. These tests validate core lifecycle operations, authorization controls, status transitions, notifications, and the distinction between delivery and pickup workflows.","## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item. || The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed. || The system shall create a delivery record associated with the rent record when delivery is selected. || Delivery scheduling and time-window validation must occur before delivery record creation. || The system shall allow authorized users to update delivery status. || The system shall notify the user when delivery status changes.",Delivery status updates are restricted to authorized users only. || Delivery records are only created when delivery method is explicitly selected; pickup orders do not trigger delivery lifecycle management.,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15|E16|E17,"R84b targets delivery lifecycle management. PRIMARY evidence (E1–E12) establishes core delivery lifecycle rules from TOOLCHAIN-CONF-DELIVERY-01 Section 8.3: delivery record creation, status tracking (Scheduled, In Transit, Delivered, Failed), authorized status updates, and user notifications. E4–E6 confirm implementation of delivery status lifecycle. E8–E10 identify related requirements (delivery method selection, scheduling, fee calculation) as prerequisites or companions. CONTEXT evidence (E13–E17) identifies synchronization ambiguities with rent lifecycle and unresolved questions about status exposure and validation semantics. No direct conflicts detected; gaps center on lifecycle synchronization and internal vs. external status visibility."" Filtered provenance/meta statements from operative_context: Delivery lifecycle is defined in TOOLCHAIN-CONF-DELIVERY-01 Section 8.3. Filtered abstract or low-relevance operative statements: Delivery method selection (pickup vs. delivery) is a prerequisite for delivery lifecycle management. | Delivery fee calculation is associated with the delivery lifecycle.",1,0,0,0

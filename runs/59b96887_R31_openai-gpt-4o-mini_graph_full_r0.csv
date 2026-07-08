@@ -1,0 +1,1181 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+59b96887,R31,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R31_1,Concrete Mixer Maintenance Window,"Feature: Maintenance Matrix Dependency
+  Scenario: Concrete Mixer maintenance window
+    Given a Concrete Mixer
+    When the maintenance is scheduled
+    Then the maintenance window should be 12 hours (720 min)",To ensure that Concrete Mixers adhere to the specified 12-hour maintenance window as required.,E1|E2|E3,Concrete Mixers must have a 12-hour (720 min) maintenance window,G21|G43|I22|I41|I43|I44|R29|R31,Maintenance matrix dependency,Maintenance matrix dependency,"[1] source=R31 type=Requirement/SrcChunk hops=0 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=TARGET
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[2] source=R31 type=Requirement hops=0 rel=TARGET
+Maintenance matrix dependency
+
+[3] source=R31 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[5] source=G21 type=Gap hops=1 rel=AFFECTS
+Missing maintenance matrix specification
+
+[6] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[8] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[9] source=I22 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Automated maintenance timer
+
+[10] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management
+
+[11] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling",Tests for the maintenance matrix dependency requirement focusing on the specific maintenance windows for Concrete Mixers and other machinery.,"Concrete Mixers must have a 12-hour (720 min) maintenance window, while all other machinery can maintain a 2-hour (120 min) rule.",,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,,0,0,0,0
+59b96887,R31,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R31_2,Other Machinery Maintenance Window,"Feature: Maintenance Matrix Dependency
+  Scenario: Other machinery maintenance window
+    Given a piece of machinery that is not a Concrete Mixer
+    When the maintenance is scheduled
+    Then the maintenance window should be 2 hours (120 min)",To confirm that all other machinery follows the 2-hour maintenance rule as specified.,E4|E5|E6,all other machinery can maintain a 2-hour (120 min) rule,G21|G43|I22|I41|I43|I44|R29|R31,Maintenance matrix dependency,Maintenance matrix dependency,"[1] source=R31 type=Requirement/SrcChunk hops=0 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=TARGET
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[2] source=R31 type=Requirement hops=0 rel=TARGET
+Maintenance matrix dependency
+
+[3] source=R31 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[5] source=G21 type=Gap hops=1 rel=AFFECTS
+Missing maintenance matrix specification
+
+[6] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[8] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[9] source=I22 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Automated maintenance timer
+
+[10] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management
+
+[11] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling",Tests for the maintenance matrix dependency requirement focusing on the specific maintenance windows for Concrete Mixers and other machinery.,"Concrete Mixers must have a 12-hour (720 min) maintenance window, while all other machinery can maintain a 2-hour (120 min) rule.",,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,,0,0,0,0
+59b96887,R31,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R31_3,Concrete Mixer Maintenance Compliance,"Feature: Maintenance Matrix Dependency
+  Scenario: Compliance check for Concrete Mixer maintenance
+    Given a Concrete Mixer is in operation
+    When the maintenance is due
+    Then it must not operate beyond the 12-hour maintenance window",To ensure compliance with the maintenance window for Concrete Mixers to prevent operational issues.,E7|E8,Concrete Mixers must have a 12-hour (720 min) maintenance window,G21|G43|I22|I41|I43|I44|R29|R31,Maintenance matrix dependency,Maintenance matrix dependency,"[1] source=R31 type=Requirement/SrcChunk hops=0 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=TARGET
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[2] source=R31 type=Requirement hops=0 rel=TARGET
+Maintenance matrix dependency
+
+[3] source=R31 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[5] source=G21 type=Gap hops=1 rel=AFFECTS
+Missing maintenance matrix specification
+
+[6] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[8] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[9] source=I22 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Automated maintenance timer
+
+[10] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management
+
+[11] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling",Tests for the maintenance matrix dependency requirement focusing on the specific maintenance windows for Concrete Mixers and other machinery.,"Concrete Mixers must have a 12-hour (720 min) maintenance window, while all other machinery can maintain a 2-hour (120 min) rule.",,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,,0,0,0,0
+59b96887,R31,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R31_4,Other Machinery Maintenance Compliance,"Feature: Maintenance Matrix Dependency
+  Scenario: Compliance check for other machinery maintenance
+    Given a piece of machinery that is not a Concrete Mixer
+    When the maintenance is due
+    Then it must not operate beyond the 2-hour maintenance window",To ensure compliance with the maintenance window for other machinery to maintain operational efficiency.,E9|E10,all other machinery can maintain a 2-hour (120 min) rule,G21|G43|I22|I41|I43|I44|R29|R31,Maintenance matrix dependency,Maintenance matrix dependency,"[1] source=R31 type=Requirement/SrcChunk hops=0 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=TARGET
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[2] source=R31 type=Requirement hops=0 rel=TARGET
+Maintenance matrix dependency
+
+[3] source=R31 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[5] source=G21 type=Gap hops=1 rel=AFFECTS
+Missing maintenance matrix specification
+
+[6] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[8] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[9] source=I22 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Automated maintenance timer
+
+[10] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management
+
+[11] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling",Tests for the maintenance matrix dependency requirement focusing on the specific maintenance windows for Concrete Mixers and other machinery.,"Concrete Mixers must have a 12-hour (720 min) maintenance window, while all other machinery can maintain a 2-hour (120 min) rule.",,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,,0,0,0,0
+59b96887,R31,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R31_5,Maintenance Window Overlap for Concrete Mixers,"Feature: Maintenance Matrix Dependency
+  Scenario: Overlapping maintenance windows for Concrete Mixers
+    Given multiple Concrete Mixers are scheduled for maintenance
+    When their maintenance windows overlap
+    Then each Concrete Mixer must still adhere to the 12-hour maintenance window individually",To verify that overlapping maintenance schedules do not compromise the required maintenance window for each Concrete Mixer.,E11,Concrete Mixers must have a 12-hour (720 min) maintenance window,G21|G43|I22|I41|I43|I44|R29|R31,Maintenance matrix dependency,Maintenance matrix dependency,"[1] source=R31 type=Requirement/SrcChunk hops=0 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=TARGET
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[2] source=R31 type=Requirement hops=0 rel=TARGET
+Maintenance matrix dependency
+
+[3] source=R31 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[5] source=G21 type=Gap hops=1 rel=AFFECTS
+Missing maintenance matrix specification
+
+[6] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[8] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[9] source=I22 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Automated maintenance timer
+
+[10] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management
+
+[11] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling",Tests for the maintenance matrix dependency requirement focusing on the specific maintenance windows for Concrete Mixers and other machinery.,"Concrete Mixers must have a 12-hour (720 min) maintenance window, while all other machinery can maintain a 2-hour (120 min) rule.",,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,,0,0,0,0
+59b96887,R31,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R31_6,Maintenance Scheduling for Mixed Machinery,"Feature: Maintenance Matrix Dependency
+  Scenario: Scheduling maintenance for mixed machinery types
+    Given a Concrete Mixer and other machinery are scheduled for maintenance
+    When the maintenance is planned
+    Then the Concrete Mixer must have a 12-hour window and other machinery must have a 2-hour window",To ensure that maintenance scheduling accommodates the different requirements for Concrete Mixers and other machinery.,E1|E4,Concrete Mixers must have a 12-hour (720 min) maintenance window|all other machinery can maintain a 2-hour (120 min) rule,G21|G43|I22|I41|I43|I44|R29|R31,Maintenance matrix dependency,Maintenance matrix dependency,"[1] source=R31 type=Requirement/SrcChunk hops=0 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=TARGET
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[2] source=R31 type=Requirement hops=0 rel=TARGET
+Maintenance matrix dependency
+
+[3] source=R31 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[5] source=G21 type=Gap hops=1 rel=AFFECTS
+Missing maintenance matrix specification
+
+[6] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[8] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[9] source=I22 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Automated maintenance timer
+
+[10] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management
+
+[11] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling",Tests for the maintenance matrix dependency requirement focusing on the specific maintenance windows for Concrete Mixers and other machinery.,"Concrete Mixers must have a 12-hour (720 min) maintenance window, while all other machinery can maintain a 2-hour (120 min) rule.",,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,,0,0,0,0
+59b96887,R31,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R31_7,Maintenance Notification for Concrete Mixers,"Feature: Maintenance Matrix Dependency
+  Scenario: Notification for Concrete Mixer maintenance
+    Given a Concrete Mixer is due for maintenance
+    When the notification is sent
+    Then it should indicate a 12-hour maintenance window",To ensure that notifications for maintenance clearly specify the required maintenance window for Concrete Mixers.,E2|E3,Concrete Mixers must have a 12-hour (720 min) maintenance window,G21|G43|I22|I41|I43|I44|R29|R31,Maintenance matrix dependency,Maintenance matrix dependency,"[1] source=R31 type=Requirement/SrcChunk hops=0 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=TARGET
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[2] source=R31 type=Requirement hops=0 rel=TARGET
+Maintenance matrix dependency
+
+[3] source=R31 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[5] source=G21 type=Gap hops=1 rel=AFFECTS
+Missing maintenance matrix specification
+
+[6] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[8] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[9] source=I22 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Automated maintenance timer
+
+[10] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management
+
+[11] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling",Tests for the maintenance matrix dependency requirement focusing on the specific maintenance windows for Concrete Mixers and other machinery.,"Concrete Mixers must have a 12-hour (720 min) maintenance window, while all other machinery can maintain a 2-hour (120 min) rule.",,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,,0,0,0,0
+59b96887,R31,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R31_8,Maintenance Notification for Other Machinery,"Feature: Maintenance Matrix Dependency
+  Scenario: Notification for other machinery maintenance
+    Given a piece of machinery that is not a Concrete Mixer is due for maintenance
+    When the notification is sent
+    Then it should indicate a 2-hour maintenance window",To ensure that notifications for maintenance clearly specify the required maintenance window for other machinery.,E5|E6,all other machinery can maintain a 2-hour (120 min) rule,G21|G43|I22|I41|I43|I44|R29|R31,Maintenance matrix dependency,Maintenance matrix dependency,"[1] source=R31 type=Requirement/SrcChunk hops=0 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=TARGET
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[2] source=R31 type=Requirement hops=0 rel=TARGET
+Maintenance matrix dependency
+
+[3] source=R31 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[5] source=G21 type=Gap hops=1 rel=AFFECTS
+Missing maintenance matrix specification
+
+[6] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[8] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[9] source=I22 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Automated maintenance timer
+
+[10] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management
+
+[11] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling",Tests for the maintenance matrix dependency requirement focusing on the specific maintenance windows for Concrete Mixers and other machinery.,"Concrete Mixers must have a 12-hour (720 min) maintenance window, while all other machinery can maintain a 2-hour (120 min) rule.",,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,,0,0,0,0
+59b96887,R31,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R31_9,Maintenance Window Enforcement for Concrete Mixers,"Feature: Maintenance Matrix Dependency
+  Scenario: Enforcement of maintenance window for Concrete Mixers
+    Given a Concrete Mixer is scheduled for maintenance
+    When the maintenance window is enforced
+    Then the Concrete Mixer must not be used until the 12-hour window has passed",To ensure that the enforcement of the maintenance window is effective for Concrete Mixers.,E7|E8,Concrete Mixers must have a 12-hour (720 min) maintenance window,G21|G43|I22|I41|I43|I44|R29|R31,Maintenance matrix dependency,Maintenance matrix dependency,"[1] source=R31 type=Requirement/SrcChunk hops=0 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=TARGET
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[2] source=R31 type=Requirement hops=0 rel=TARGET
+Maintenance matrix dependency
+
+[3] source=R31 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[5] source=G21 type=Gap hops=1 rel=AFFECTS
+Missing maintenance matrix specification
+
+[6] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[8] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[9] source=I22 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Automated maintenance timer
+
+[10] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management
+
+[11] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling",Tests for the maintenance matrix dependency requirement focusing on the specific maintenance windows for Concrete Mixers and other machinery.,"Concrete Mixers must have a 12-hour (720 min) maintenance window, while all other machinery can maintain a 2-hour (120 min) rule.",,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,,0,0,0,0
+59b96887,R31,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R31_10,Maintenance Window Enforcement for Other Machinery,"Feature: Maintenance Matrix Dependency
+  Scenario: Enforcement of maintenance window for other machinery
+    Given a piece of machinery that is not a Concrete Mixer is scheduled for maintenance
+    When the maintenance window is enforced
+    Then the machinery must not be used until the 2-hour window has passed",To ensure that the enforcement of the maintenance window is effective for other machinery.,E9|E10,all other machinery can maintain a 2-hour (120 min) rule,G21|G43|I22|I41|I43|I44|R29|R31,Maintenance matrix dependency,Maintenance matrix dependency,"[1] source=R31 type=Requirement/SrcChunk hops=0 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=TARGET
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[2] source=R31 type=Requirement hops=0 rel=TARGET
+Maintenance matrix dependency
+
+[3] source=R31 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[5] source=G21 type=Gap hops=1 rel=AFFECTS
+Missing maintenance matrix specification
+
+[6] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[8] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[9] source=I22 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Automated maintenance timer
+
+[10] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management
+
+[11] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling",Tests for the maintenance matrix dependency requirement focusing on the specific maintenance windows for Concrete Mixers and other machinery.,"Concrete Mixers must have a 12-hour (720 min) maintenance window, while all other machinery can maintain a 2-hour (120 min) rule.",,,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,,0,0,0,0

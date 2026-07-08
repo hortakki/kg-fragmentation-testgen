@@ -1,0 +1,2325 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+87efe0c8,R62,graph,full,openai,gpt-4o-mini,2,2026-07-03.v3,R62_1,Verify rental status updates to Active on rental start date,"Feature: Rental Status Update
+  Scenario: Update rent status to Active when rental start date is reached
+    Given the rental start date is set to today
+    When the system checks the rental status
+    Then the rental status should be updated to Active","To ensure that the system correctly updates the rental status to Active when the rental start date is reached, which is a critical part of the rental cost calculation process.",E1|E2|E3|E4|E5|E6|E7|E8,2.4.1 The system shall update the rent status to Active when the rental start date is reached.,I62|R21|R24|R25|R29|R32|R38|R62|R92c,Rental cost calculation rule,Rental cost calculation rule,"[1] source=R62 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R62 type=Requirement hops=0 rel=TARGET
+Rental cost calculation rule
+
+[3] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[4] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=R92c type=Requirement/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[7] source=R92c type=Requirement/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=AFFECTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[8] source=R29 type=Requirement/SrcChunk hops=2 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=AFFECTS > REFINES
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[9] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[10] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[11] source=R38 type=Requirement/SrcChunk hops=1 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[12] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[13] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[14] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[15] source=R32 type=Requirement hops=2 rel=AFFECTS > REFINES
+Canonical item identity rule",Tests for the rental cost calculation rule ensuring accurate updates and calculations based on the rental start date.,## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,,,,E1|E2|E3|E4|E5|E6|E7|E8,"Filtered abstract or low-relevance operative statements: The system shall implement rental cost calculation based on duration and pricing rules, ensuring consistent derivation of the resulting amount across calculation, storage, and user-facing display.",1,0,0,0
+87efe0c8,R62,graph,full,openai,gpt-4o-mini,2,2026-07-03.v3,R62_2,Validate rental cost calculation based on duration,"Feature: Rental Cost Calculation
+  Scenario: Calculate rental cost based on duration
+    Given the rental duration is set to 30 days
+    When the system calculates the rental cost
+    Then the rental cost should reflect the pricing rules for 30 days","To ensure that the rental cost is calculated correctly based on the duration, which is essential for accurate billing.",E1|E2|E3|E4|E5|E6|E7|E8,The system shall implement rental cost calculation based on duration and pricing rules.,I62|R21|R24|R25|R29|R32|R38|R62|R92c,Rental cost calculation rule,Rental cost calculation rule,"[1] source=R62 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R62 type=Requirement hops=0 rel=TARGET
+Rental cost calculation rule
+
+[3] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[4] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=R92c type=Requirement/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[7] source=R92c type=Requirement/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=AFFECTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[8] source=R29 type=Requirement/SrcChunk hops=2 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=AFFECTS > REFINES
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[9] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[10] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[11] source=R38 type=Requirement/SrcChunk hops=1 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[12] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[13] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[14] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[15] source=R32 type=Requirement hops=2 rel=AFFECTS > REFINES
+Canonical item identity rule",Tests for the rental cost calculation rule ensuring accurate updates and calculations based on the rental start date.,## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,,,,E1|E2|E3|E4|E5|E6|E7|E8,"Filtered abstract or low-relevance operative statements: The system shall implement rental cost calculation based on duration and pricing rules, ensuring consistent derivation of the resulting amount across calculation, storage, and user-facing display.",1,0,0,0
+87efe0c8,R62,graph,full,openai,gpt-4o-mini,2,2026-07-03.v3,R62_3,Ensure consistent rental cost display to users,"Feature: User-facing Rental Cost Display
+  Scenario: Display rental cost to users
+    Given the rental cost is calculated
+    When the user views the rental cost
+    Then the displayed rental cost should match the calculated amount","To verify that the rental cost displayed to users is consistent with the calculated amount, ensuring transparency and trust in the system.",E1|E2|E3|E4|E5|E6|E7|E8,The system shall implement rental cost calculation based on duration and pricing rules.,I62|R21|R24|R25|R29|R32|R38|R62|R92c,Rental cost calculation rule,Rental cost calculation rule,"[1] source=R62 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R62 type=Requirement hops=0 rel=TARGET
+Rental cost calculation rule
+
+[3] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[4] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=R92c type=Requirement/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[7] source=R92c type=Requirement/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=AFFECTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[8] source=R29 type=Requirement/SrcChunk hops=2 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=AFFECTS > REFINES
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[9] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[10] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[11] source=R38 type=Requirement/SrcChunk hops=1 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[12] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[13] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[14] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[15] source=R32 type=Requirement hops=2 rel=AFFECTS > REFINES
+Canonical item identity rule",Tests for the rental cost calculation rule ensuring accurate updates and calculations based on the rental start date.,## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,,,,E1|E2|E3|E4|E5|E6|E7|E8,"Filtered abstract or low-relevance operative statements: The system shall implement rental cost calculation based on duration and pricing rules, ensuring consistent derivation of the resulting amount across calculation, storage, and user-facing display.",1,0,0,0
+87efe0c8,R62,graph,full,openai,gpt-4o-mini,2,2026-07-03.v3,R62_4,Check rental cost calculation for different pricing rules,"Feature: Rental Cost Calculation with Pricing Rules
+  Scenario: Calculate rental cost with different pricing rules
+    Given the rental duration is 15 days
+    And the pricing rule is set to $10 per day
+    When the system calculates the rental cost
+    Then the rental cost should be $150",To ensure that the system correctly applies different pricing rules to calculate the rental cost based on the duration.,E1|E2|E3|E4|E5|E6|E7|E8,The system shall implement rental cost calculation based on duration and pricing rules.,I62|R21|R24|R25|R29|R32|R38|R62|R92c,Rental cost calculation rule,Rental cost calculation rule,"[1] source=R62 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R62 type=Requirement hops=0 rel=TARGET
+Rental cost calculation rule
+
+[3] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[4] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=R92c type=Requirement/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[7] source=R92c type=Requirement/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=AFFECTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[8] source=R29 type=Requirement/SrcChunk hops=2 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=AFFECTS > REFINES
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[9] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[10] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[11] source=R38 type=Requirement/SrcChunk hops=1 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[12] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[13] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[14] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[15] source=R32 type=Requirement hops=2 rel=AFFECTS > REFINES
+Canonical item identity rule",Tests for the rental cost calculation rule ensuring accurate updates and calculations based on the rental start date.,## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,,,,E1|E2|E3|E4|E5|E6|E7|E8,"Filtered abstract or low-relevance operative statements: The system shall implement rental cost calculation based on duration and pricing rules, ensuring consistent derivation of the resulting amount across calculation, storage, and user-facing display.",1,0,0,0
+87efe0c8,R62,graph,full,openai,gpt-4o-mini,2,2026-07-03.v3,R62_5,Verify rental cost calculation for zero duration,"Feature: Rental Cost Calculation for Zero Duration
+  Scenario: Calculate rental cost with zero duration
+    Given the rental duration is set to 0 days
+    When the system calculates the rental cost
+    Then the rental cost should be $0","To ensure that the system handles edge cases correctly, such as a rental duration of zero, resulting in no cost.",E1|E2|E3|E4|E5|E6|E7|E8,The system shall implement rental cost calculation based on duration and pricing rules.,I62|R21|R24|R25|R29|R32|R38|R62|R92c,Rental cost calculation rule,Rental cost calculation rule,"[1] source=R62 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R62 type=Requirement hops=0 rel=TARGET
+Rental cost calculation rule
+
+[3] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[4] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=R92c type=Requirement/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[7] source=R92c type=Requirement/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=AFFECTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[8] source=R29 type=Requirement/SrcChunk hops=2 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=AFFECTS > REFINES
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[9] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[10] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[11] source=R38 type=Requirement/SrcChunk hops=1 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[12] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[13] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[14] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[15] source=R32 type=Requirement hops=2 rel=AFFECTS > REFINES
+Canonical item identity rule",Tests for the rental cost calculation rule ensuring accurate updates and calculations based on the rental start date.,## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,,,,E1|E2|E3|E4|E5|E6|E7|E8,"Filtered abstract or low-relevance operative statements: The system shall implement rental cost calculation based on duration and pricing rules, ensuring consistent derivation of the resulting amount across calculation, storage, and user-facing display.",1,0,0,0
+87efe0c8,R62,graph,full,openai,gpt-4o-mini,2,2026-07-03.v3,R62_6,Test rental cost calculation with negative duration,"Feature: Rental Cost Calculation for Negative Duration
+  Scenario: Calculate rental cost with negative duration
+    Given the rental duration is set to -5 days
+    When the system calculates the rental cost
+    Then an error should be raised indicating invalid duration","To ensure that the system validates input correctly and raises errors for invalid rental durations, maintaining data integrity.",E1|E2|E3|E4|E5|E6|E7|E8,The system shall implement rental cost calculation based on duration and pricing rules.,I62|R21|R24|R25|R29|R32|R38|R62|R92c,Rental cost calculation rule,Rental cost calculation rule,"[1] source=R62 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R62 type=Requirement hops=0 rel=TARGET
+Rental cost calculation rule
+
+[3] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[4] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=R92c type=Requirement/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[7] source=R92c type=Requirement/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=AFFECTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[8] source=R29 type=Requirement/SrcChunk hops=2 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=AFFECTS > REFINES
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[9] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[10] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[11] source=R38 type=Requirement/SrcChunk hops=1 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[12] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[13] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[14] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[15] source=R32 type=Requirement hops=2 rel=AFFECTS > REFINES
+Canonical item identity rule",Tests for the rental cost calculation rule ensuring accurate updates and calculations based on the rental start date.,## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,,,,E1|E2|E3|E4|E5|E6|E7|E8,"Filtered abstract or low-relevance operative statements: The system shall implement rental cost calculation based on duration and pricing rules, ensuring consistent derivation of the resulting amount across calculation, storage, and user-facing display.",1,0,0,0
+87efe0c8,R62,graph,full,openai,gpt-4o-mini,2,2026-07-03.v3,R62_7,Confirm rental cost calculation for varying rental periods,"Feature: Rental Cost Calculation for Varying Periods
+  Scenario: Calculate rental cost for varying rental periods
+    Given the rental duration is set to 7 days
+    And the pricing rule is $20 per day
+    When the system calculates the rental cost
+    Then the rental cost should be $140",To ensure that the system can handle varying rental periods and apply the correct pricing rules accordingly.,E1|E2|E3|E4|E5|E6|E7|E8,The system shall implement rental cost calculation based on duration and pricing rules.,I62|R21|R24|R25|R29|R32|R38|R62|R92c,Rental cost calculation rule,Rental cost calculation rule,"[1] source=R62 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R62 type=Requirement hops=0 rel=TARGET
+Rental cost calculation rule
+
+[3] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[4] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=R92c type=Requirement/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[7] source=R92c type=Requirement/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=AFFECTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[8] source=R29 type=Requirement/SrcChunk hops=2 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=AFFECTS > REFINES
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[9] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[10] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[11] source=R38 type=Requirement/SrcChunk hops=1 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[12] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[13] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[14] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[15] source=R32 type=Requirement hops=2 rel=AFFECTS > REFINES
+Canonical item identity rule",Tests for the rental cost calculation rule ensuring accurate updates and calculations based on the rental start date.,## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,,,,E1|E2|E3|E4|E5|E6|E7|E8,"Filtered abstract or low-relevance operative statements: The system shall implement rental cost calculation based on duration and pricing rules, ensuring consistent derivation of the resulting amount across calculation, storage, and user-facing display.",1,0,0,0
+87efe0c8,R62,graph,full,openai,gpt-4o-mini,2,2026-07-03.v3,R62_8,Validate rental cost calculation for maximum duration,"Feature: Rental Cost Calculation for Maximum Duration
+  Scenario: Calculate rental cost for maximum rental duration
+    Given the rental duration is set to 365 days
+    And the pricing rule is $15 per day
+    When the system calculates the rental cost
+    Then the rental cost should be $5475",To ensure that the system can handle maximum rental durations and calculate costs accurately without overflow errors.,E1|E2|E3|E4|E5|E6|E7|E8,The system shall implement rental cost calculation based on duration and pricing rules.,I62|R21|R24|R25|R29|R32|R38|R62|R92c,Rental cost calculation rule,Rental cost calculation rule,"[1] source=R62 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R62 type=Requirement hops=0 rel=TARGET
+Rental cost calculation rule
+
+[3] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[4] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=R92c type=Requirement/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[7] source=R92c type=Requirement/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=AFFECTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[8] source=R29 type=Requirement/SrcChunk hops=2 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=AFFECTS > REFINES
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[9] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[10] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[11] source=R38 type=Requirement/SrcChunk hops=1 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[12] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[13] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[14] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[15] source=R32 type=Requirement hops=2 rel=AFFECTS > REFINES
+Canonical item identity rule",Tests for the rental cost calculation rule ensuring accurate updates and calculations based on the rental start date.,## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,,,,E1|E2|E3|E4|E5|E6|E7|E8,"Filtered abstract or low-relevance operative statements: The system shall implement rental cost calculation based on duration and pricing rules, ensuring consistent derivation of the resulting amount across calculation, storage, and user-facing display.",1,0,0,0
+87efe0c8,R62,graph,full,openai,gpt-4o-mini,2,2026-07-03.v3,R62_9,Check rental cost calculation for leap year,"Feature: Rental Cost Calculation for Leap Year
+  Scenario: Calculate rental cost during a leap year
+    Given the rental duration is set to 29 days in February of a leap year
+    And the pricing rule is $10 per day
+    When the system calculates the rental cost
+    Then the rental cost should be $290","To ensure that the system correctly accounts for leap years in rental duration calculations, maintaining accuracy in billing.",E1|E2|E3|E4|E5|E6|E7|E8,The system shall implement rental cost calculation based on duration and pricing rules.,I62|R21|R24|R25|R29|R32|R38|R62|R92c,Rental cost calculation rule,Rental cost calculation rule,"[1] source=R62 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R62 type=Requirement hops=0 rel=TARGET
+Rental cost calculation rule
+
+[3] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[4] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=R92c type=Requirement/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[7] source=R92c type=Requirement/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=AFFECTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[8] source=R29 type=Requirement/SrcChunk hops=2 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=AFFECTS > REFINES
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[9] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[10] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[11] source=R38 type=Requirement/SrcChunk hops=1 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[12] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[13] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[14] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[15] source=R32 type=Requirement hops=2 rel=AFFECTS > REFINES
+Canonical item identity rule",Tests for the rental cost calculation rule ensuring accurate updates and calculations based on the rental start date.,## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,,,,E1|E2|E3|E4|E5|E6|E7|E8,"Filtered abstract or low-relevance operative statements: The system shall implement rental cost calculation based on duration and pricing rules, ensuring consistent derivation of the resulting amount across calculation, storage, and user-facing display.",1,0,0,0
+87efe0c8,R62,graph,full,openai,gpt-4o-mini,2,2026-07-03.v3,R62_10,Ensure rental cost calculation handles currency formats,"Feature: Rental Cost Calculation Currency Format
+  Scenario: Display rental cost in correct currency format
+    Given the rental cost is calculated as $200
+    When the user views the rental cost
+    Then the rental cost should be displayed as ""$200.00""","To ensure that the rental cost is displayed in the correct currency format, enhancing user experience and clarity.",E1|E2|E3|E4|E5|E6|E7|E8,The system shall implement rental cost calculation based on duration and pricing rules.,I62|R21|R24|R25|R29|R32|R38|R62|R92c,Rental cost calculation rule,Rental cost calculation rule,"[1] source=R62 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R62 type=Requirement hops=0 rel=TARGET
+Rental cost calculation rule
+
+[3] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[4] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=R92c type=Requirement/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[7] source=R92c type=Requirement/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=AFFECTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[8] source=R29 type=Requirement/SrcChunk hops=2 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=AFFECTS > REFINES
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[9] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[10] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[11] source=R38 type=Requirement/SrcChunk hops=1 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[12] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[13] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[14] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[15] source=R32 type=Requirement hops=2 rel=AFFECTS > REFINES
+Canonical item identity rule",Tests for the rental cost calculation rule ensuring accurate updates and calculations based on the rental start date.,## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,,,,E1|E2|E3|E4|E5|E6|E7|E8,"Filtered abstract or low-relevance operative statements: The system shall implement rental cost calculation based on duration and pricing rules, ensuring consistent derivation of the resulting amount across calculation, storage, and user-facing display.",1,0,0,0

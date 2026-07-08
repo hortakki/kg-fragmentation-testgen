@@ -1,0 +1,1691 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+e460abc8,R72,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R72_1,Stored billing amount matches displayed total,"Feature: Billing Display vs Storage Separation
+  Scenario: User-facing total matches persisted billing amount
+    Given a billing record with a calculated price of 1500.00
+    When the billing amount is stored in the database
+    And the user views the billing display
+    Then the displayed total shall equal the stored amount exactly
+    And no rounding or simplification shall alter the visible total","Verifies the core requirement that user-facing billing display must be derived consistently from persisted storage, preventing visible mismatches between presented totals and stored amounts.",E1|E5,User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts,G62|I61|I63|I84|R69|R72,Billing display vs storage separation,Billing display vs storage separation,"[1] source=R72 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R72 type=Requirement hops=0 rel=TARGET
+Billing display vs storage separation
+
+[3] source=R72 type=Requirement/SrcChunk hops=0 chunk=0374b1fefbab130e doc=JIRA-Payment.md rel=TARGET
+PAY-608"",
+    ""summary"": ""Billing Access Control"",
+    ""description"": ""Implement access control rules for billing records so users can view only their own financial history while authorized roles can review broader payment and invoice data."",
+    ""status"": ""Closed""
+  }
+]
+
+[4] source=R72 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=REFINES
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=R69 type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[9] source=I84 type=Implementation/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[10] source=G62 type=Gap hops=2 rel=REFINES > AFFECTS
+Display vs stored value discrepancy","R72 requires that user-facing billing display and persisted billing storage remain consistently aligned to prevent visible mismatches between presented totals and stored amounts. Tests verify that billing calculations are stored correctly, displayed accurately, and that display simplifications do not create discrepancies with financial records. Exception handling for currency conversion is tested separately to ensure pilot-specific rules do not break alignment.",User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts || Billing display simplifications in presentation layer must not silently override core pricing logic or create discrepancies with stored financial records || ## 6.5.3 The system shall allow authorized users to view payment status. || Generated invoices must be stored,"Currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals should not be treated as acceptable default behavior,,E1|E2|E3|E4|E5|E6|E8|E9,"R72 targets the separation and consistency between billing display and storage. PRIMARY evidence (E1, E5) explicitly documents developer and QA concerns about display-friendly simplifications creating mismatches with stored values, and the requirement that user-facing totals must match persisted amounts exactly. E4 and E6 establish that calculated prices must be stored with rent records and invoices must be stored. CONTEXT evidence (E8, E9) reinforces the risk of display simplifications diverging from underlying records, particularly in currency and audit contexts. E10 references a related gap on display vs stored value discrepancy. The core operative rule is consistency between display and storage; exceptions and gaps address pilot-specific currency handling and unresolved edge cases around fractions and precision."" Filtered abstract or low-relevance operative statements: Price calculation must be consistent across calculation stage, storage, and user-facing display | Stored calculated price must be associated with rent records | Invoices must include rent details, pricing, and total amount",1,0,0,0
+e460abc8,R72,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R72_2,Calculated price stored with rent record,"Feature: Billing Display vs Storage Separation
+  Scenario: Calculated price is persisted with rent record
+    Given a rent record with base amount 1000.00 and applicable fees
+    When the system calculates the total price as 1250.00
+    Then the calculated price shall be stored in the rent record
+    And the stored price shall be retrievable for billing display","Ensures that calculated prices are persisted with rent records as required, establishing the source of truth for billing display and preventing display-only calculations that diverge from storage.",E4|E6,Stored calculated price must be associated with rent records,G62|I61|I63|I84|R69|R72,Billing display vs storage separation,Billing display vs storage separation,"[1] source=R72 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R72 type=Requirement hops=0 rel=TARGET
+Billing display vs storage separation
+
+[3] source=R72 type=Requirement/SrcChunk hops=0 chunk=0374b1fefbab130e doc=JIRA-Payment.md rel=TARGET
+PAY-608"",
+    ""summary"": ""Billing Access Control"",
+    ""description"": ""Implement access control rules for billing records so users can view only their own financial history while authorized roles can review broader payment and invoice data."",
+    ""status"": ""Closed""
+  }
+]
+
+[4] source=R72 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=REFINES
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=R69 type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[9] source=I84 type=Implementation/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[10] source=G62 type=Gap hops=2 rel=REFINES > AFFECTS
+Display vs stored value discrepancy","R72 requires that user-facing billing display and persisted billing storage remain consistently aligned to prevent visible mismatches between presented totals and stored amounts. Tests verify that billing calculations are stored correctly, displayed accurately, and that display simplifications do not create discrepancies with financial records. Exception handling for currency conversion is tested separately to ensure pilot-specific rules do not break alignment.",User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts || Billing display simplifications in presentation layer must not silently override core pricing logic or create discrepancies with stored financial records || ## 6.5.3 The system shall allow authorized users to view payment status. || Generated invoices must be stored,"Currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals should not be treated as acceptable default behavior,,E1|E2|E3|E4|E5|E6|E8|E9,"R72 targets the separation and consistency between billing display and storage. PRIMARY evidence (E1, E5) explicitly documents developer and QA concerns about display-friendly simplifications creating mismatches with stored values, and the requirement that user-facing totals must match persisted amounts exactly. E4 and E6 establish that calculated prices must be stored with rent records and invoices must be stored. CONTEXT evidence (E8, E9) reinforces the risk of display simplifications diverging from underlying records, particularly in currency and audit contexts. E10 references a related gap on display vs stored value discrepancy. The core operative rule is consistency between display and storage; exceptions and gaps address pilot-specific currency handling and unresolved edge cases around fractions and precision."" Filtered abstract or low-relevance operative statements: Price calculation must be consistent across calculation stage, storage, and user-facing display | Stored calculated price must be associated with rent records | Invoices must include rent details, pricing, and total amount",1,0,0,0
+e460abc8,R72,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R72_3,Invoice storage includes complete billing details,"Feature: Billing Display vs Storage Separation
+  Scenario: Generated invoice is stored with all billing components
+    Given a billing transaction with rent details, pricing, and total amount
+    When an invoice is generated
+    Then the invoice shall be stored in persistent storage
+    And the stored invoice shall include rent details, pricing, and total amount
+    And the stored invoice total shall match the displayed invoice total","Verifies that generated invoices are stored completely and that stored invoice totals align with displayed totals, preventing discrepancies between customer-visible and persisted financial records.",E4|E6,"Generated invoices must be stored|Invoices must include rent details, pricing, and total amount",G62|I61|I63|I84|R69|R72,Billing display vs storage separation,Billing display vs storage separation,"[1] source=R72 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R72 type=Requirement hops=0 rel=TARGET
+Billing display vs storage separation
+
+[3] source=R72 type=Requirement/SrcChunk hops=0 chunk=0374b1fefbab130e doc=JIRA-Payment.md rel=TARGET
+PAY-608"",
+    ""summary"": ""Billing Access Control"",
+    ""description"": ""Implement access control rules for billing records so users can view only their own financial history while authorized roles can review broader payment and invoice data."",
+    ""status"": ""Closed""
+  }
+]
+
+[4] source=R72 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=REFINES
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=R69 type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[9] source=I84 type=Implementation/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[10] source=G62 type=Gap hops=2 rel=REFINES > AFFECTS
+Display vs stored value discrepancy","R72 requires that user-facing billing display and persisted billing storage remain consistently aligned to prevent visible mismatches between presented totals and stored amounts. Tests verify that billing calculations are stored correctly, displayed accurately, and that display simplifications do not create discrepancies with financial records. Exception handling for currency conversion is tested separately to ensure pilot-specific rules do not break alignment.",User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts || Billing display simplifications in presentation layer must not silently override core pricing logic or create discrepancies with stored financial records || ## 6.5.3 The system shall allow authorized users to view payment status. || Generated invoices must be stored,"Currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals should not be treated as acceptable default behavior,,E1|E2|E3|E4|E5|E6|E8|E9,"R72 targets the separation and consistency between billing display and storage. PRIMARY evidence (E1, E5) explicitly documents developer and QA concerns about display-friendly simplifications creating mismatches with stored values, and the requirement that user-facing totals must match persisted amounts exactly. E4 and E6 establish that calculated prices must be stored with rent records and invoices must be stored. CONTEXT evidence (E8, E9) reinforces the risk of display simplifications diverging from underlying records, particularly in currency and audit contexts. E10 references a related gap on display vs stored value discrepancy. The core operative rule is consistency between display and storage; exceptions and gaps address pilot-specific currency handling and unresolved edge cases around fractions and precision."" Filtered abstract or low-relevance operative statements: Price calculation must be consistent across calculation stage, storage, and user-facing display | Stored calculated price must be associated with rent records | Invoices must include rent details, pricing, and total amount",1,0,0,0
+e460abc8,R72,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R72_4,Display simplifications do not override core pricing logic,"Feature: Billing Display vs Storage Separation
+  Scenario: Display formatting does not alter stored pricing values
+    Given a calculated price of 1234.567 stored in the system
+    When the billing display applies formatting or rounding for presentation
+    Then the stored value shall remain 1234.567 unchanged
+    And the displayed value shall be clearly derived from the stored value
+    And no silent override of core pricing logic shall occur","Ensures that display-friendly simplifications in the presentation layer do not silently override core pricing logic or create discrepancies with stored financial records, addressing the primary conflict identified in the requirement.",E1|E5|E8,Billing display simplifications in presentation layer must not silently override core pricing logic or create discrepancies with stored financial records,G62|I61|I63|I84|R69|R72,Billing display vs storage separation,Billing display vs storage separation,"[1] source=R72 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R72 type=Requirement hops=0 rel=TARGET
+Billing display vs storage separation
+
+[3] source=R72 type=Requirement/SrcChunk hops=0 chunk=0374b1fefbab130e doc=JIRA-Payment.md rel=TARGET
+PAY-608"",
+    ""summary"": ""Billing Access Control"",
+    ""description"": ""Implement access control rules for billing records so users can view only their own financial history while authorized roles can review broader payment and invoice data."",
+    ""status"": ""Closed""
+  }
+]
+
+[4] source=R72 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=REFINES
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=R69 type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[9] source=I84 type=Implementation/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[10] source=G62 type=Gap hops=2 rel=REFINES > AFFECTS
+Display vs stored value discrepancy","R72 requires that user-facing billing display and persisted billing storage remain consistently aligned to prevent visible mismatches between presented totals and stored amounts. Tests verify that billing calculations are stored correctly, displayed accurately, and that display simplifications do not create discrepancies with financial records. Exception handling for currency conversion is tested separately to ensure pilot-specific rules do not break alignment.",User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts || Billing display simplifications in presentation layer must not silently override core pricing logic or create discrepancies with stored financial records || ## 6.5.3 The system shall allow authorized users to view payment status. || Generated invoices must be stored,"Currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals should not be treated as acceptable default behavior,,E1|E2|E3|E4|E5|E6|E8|E9,"R72 targets the separation and consistency between billing display and storage. PRIMARY evidence (E1, E5) explicitly documents developer and QA concerns about display-friendly simplifications creating mismatches with stored values, and the requirement that user-facing totals must match persisted amounts exactly. E4 and E6 establish that calculated prices must be stored with rent records and invoices must be stored. CONTEXT evidence (E8, E9) reinforces the risk of display simplifications diverging from underlying records, particularly in currency and audit contexts. E10 references a related gap on display vs stored value discrepancy. The core operative rule is consistency between display and storage; exceptions and gaps address pilot-specific currency handling and unresolved edge cases around fractions and precision."" Filtered abstract or low-relevance operative statements: Price calculation must be consistent across calculation stage, storage, and user-facing display | Stored calculated price must be associated with rent records | Invoices must include rent details, pricing, and total amount",1,0,0,0
+e460abc8,R72,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R72_5,Authorized user views accurate payment status,"Feature: Billing Display vs Storage Separation
+  Scenario: Authorized user views payment status matching stored records
+    Given an authorized user with billing view permissions
+    And a payment record stored with status 'Paid' and amount 500.00
+    When the user views the payment status display
+    Then the displayed payment status shall match the stored status
+    And the displayed payment amount shall match the stored amount exactly","Implements the requirement that authorized users can view payment status while ensuring the displayed status and amount are consistent with persisted records, preventing misalignment.",E3,The system shall allow authorized users to view payment status,G62|I61|I63|I84|R69|R72,Billing display vs storage separation,Billing display vs storage separation,"[1] source=R72 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R72 type=Requirement hops=0 rel=TARGET
+Billing display vs storage separation
+
+[3] source=R72 type=Requirement/SrcChunk hops=0 chunk=0374b1fefbab130e doc=JIRA-Payment.md rel=TARGET
+PAY-608"",
+    ""summary"": ""Billing Access Control"",
+    ""description"": ""Implement access control rules for billing records so users can view only their own financial history while authorized roles can review broader payment and invoice data."",
+    ""status"": ""Closed""
+  }
+]
+
+[4] source=R72 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=REFINES
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=R69 type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[9] source=I84 type=Implementation/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[10] source=G62 type=Gap hops=2 rel=REFINES > AFFECTS
+Display vs stored value discrepancy","R72 requires that user-facing billing display and persisted billing storage remain consistently aligned to prevent visible mismatches between presented totals and stored amounts. Tests verify that billing calculations are stored correctly, displayed accurately, and that display simplifications do not create discrepancies with financial records. Exception handling for currency conversion is tested separately to ensure pilot-specific rules do not break alignment.",User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts || Billing display simplifications in presentation layer must not silently override core pricing logic or create discrepancies with stored financial records || ## 6.5.3 The system shall allow authorized users to view payment status. || Generated invoices must be stored,"Currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals should not be treated as acceptable default behavior,,E1|E2|E3|E4|E5|E6|E8|E9,"R72 targets the separation and consistency between billing display and storage. PRIMARY evidence (E1, E5) explicitly documents developer and QA concerns about display-friendly simplifications creating mismatches with stored values, and the requirement that user-facing totals must match persisted amounts exactly. E4 and E6 establish that calculated prices must be stored with rent records and invoices must be stored. CONTEXT evidence (E8, E9) reinforces the risk of display simplifications diverging from underlying records, particularly in currency and audit contexts. E10 references a related gap on display vs stored value discrepancy. The core operative rule is consistency between display and storage; exceptions and gaps address pilot-specific currency handling and unresolved edge cases around fractions and precision."" Filtered abstract or low-relevance operative statements: Price calculation must be consistent across calculation stage, storage, and user-facing display | Stored calculated price must be associated with rent records | Invoices must include rent details, pricing, and total amount",1,0,0,0
+e460abc8,R72,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R72_6,Currency conversion maintains alignment between display and storage,"Feature: Billing Display vs Storage Separation
+  Scenario: Currency conversion does not create misalignment in international context
+    Given a billing amount of 1000.00 USD stored in the system
+    And a pilot-specific currency conversion rule for EUR display
+    When the system converts and displays the amount in EUR
+    Then the stored amount shall remain 1000.00 USD unchanged
+    And the displayed EUR amount shall be clearly traceable to the stored USD amount
+    And no hidden discrepancy shall exist between customer-visible total and underlying financial record","Addresses the exception that currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records.",E8|E9,"Currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records",G62|I61|I63|I84|R69|R72,Billing display vs storage separation,Billing display vs storage separation,"[1] source=R72 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R72 type=Requirement hops=0 rel=TARGET
+Billing display vs storage separation
+
+[3] source=R72 type=Requirement/SrcChunk hops=0 chunk=0374b1fefbab130e doc=JIRA-Payment.md rel=TARGET
+PAY-608"",
+    ""summary"": ""Billing Access Control"",
+    ""description"": ""Implement access control rules for billing records so users can view only their own financial history while authorized roles can review broader payment and invoice data."",
+    ""status"": ""Closed""
+  }
+]
+
+[4] source=R72 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=REFINES
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=R69 type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[9] source=I84 type=Implementation/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[10] source=G62 type=Gap hops=2 rel=REFINES > AFFECTS
+Display vs stored value discrepancy","R72 requires that user-facing billing display and persisted billing storage remain consistently aligned to prevent visible mismatches between presented totals and stored amounts. Tests verify that billing calculations are stored correctly, displayed accurately, and that display simplifications do not create discrepancies with financial records. Exception handling for currency conversion is tested separately to ensure pilot-specific rules do not break alignment.",User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts || Billing display simplifications in presentation layer must not silently override core pricing logic or create discrepancies with stored financial records || ## 6.5.3 The system shall allow authorized users to view payment status. || Generated invoices must be stored,"Currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals should not be treated as acceptable default behavior,,E1|E2|E3|E4|E5|E6|E8|E9,"R72 targets the separation and consistency between billing display and storage. PRIMARY evidence (E1, E5) explicitly documents developer and QA concerns about display-friendly simplifications creating mismatches with stored values, and the requirement that user-facing totals must match persisted amounts exactly. E4 and E6 establish that calculated prices must be stored with rent records and invoices must be stored. CONTEXT evidence (E8, E9) reinforces the risk of display simplifications diverging from underlying records, particularly in currency and audit contexts. E10 references a related gap on display vs stored value discrepancy. The core operative rule is consistency between display and storage; exceptions and gaps address pilot-specific currency handling and unresolved edge cases around fractions and precision."" Filtered abstract or low-relevance operative statements: Price calculation must be consistent across calculation stage, storage, and user-facing display | Stored calculated price must be associated with rent records | Invoices must include rent details, pricing, and total amount",1,0,0,0
+e460abc8,R72,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R72_7,Multiple billing records maintain individual storage-display consistency,"Feature: Billing Display vs Storage Separation
+  Scenario: Multiple billing records each maintain consistent display and storage
+    Given three billing records with amounts 500.00, 750.00, and 1000.00 stored
+    When the user views the billing list display
+    Then each displayed amount shall match its corresponding stored amount
+    And the sum of displayed amounts shall equal the sum of stored amounts
+    And no aggregation or simplification shall introduce discrepancies","Verifies that consistency between display and storage is maintained across multiple billing records, preventing cumulative mismatches from display simplifications.",E1|E5,User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts,G62|I61|I63|I84|R69|R72,Billing display vs storage separation,Billing display vs storage separation,"[1] source=R72 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R72 type=Requirement hops=0 rel=TARGET
+Billing display vs storage separation
+
+[3] source=R72 type=Requirement/SrcChunk hops=0 chunk=0374b1fefbab130e doc=JIRA-Payment.md rel=TARGET
+PAY-608"",
+    ""summary"": ""Billing Access Control"",
+    ""description"": ""Implement access control rules for billing records so users can view only their own financial history while authorized roles can review broader payment and invoice data."",
+    ""status"": ""Closed""
+  }
+]
+
+[4] source=R72 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=REFINES
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=R69 type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[9] source=I84 type=Implementation/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[10] source=G62 type=Gap hops=2 rel=REFINES > AFFECTS
+Display vs stored value discrepancy","R72 requires that user-facing billing display and persisted billing storage remain consistently aligned to prevent visible mismatches between presented totals and stored amounts. Tests verify that billing calculations are stored correctly, displayed accurately, and that display simplifications do not create discrepancies with financial records. Exception handling for currency conversion is tested separately to ensure pilot-specific rules do not break alignment.",User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts || Billing display simplifications in presentation layer must not silently override core pricing logic or create discrepancies with stored financial records || ## 6.5.3 The system shall allow authorized users to view payment status. || Generated invoices must be stored,"Currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals should not be treated as acceptable default behavior,,E1|E2|E3|E4|E5|E6|E8|E9,"R72 targets the separation and consistency between billing display and storage. PRIMARY evidence (E1, E5) explicitly documents developer and QA concerns about display-friendly simplifications creating mismatches with stored values, and the requirement that user-facing totals must match persisted amounts exactly. E4 and E6 establish that calculated prices must be stored with rent records and invoices must be stored. CONTEXT evidence (E8, E9) reinforces the risk of display simplifications diverging from underlying records, particularly in currency and audit contexts. E10 references a related gap on display vs stored value discrepancy. The core operative rule is consistency between display and storage; exceptions and gaps address pilot-specific currency handling and unresolved edge cases around fractions and precision."" Filtered abstract or low-relevance operative statements: Price calculation must be consistent across calculation stage, storage, and user-facing display | Stored calculated price must be associated with rent records | Invoices must include rent details, pricing, and total amount",1,0,0,0
+e460abc8,R72,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R72_8,Billing audit trail shows stored and displayed values match,"Feature: Billing Display vs Storage Separation
+  Scenario: Audit trail confirms alignment between stored and displayed billing
+    Given a billing record with stored amount 2500.00
+    When an audit log is generated for the billing transaction
+    Then the audit log shall record the stored amount as 2500.00
+    And the audit log shall confirm the displayed amount was 2500.00
+    And no discrepancy between stored and displayed shall be recorded","Ensures that audit trails document the alignment between stored and displayed billing values, supporting the requirement that financial records and customer-visible totals must match exactly.",E8|E9,User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts,G62|I61|I63|I84|R69|R72,Billing display vs storage separation,Billing display vs storage separation,"[1] source=R72 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R72 type=Requirement hops=0 rel=TARGET
+Billing display vs storage separation
+
+[3] source=R72 type=Requirement/SrcChunk hops=0 chunk=0374b1fefbab130e doc=JIRA-Payment.md rel=TARGET
+PAY-608"",
+    ""summary"": ""Billing Access Control"",
+    ""description"": ""Implement access control rules for billing records so users can view only their own financial history while authorized roles can review broader payment and invoice data."",
+    ""status"": ""Closed""
+  }
+]
+
+[4] source=R72 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=REFINES
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=R69 type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[9] source=I84 type=Implementation/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[10] source=G62 type=Gap hops=2 rel=REFINES > AFFECTS
+Display vs stored value discrepancy","R72 requires that user-facing billing display and persisted billing storage remain consistently aligned to prevent visible mismatches between presented totals and stored amounts. Tests verify that billing calculations are stored correctly, displayed accurately, and that display simplifications do not create discrepancies with financial records. Exception handling for currency conversion is tested separately to ensure pilot-specific rules do not break alignment.",User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts || Billing display simplifications in presentation layer must not silently override core pricing logic or create discrepancies with stored financial records || ## 6.5.3 The system shall allow authorized users to view payment status. || Generated invoices must be stored,"Currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals should not be treated as acceptable default behavior,,E1|E2|E3|E4|E5|E6|E8|E9,"R72 targets the separation and consistency between billing display and storage. PRIMARY evidence (E1, E5) explicitly documents developer and QA concerns about display-friendly simplifications creating mismatches with stored values, and the requirement that user-facing totals must match persisted amounts exactly. E4 and E6 establish that calculated prices must be stored with rent records and invoices must be stored. CONTEXT evidence (E8, E9) reinforces the risk of display simplifications diverging from underlying records, particularly in currency and audit contexts. E10 references a related gap on display vs stored value discrepancy. The core operative rule is consistency between display and storage; exceptions and gaps address pilot-specific currency handling and unresolved edge cases around fractions and precision."" Filtered abstract or low-relevance operative statements: Price calculation must be consistent across calculation stage, storage, and user-facing display | Stored calculated price must be associated with rent records | Invoices must include rent details, pricing, and total amount",1,0,0,0
+e460abc8,R72,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R72_9,Billing display retrieves values directly from storage without transformation,"Feature: Billing Display vs Storage Separation
+  Scenario: Display layer retrieves and presents stored billing values without silent transformation
+    Given a stored billing amount of 3333.33
+    When the display layer retrieves the billing amount from storage
+    Then the retrieved value shall be 3333.33
+    And any presentation formatting shall be transparent and reversible
+    And the underlying stored value shall not be modified or overridden","Verifies that the display layer derives billing values consistently from storage without silent transformations that could create mismatches, addressing the core separation requirement.",E1|E5,User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts,G62|I61|I63|I84|R69|R72,Billing display vs storage separation,Billing display vs storage separation,"[1] source=R72 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R72 type=Requirement hops=0 rel=TARGET
+Billing display vs storage separation
+
+[3] source=R72 type=Requirement/SrcChunk hops=0 chunk=0374b1fefbab130e doc=JIRA-Payment.md rel=TARGET
+PAY-608"",
+    ""summary"": ""Billing Access Control"",
+    ""description"": ""Implement access control rules for billing records so users can view only their own financial history while authorized roles can review broader payment and invoice data."",
+    ""status"": ""Closed""
+  }
+]
+
+[4] source=R72 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=REFINES
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=R69 type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[9] source=I84 type=Implementation/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[10] source=G62 type=Gap hops=2 rel=REFINES > AFFECTS
+Display vs stored value discrepancy","R72 requires that user-facing billing display and persisted billing storage remain consistently aligned to prevent visible mismatches between presented totals and stored amounts. Tests verify that billing calculations are stored correctly, displayed accurately, and that display simplifications do not create discrepancies with financial records. Exception handling for currency conversion is tested separately to ensure pilot-specific rules do not break alignment.",User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts || Billing display simplifications in presentation layer must not silently override core pricing logic or create discrepancies with stored financial records || ## 6.5.3 The system shall allow authorized users to view payment status. || Generated invoices must be stored,"Currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals should not be treated as acceptable default behavior,,E1|E2|E3|E4|E5|E6|E8|E9,"R72 targets the separation and consistency between billing display and storage. PRIMARY evidence (E1, E5) explicitly documents developer and QA concerns about display-friendly simplifications creating mismatches with stored values, and the requirement that user-facing totals must match persisted amounts exactly. E4 and E6 establish that calculated prices must be stored with rent records and invoices must be stored. CONTEXT evidence (E8, E9) reinforces the risk of display simplifications diverging from underlying records, particularly in currency and audit contexts. E10 references a related gap on display vs stored value discrepancy. The core operative rule is consistency between display and storage; exceptions and gaps address pilot-specific currency handling and unresolved edge cases around fractions and precision."" Filtered abstract or low-relevance operative statements: Price calculation must be consistent across calculation stage, storage, and user-facing display | Stored calculated price must be associated with rent records | Invoices must include rent details, pricing, and total amount",1,0,0,0
+e460abc8,R72,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R72_10,Pricing calculation consistency across stages,"Feature: Billing Display vs Storage Separation
+  Scenario: Price calculation remains consistent from calculation through storage to display
+    Given a rent record with base amount 2000.00 and applicable fees of 200.00
+    When the system calculates the total price as 2200.00
+    Then the calculated price shall be stored as 2200.00
+    And the stored price shall be displayed as 2200.00
+    And no intermediate simplification shall alter the value at any stage","Ensures that price calculation is consistent across the calculation stage, storage, and user-facing display, preventing discrepancies that could arise from stage-specific simplifications.",E4|E6,"Price calculation must be consistent across calculation stage, storage, and user-facing display",G62|I61|I63|I84|R69|R72,Billing display vs storage separation,Billing display vs storage separation,"[1] source=R72 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R72 type=Requirement hops=0 rel=TARGET
+Billing display vs storage separation
+
+[3] source=R72 type=Requirement/SrcChunk hops=0 chunk=0374b1fefbab130e doc=JIRA-Payment.md rel=TARGET
+PAY-608"",
+    ""summary"": ""Billing Access Control"",
+    ""description"": ""Implement access control rules for billing records so users can view only their own financial history while authorized roles can review broader payment and invoice data."",
+    ""status"": ""Closed""
+  }
+]
+
+[4] source=R72 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=REFINES
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=R69 type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[9] source=I84 type=Implementation/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[10] source=G62 type=Gap hops=2 rel=REFINES > AFFECTS
+Display vs stored value discrepancy","R72 requires that user-facing billing display and persisted billing storage remain consistently aligned to prevent visible mismatches between presented totals and stored amounts. Tests verify that billing calculations are stored correctly, displayed accurately, and that display simplifications do not create discrepancies with financial records. Exception handling for currency conversion is tested separately to ensure pilot-specific rules do not break alignment.",User-facing billing display and persisted billing storage must be derived consistently to prevent visible mismatches between presented totals and stored amounts || Billing display simplifications in presentation layer must not silently override core pricing logic or create discrepancies with stored financial records || ## 6.5.3 The system shall allow authorized users to view payment status. || Generated invoices must be stored,"Currency presentation and conversion rules may require pilot-specific handling for international billing contexts, but must not create misalignment between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals should not be treated as acceptable default behavior,,E1|E2|E3|E4|E5|E6|E8|E9,"R72 targets the separation and consistency between billing display and storage. PRIMARY evidence (E1, E5) explicitly documents developer and QA concerns about display-friendly simplifications creating mismatches with stored values, and the requirement that user-facing totals must match persisted amounts exactly. E4 and E6 establish that calculated prices must be stored with rent records and invoices must be stored. CONTEXT evidence (E8, E9) reinforces the risk of display simplifications diverging from underlying records, particularly in currency and audit contexts. E10 references a related gap on display vs stored value discrepancy. The core operative rule is consistency between display and storage; exceptions and gaps address pilot-specific currency handling and unresolved edge cases around fractions and precision."" Filtered abstract or low-relevance operative statements: Price calculation must be consistent across calculation stage, storage, and user-facing display | Stored calculated price must be associated with rent records | Invoices must include rent details, pricing, and total amount",1,0,0,0

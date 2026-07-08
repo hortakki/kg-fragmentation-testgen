@@ -1,0 +1,1760 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+7e5c98b6,R30,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R30_1,Operator cancels rental within grace period without penalty,"Feature: Operator Grace-Period Cancellation
+  Scenario: Operator cancels active rental within grace period
+    Given an active rental exists with a grace-period window
+    And the current time is within the grace-period window
+    And an operator with 'OPERATOR' role is authenticated
+    When the operator initiates a cancellation request
+    Then the cancellation is accepted
+    And no penalty fees are applied
+    And the rental status transitions to cancelled",Validates the core requirement that operators can cancel rentals during the grace-period window without incurring penalties. This directly addresses the operative context that early operator cancellation should not apply penalties during the grace period.,E1|E2|E3,Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply|Penalty fees should not be applied during an operator's initial grace-period window for early cancellation|Cancellation rules currently allow stopping an active rent,G1|G23|G64|I25|I42|I44|R30,Operator grace-period cancellation,Operator grace-period cancellation,"[1] source=R30 type=Requirement/SrcChunk hops=0 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=TARGET
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[2] source=R30 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R30 type=Requirement hops=0 rel=TARGET
+Operator grace-period cancellation
+
+[4] source=R30 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=G23 type=Gap hops=1 rel=AFFECTS
+Grace-period cancellation rule ambiguity
+
+[6] source=G23 type=Gap/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=AFFECTS
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=I25 type=Implementation hops=1 rel=AFFECTS
+Cancellation penalty bug
+
+[10] source=I42 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[11] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","Operator grace-period cancellation tests verify that operators can cancel active rentals during an initial grace-period window without incurring penalty fees. Tests cover the core requirement that grace-period exemptions apply to early cancellations, validate role-based access control for cancellation actions, and confirm that penalties are properly suppressed during the grace period. The tests address the documented gap where grace-period penalty exemptions were previously specified but are now missing or unclear in current cancellation rules.","Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply || Cancellation rules currently allow stopping an active rent || : ""Maintenance Period Management""",Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,"Earlier lifecycle guidance included an exemption for penalties during operator tolerance window, but this exemption language may have been removed or is missing from the latest documentation || Current cancellation rules do not clearly reflect the grace-period exemption that was previously documented",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R30 targets operator grace-period cancellation as a rental lifecycle feature. PRIMARY evidence (E1-E9) establishes that operators with appropriate roles can trigger cancellation actions, and that a grace-period exemption from penalties was previously documented but is now missing or unclear in current rules. E2 explicitly flags this as a potential documentation gap requiring confirmation. CONTEXT evidence (E10-E11) reinforces the ambiguity around grace-period cancellation rules and availability query behavior. The core operative rule is that operators can cancel during a grace period without penalty, but the grace period's duration, exact conditions, and current implementation status remain unresolved gaps. Filtered abstract or low-relevance operative statements: Operator grace-period cancellation is a defined requirement for rental lifecycle management | Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions",1,0,0,0
+7e5c98b6,R30,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R30_2,ADMIN role operator cancels rental within grace period without penalty,"Feature: Operator Grace-Period Cancellation
+  Scenario: ADMIN role operator cancels active rental within grace period
+    Given an active rental exists with a grace-period window
+    And the current time is within the grace-period window
+    And an operator with 'ADMIN' role is authenticated
+    When the operator initiates a cancellation request
+    Then the cancellation is accepted
+    And no penalty fees are applied
+    And the rental status transitions to cancelled","Confirms that operators with ADMIN role also have the ability to cancel rentals during grace period without penalties, ensuring role-based access control is properly implemented for the grace-period cancellation feature.",E1|E4|E5,Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions|Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,G1|G23|G64|I25|I42|I44|R30,Operator grace-period cancellation,Operator grace-period cancellation,"[1] source=R30 type=Requirement/SrcChunk hops=0 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=TARGET
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[2] source=R30 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R30 type=Requirement hops=0 rel=TARGET
+Operator grace-period cancellation
+
+[4] source=R30 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=G23 type=Gap hops=1 rel=AFFECTS
+Grace-period cancellation rule ambiguity
+
+[6] source=G23 type=Gap/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=AFFECTS
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=I25 type=Implementation hops=1 rel=AFFECTS
+Cancellation penalty bug
+
+[10] source=I42 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[11] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","Operator grace-period cancellation tests verify that operators can cancel active rentals during an initial grace-period window without incurring penalty fees. Tests cover the core requirement that grace-period exemptions apply to early cancellations, validate role-based access control for cancellation actions, and confirm that penalties are properly suppressed during the grace period. The tests address the documented gap where grace-period penalty exemptions were previously specified but are now missing or unclear in current cancellation rules.","Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply || Cancellation rules currently allow stopping an active rent || : ""Maintenance Period Management""",Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,"Earlier lifecycle guidance included an exemption for penalties during operator tolerance window, but this exemption language may have been removed or is missing from the latest documentation || Current cancellation rules do not clearly reflect the grace-period exemption that was previously documented",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R30 targets operator grace-period cancellation as a rental lifecycle feature. PRIMARY evidence (E1-E9) establishes that operators with appropriate roles can trigger cancellation actions, and that a grace-period exemption from penalties was previously documented but is now missing or unclear in current rules. E2 explicitly flags this as a potential documentation gap requiring confirmation. CONTEXT evidence (E10-E11) reinforces the ambiguity around grace-period cancellation rules and availability query behavior. The core operative rule is that operators can cancel during a grace period without penalty, but the grace period's duration, exact conditions, and current implementation status remain unresolved gaps. Filtered abstract or low-relevance operative statements: Operator grace-period cancellation is a defined requirement for rental lifecycle management | Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions",1,0,0,0
+7e5c98b6,R30,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R30_3,Operator cancellation after grace period incurs penalties,"Feature: Operator Grace-Period Cancellation
+  Scenario: Operator cancels active rental after grace period expires
+    Given an active rental exists with a grace-period window
+    And the current time is after the grace-period window has expired
+    And an operator with 'OPERATOR' role is authenticated
+    When the operator initiates a cancellation request
+    Then the cancellation is accepted
+    And penalty fees are applied according to cancellation rules
+    And the rental status transitions to cancelled",Establishes the boundary condition that penalties should apply when cancellation occurs outside the grace-period window. This validates that the grace-period exemption is time-bound and penalties resume after the grace period expires.,E1|E3|E6,Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply|Cancellation rules currently allow stopping an active rent,G1|G23|G64|I25|I42|I44|R30,Operator grace-period cancellation,Operator grace-period cancellation,"[1] source=R30 type=Requirement/SrcChunk hops=0 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=TARGET
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[2] source=R30 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R30 type=Requirement hops=0 rel=TARGET
+Operator grace-period cancellation
+
+[4] source=R30 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=G23 type=Gap hops=1 rel=AFFECTS
+Grace-period cancellation rule ambiguity
+
+[6] source=G23 type=Gap/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=AFFECTS
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=I25 type=Implementation hops=1 rel=AFFECTS
+Cancellation penalty bug
+
+[10] source=I42 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[11] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","Operator grace-period cancellation tests verify that operators can cancel active rentals during an initial grace-period window without incurring penalty fees. Tests cover the core requirement that grace-period exemptions apply to early cancellations, validate role-based access control for cancellation actions, and confirm that penalties are properly suppressed during the grace period. The tests address the documented gap where grace-period penalty exemptions were previously specified but are now missing or unclear in current cancellation rules.","Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply || Cancellation rules currently allow stopping an active rent || : ""Maintenance Period Management""",Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,"Earlier lifecycle guidance included an exemption for penalties during operator tolerance window, but this exemption language may have been removed or is missing from the latest documentation || Current cancellation rules do not clearly reflect the grace-period exemption that was previously documented",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R30 targets operator grace-period cancellation as a rental lifecycle feature. PRIMARY evidence (E1-E9) establishes that operators with appropriate roles can trigger cancellation actions, and that a grace-period exemption from penalties was previously documented but is now missing or unclear in current rules. E2 explicitly flags this as a potential documentation gap requiring confirmation. CONTEXT evidence (E10-E11) reinforces the ambiguity around grace-period cancellation rules and availability query behavior. The core operative rule is that operators can cancel during a grace period without penalty, but the grace period's duration, exact conditions, and current implementation status remain unresolved gaps. Filtered abstract or low-relevance operative statements: Operator grace-period cancellation is a defined requirement for rental lifecycle management | Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions",1,0,0,0
+7e5c98b6,R30,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R30_4,Non-operator user cannot cancel rental during grace period,"Feature: Operator Grace-Period Cancellation
+  Scenario: Non-operator user attempts cancellation during grace period
+    Given an active rental exists with a grace-period window
+    And the current time is within the grace-period window
+    And a user without 'OPERATOR' or 'ADMIN' role is authenticated
+    When the user attempts to initiate a cancellation request
+    Then the cancellation request is rejected
+    And an authorization error is returned","Validates role-based access control by confirming that only operators with appropriate roles can trigger cancellation actions, even during the grace period. This ensures the grace-period cancellation feature is restricted to authorized operators.",E1|E2|E7,Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions|Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,G1|G23|G64|I25|I42|I44|R30,Operator grace-period cancellation,Operator grace-period cancellation,"[1] source=R30 type=Requirement/SrcChunk hops=0 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=TARGET
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[2] source=R30 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R30 type=Requirement hops=0 rel=TARGET
+Operator grace-period cancellation
+
+[4] source=R30 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=G23 type=Gap hops=1 rel=AFFECTS
+Grace-period cancellation rule ambiguity
+
+[6] source=G23 type=Gap/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=AFFECTS
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=I25 type=Implementation hops=1 rel=AFFECTS
+Cancellation penalty bug
+
+[10] source=I42 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[11] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","Operator grace-period cancellation tests verify that operators can cancel active rentals during an initial grace-period window without incurring penalty fees. Tests cover the core requirement that grace-period exemptions apply to early cancellations, validate role-based access control for cancellation actions, and confirm that penalties are properly suppressed during the grace period. The tests address the documented gap where grace-period penalty exemptions were previously specified but are now missing or unclear in current cancellation rules.","Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply || Cancellation rules currently allow stopping an active rent || : ""Maintenance Period Management""",Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,"Earlier lifecycle guidance included an exemption for penalties during operator tolerance window, but this exemption language may have been removed or is missing from the latest documentation || Current cancellation rules do not clearly reflect the grace-period exemption that was previously documented",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R30 targets operator grace-period cancellation as a rental lifecycle feature. PRIMARY evidence (E1-E9) establishes that operators with appropriate roles can trigger cancellation actions, and that a grace-period exemption from penalties was previously documented but is now missing or unclear in current rules. E2 explicitly flags this as a potential documentation gap requiring confirmation. CONTEXT evidence (E10-E11) reinforces the ambiguity around grace-period cancellation rules and availability query behavior. The core operative rule is that operators can cancel during a grace period without penalty, but the grace period's duration, exact conditions, and current implementation status remain unresolved gaps. Filtered abstract or low-relevance operative statements: Operator grace-period cancellation is a defined requirement for rental lifecycle management | Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions",1,0,0,0
+7e5c98b6,R30,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R30_5,Grace-period cancellation updates rental lifecycle status,"Feature: Operator Grace-Period Cancellation
+  Scenario: Grace-period cancellation properly updates rental lifecycle
+    Given an active rental exists with a grace-period window
+    And the current time is within the grace-period window
+    And an operator with 'OPERATOR' role is authenticated
+    When the operator initiates a cancellation request
+    Then the rental lifecycle transitions from 'active' to 'cancelled'
+    And the cancellation timestamp is recorded
+    And no penalty fees appear in the rental record",Confirms that grace-period cancellation properly manages the rental lifecycle state transitions and maintains accurate records. This validates the integration of grace-period cancellation with the broader rental lifecycle management system.,E1|E8|E9,R30 targets operator grace-period cancellation as a rental lifecycle feature|Maintenance Period Management|Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,G1|G23|G64|I25|I42|I44|R30,Operator grace-period cancellation,Operator grace-period cancellation,"[1] source=R30 type=Requirement/SrcChunk hops=0 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=TARGET
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[2] source=R30 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R30 type=Requirement hops=0 rel=TARGET
+Operator grace-period cancellation
+
+[4] source=R30 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=G23 type=Gap hops=1 rel=AFFECTS
+Grace-period cancellation rule ambiguity
+
+[6] source=G23 type=Gap/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=AFFECTS
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=I25 type=Implementation hops=1 rel=AFFECTS
+Cancellation penalty bug
+
+[10] source=I42 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[11] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","Operator grace-period cancellation tests verify that operators can cancel active rentals during an initial grace-period window without incurring penalty fees. Tests cover the core requirement that grace-period exemptions apply to early cancellations, validate role-based access control for cancellation actions, and confirm that penalties are properly suppressed during the grace period. The tests address the documented gap where grace-period penalty exemptions were previously specified but are now missing or unclear in current cancellation rules.","Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply || Cancellation rules currently allow stopping an active rent || : ""Maintenance Period Management""",Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,"Earlier lifecycle guidance included an exemption for penalties during operator tolerance window, but this exemption language may have been removed or is missing from the latest documentation || Current cancellation rules do not clearly reflect the grace-period exemption that was previously documented",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R30 targets operator grace-period cancellation as a rental lifecycle feature. PRIMARY evidence (E1-E9) establishes that operators with appropriate roles can trigger cancellation actions, and that a grace-period exemption from penalties was previously documented but is now missing or unclear in current rules. E2 explicitly flags this as a potential documentation gap requiring confirmation. CONTEXT evidence (E10-E11) reinforces the ambiguity around grace-period cancellation rules and availability query behavior. The core operative rule is that operators can cancel during a grace period without penalty, but the grace period's duration, exact conditions, and current implementation status remain unresolved gaps. Filtered abstract or low-relevance operative statements: Operator grace-period cancellation is a defined requirement for rental lifecycle management | Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions",1,0,0,0
+7e5c98b6,R30,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R30_6,Multiple cancellations within grace period are handled correctly,"Feature: Operator Grace-Period Cancellation
+  Scenario: Operator attempts multiple cancellation requests within grace period
+    Given an active rental exists with a grace-period window
+    And the current time is within the grace-period window
+    And an operator with 'OPERATOR' role is authenticated
+    When the operator initiates a first cancellation request
+    Then the cancellation is accepted and rental status is cancelled
+    When the operator attempts a second cancellation request on the same rental
+    Then the second request is rejected with an appropriate error
+    And no additional penalty fees are applied","Validates that the grace-period cancellation feature handles edge cases correctly, ensuring that once a rental is cancelled, subsequent cancellation attempts are properly rejected without applying additional penalties.",E2|E3|E4,Cancellation rules currently allow stopping an active rent|Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,G1|G23|G64|I25|I42|I44|R30,Operator grace-period cancellation,Operator grace-period cancellation,"[1] source=R30 type=Requirement/SrcChunk hops=0 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=TARGET
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[2] source=R30 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R30 type=Requirement hops=0 rel=TARGET
+Operator grace-period cancellation
+
+[4] source=R30 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=G23 type=Gap hops=1 rel=AFFECTS
+Grace-period cancellation rule ambiguity
+
+[6] source=G23 type=Gap/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=AFFECTS
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=I25 type=Implementation hops=1 rel=AFFECTS
+Cancellation penalty bug
+
+[10] source=I42 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[11] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","Operator grace-period cancellation tests verify that operators can cancel active rentals during an initial grace-period window without incurring penalty fees. Tests cover the core requirement that grace-period exemptions apply to early cancellations, validate role-based access control for cancellation actions, and confirm that penalties are properly suppressed during the grace period. The tests address the documented gap where grace-period penalty exemptions were previously specified but are now missing or unclear in current cancellation rules.","Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply || Cancellation rules currently allow stopping an active rent || : ""Maintenance Period Management""",Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,"Earlier lifecycle guidance included an exemption for penalties during operator tolerance window, but this exemption language may have been removed or is missing from the latest documentation || Current cancellation rules do not clearly reflect the grace-period exemption that was previously documented",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R30 targets operator grace-period cancellation as a rental lifecycle feature. PRIMARY evidence (E1-E9) establishes that operators with appropriate roles can trigger cancellation actions, and that a grace-period exemption from penalties was previously documented but is now missing or unclear in current rules. E2 explicitly flags this as a potential documentation gap requiring confirmation. CONTEXT evidence (E10-E11) reinforces the ambiguity around grace-period cancellation rules and availability query behavior. The core operative rule is that operators can cancel during a grace period without penalty, but the grace period's duration, exact conditions, and current implementation status remain unresolved gaps. Filtered abstract or low-relevance operative statements: Operator grace-period cancellation is a defined requirement for rental lifecycle management | Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions",1,0,0,0
+7e5c98b6,R30,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R30_7,Grace-period duration is correctly enforced,"Feature: Operator Grace-Period Cancellation
+  Scenario: Grace-period duration boundary is correctly enforced
+    Given an active rental exists with a defined grace-period duration
+    And an operator with 'OPERATOR' role is authenticated
+    When the operator cancels at the last moment within the grace period
+    Then the cancellation is accepted without penalties
+    When another rental with the same grace-period duration is cancelled one second after expiration
+    Then the cancellation is accepted but penalties are applied","Ensures that the grace-period duration is precisely enforced at the boundary, confirming that the system correctly distinguishes between cancellations within and outside the grace-period window.",E5|E6|E10,Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply|Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,G1|G23|G64|I25|I42|I44|R30,Operator grace-period cancellation,Operator grace-period cancellation,"[1] source=R30 type=Requirement/SrcChunk hops=0 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=TARGET
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[2] source=R30 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R30 type=Requirement hops=0 rel=TARGET
+Operator grace-period cancellation
+
+[4] source=R30 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=G23 type=Gap hops=1 rel=AFFECTS
+Grace-period cancellation rule ambiguity
+
+[6] source=G23 type=Gap/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=AFFECTS
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=I25 type=Implementation hops=1 rel=AFFECTS
+Cancellation penalty bug
+
+[10] source=I42 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[11] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","Operator grace-period cancellation tests verify that operators can cancel active rentals during an initial grace-period window without incurring penalty fees. Tests cover the core requirement that grace-period exemptions apply to early cancellations, validate role-based access control for cancellation actions, and confirm that penalties are properly suppressed during the grace period. The tests address the documented gap where grace-period penalty exemptions were previously specified but are now missing or unclear in current cancellation rules.","Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply || Cancellation rules currently allow stopping an active rent || : ""Maintenance Period Management""",Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,"Earlier lifecycle guidance included an exemption for penalties during operator tolerance window, but this exemption language may have been removed or is missing from the latest documentation || Current cancellation rules do not clearly reflect the grace-period exemption that was previously documented",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R30 targets operator grace-period cancellation as a rental lifecycle feature. PRIMARY evidence (E1-E9) establishes that operators with appropriate roles can trigger cancellation actions, and that a grace-period exemption from penalties was previously documented but is now missing or unclear in current rules. E2 explicitly flags this as a potential documentation gap requiring confirmation. CONTEXT evidence (E10-E11) reinforces the ambiguity around grace-period cancellation rules and availability query behavior. The core operative rule is that operators can cancel during a grace period without penalty, but the grace period's duration, exact conditions, and current implementation status remain unresolved gaps. Filtered abstract or low-relevance operative statements: Operator grace-period cancellation is a defined requirement for rental lifecycle management | Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions",1,0,0,0
+7e5c98b6,R30,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R30_8,Grace-period cancellation is documented in rental history,"Feature: Operator Grace-Period Cancellation
+  Scenario: Grace-period cancellation is recorded in rental history
+    Given an active rental exists with a grace-period window
+    And the current time is within the grace-period window
+    And an operator with 'OPERATOR' role is authenticated
+    When the operator initiates a cancellation request
+    Then the cancellation is accepted
+    And the rental history includes a cancellation event
+    And the event is marked as 'grace-period cancellation'
+    And no penalty fees are recorded in the history","Validates that grace-period cancellations are properly documented and auditable, ensuring transparency and traceability of the cancellation action and its grace-period status.",E1|E7|E8,R30 targets operator grace-period cancellation as a rental lifecycle feature|Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,G1|G23|G64|I25|I42|I44|R30,Operator grace-period cancellation,Operator grace-period cancellation,"[1] source=R30 type=Requirement/SrcChunk hops=0 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=TARGET
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[2] source=R30 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R30 type=Requirement hops=0 rel=TARGET
+Operator grace-period cancellation
+
+[4] source=R30 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=G23 type=Gap hops=1 rel=AFFECTS
+Grace-period cancellation rule ambiguity
+
+[6] source=G23 type=Gap/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=AFFECTS
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=I25 type=Implementation hops=1 rel=AFFECTS
+Cancellation penalty bug
+
+[10] source=I42 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[11] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","Operator grace-period cancellation tests verify that operators can cancel active rentals during an initial grace-period window without incurring penalty fees. Tests cover the core requirement that grace-period exemptions apply to early cancellations, validate role-based access control for cancellation actions, and confirm that penalties are properly suppressed during the grace period. The tests address the documented gap where grace-period penalty exemptions were previously specified but are now missing or unclear in current cancellation rules.","Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply || Cancellation rules currently allow stopping an active rent || : ""Maintenance Period Management""",Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,"Earlier lifecycle guidance included an exemption for penalties during operator tolerance window, but this exemption language may have been removed or is missing from the latest documentation || Current cancellation rules do not clearly reflect the grace-period exemption that was previously documented",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R30 targets operator grace-period cancellation as a rental lifecycle feature. PRIMARY evidence (E1-E9) establishes that operators with appropriate roles can trigger cancellation actions, and that a grace-period exemption from penalties was previously documented but is now missing or unclear in current rules. E2 explicitly flags this as a potential documentation gap requiring confirmation. CONTEXT evidence (E10-E11) reinforces the ambiguity around grace-period cancellation rules and availability query behavior. The core operative rule is that operators can cancel during a grace period without penalty, but the grace period's duration, exact conditions, and current implementation status remain unresolved gaps. Filtered abstract or low-relevance operative statements: Operator grace-period cancellation is a defined requirement for rental lifecycle management | Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions",1,0,0,0
+7e5c98b6,R30,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R30_9,Grace-period exemption is confirmed in current implementation,"Feature: Operator Grace-Period Cancellation
+  Scenario: Verify grace-period penalty exemption is implemented
+    Given an active rental exists with a grace-period window
+    And the current time is within the grace-period window
+    And an operator with 'OPERATOR' role is authenticated
+    When the operator initiates a cancellation request
+    Then the system applies the grace-period exemption rule
+    And the cancellation rules reflect the grace-period penalty exemption
+    And no penalty fees are calculated or applied",Directly addresses the documented gap where grace-period penalty exemptions were previously specified but are now missing or unclear in current cancellation rules. This test confirms that the exemption is properly implemented in the current system.,E2|E9|E11,"Earlier lifecycle guidance included an exemption for penalties during operator tolerance window, but this exemption language may have been removed or is missing from the latest documentation|Current cancellation rules do not clearly reflect the grace-period exemption that was previously documented|Penalty fees should not be applied during an operator's initial grace-period window for early cancellation",G1|G23|G64|I25|I42|I44|R30,Operator grace-period cancellation,Operator grace-period cancellation,"[1] source=R30 type=Requirement/SrcChunk hops=0 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=TARGET
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[2] source=R30 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R30 type=Requirement hops=0 rel=TARGET
+Operator grace-period cancellation
+
+[4] source=R30 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=G23 type=Gap hops=1 rel=AFFECTS
+Grace-period cancellation rule ambiguity
+
+[6] source=G23 type=Gap/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=AFFECTS
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=I25 type=Implementation hops=1 rel=AFFECTS
+Cancellation penalty bug
+
+[10] source=I42 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[11] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","Operator grace-period cancellation tests verify that operators can cancel active rentals during an initial grace-period window without incurring penalty fees. Tests cover the core requirement that grace-period exemptions apply to early cancellations, validate role-based access control for cancellation actions, and confirm that penalties are properly suppressed during the grace period. The tests address the documented gap where grace-period penalty exemptions were previously specified but are now missing or unclear in current cancellation rules.","Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply || Cancellation rules currently allow stopping an active rent || : ""Maintenance Period Management""",Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,"Earlier lifecycle guidance included an exemption for penalties during operator tolerance window, but this exemption language may have been removed or is missing from the latest documentation || Current cancellation rules do not clearly reflect the grace-period exemption that was previously documented",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R30 targets operator grace-period cancellation as a rental lifecycle feature. PRIMARY evidence (E1-E9) establishes that operators with appropriate roles can trigger cancellation actions, and that a grace-period exemption from penalties was previously documented but is now missing or unclear in current rules. E2 explicitly flags this as a potential documentation gap requiring confirmation. CONTEXT evidence (E10-E11) reinforces the ambiguity around grace-period cancellation rules and availability query behavior. The core operative rule is that operators can cancel during a grace period without penalty, but the grace period's duration, exact conditions, and current implementation status remain unresolved gaps. Filtered abstract or low-relevance operative statements: Operator grace-period cancellation is a defined requirement for rental lifecycle management | Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions",1,0,0,0
+7e5c98b6,R30,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R30_10,Operator grace-period cancellation availability is queryable,"Feature: Operator Grace-Period Cancellation
+  Scenario: Query rental availability and grace-period cancellation status
+    Given an active rental exists with a grace-period window
+    And the current time is within the grace-period window
+    When an operator queries the rental availability and cancellation options
+    Then the response includes the grace-period status
+    And the response indicates that cancellation without penalties is available
+    And the response includes the remaining grace-period duration","Validates that operators can query rental information to determine whether grace-period cancellation is available, supporting informed decision-making and system transparency regarding cancellation options.",E1|E10|E11,Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply|CONTEXT evidence reinforces the ambiguity around grace-period cancellation rules and availability query behavior,G1|G23|G64|I25|I42|I44|R30,Operator grace-period cancellation,Operator grace-period cancellation,"[1] source=R30 type=Requirement/SrcChunk hops=0 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=TARGET
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[2] source=R30 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R30 type=Requirement hops=0 rel=TARGET
+Operator grace-period cancellation
+
+[4] source=R30 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[5] source=G23 type=Gap hops=1 rel=AFFECTS
+Grace-period cancellation rule ambiguity
+
+[6] source=G23 type=Gap/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=AFFECTS
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=I25 type=Implementation hops=1 rel=AFFECTS
+Cancellation penalty bug
+
+[10] source=I42 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[11] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","Operator grace-period cancellation tests verify that operators can cancel active rentals during an initial grace-period window without incurring penalty fees. Tests cover the core requirement that grace-period exemptions apply to early cancellations, validate role-based access control for cancellation actions, and confirm that penalties are properly suppressed during the grace period. The tests address the documented gap where grace-period penalty exemptions were previously specified but are now missing or unclear in current cancellation rules.","Early operator cancellation may involve a tolerance window or grace period during which penalties should not apply || Cancellation rules currently allow stopping an active rent || : ""Maintenance Period Management""",Penalty fees should not be applied during an operator's initial grace-period window for early cancellation,"Earlier lifecycle guidance included an exemption for penalties during operator tolerance window, but this exemption language may have been removed or is missing from the latest documentation || Current cancellation rules do not clearly reflect the grace-period exemption that was previously documented",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R30 targets operator grace-period cancellation as a rental lifecycle feature. PRIMARY evidence (E1-E9) establishes that operators with appropriate roles can trigger cancellation actions, and that a grace-period exemption from penalties was previously documented but is now missing or unclear in current rules. E2 explicitly flags this as a potential documentation gap requiring confirmation. CONTEXT evidence (E10-E11) reinforces the ambiguity around grace-period cancellation rules and availability query behavior. The core operative rule is that operators can cancel during a grace period without penalty, but the grace period's duration, exact conditions, and current implementation status remain unresolved gaps. Filtered abstract or low-relevance operative statements: Operator grace-period cancellation is a defined requirement for rental lifecycle management | Operators with 'OPERATOR' or 'ADMIN' roles can trigger approval actions",1,0,0,0

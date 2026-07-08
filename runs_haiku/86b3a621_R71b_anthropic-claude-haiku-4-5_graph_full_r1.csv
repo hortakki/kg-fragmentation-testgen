@@ -1,0 +1,1655 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+86b3a621,R71b,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71b_1,Authorized user can generate rent report with core rental record information,"Feature: Rent Report Generation
+  Scenario: Authorized user generates rent report with core rental information
+    Given an authorized user with rent report generation permissions
+    And rental records exist with core identifying information (tenant ID, property ID, lease start date, lease end date)
+    When the user requests a rent report
+    Then the report is generated successfully
+    And the report contains core identifying information for each rental record
+    And the report contains timing information (lease dates, payment dates)",Validates the primary operative requirement that rent report generation must allow authorized users to review rental records with core identifying and timing information.,E1|E2|E3,Rent report generation must allow authorized users to review rental records with core identifying and timing information,9dd628a82a09c2ba|D21|G63|G74|G93c|I24|I71|I72|R25|R71b|R79b,Rent report generation rule,Rent report generation rule,"[1] source=R71b type=Requirement hops=0 rel=TARGET
+Rent report generation rule
+
+[2] source=R71b type=Requirement/SrcChunk hops=0 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[3] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[4] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[5] source=R79b type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[6] source=I71 type=Implementation hops=1 rel=IMPLEMENTS
+Rent report generation logic
+
+[7] source=R79b type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=R25 type=Requirement hops=1 rel=AFFECTS
+End-of-rent lifecycle transition
+
+[10] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[11] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[12] source=D21 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Rent Lifecycle v1.0
+
+[13] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[14] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[15] source=I24 type=Implementation hops=2 rel=AFFECTS > IMPLEMENTS
+Manual rent completion
+
+[16] source=I72 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Financial report accuracy","Rent report generation rule (R71b) test suite covering authorized user access to rental records, identifier consistency, rounding discrepancies, and historical data handling. Tests address the core operative context that rent reports must allow authorized users to review rental records with core identifying and timing information, while accounting for identifier representation exceptions and potential legacy data inconsistencies.",Rent report generation must allow authorized users to review rental records with core identifying and timing information || Export/report rounding discrepancy,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used","Historical rental records may use earlier identifier representations, creating potential inconsistency in report output unless legacy handling is defined",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R71b targets rent report generation with focus on authorized user access to rental records and identifier consistency. Primary evidence E2 reveals unresolved design questions about identifier representation (warehouse-facing vs. formal specification terms) and historical data compatibility. E3 and E10 provide lifecycle context (rent validation, approval, activation, completion). E5, E8, E9 indicate related gaps in financial reporting, rounding, and multi-currency handling. E13-E14 (CONTEXT) highlight audit visibility and source-of-truth concerns that may refine reporting requirements. No direct conflicts with PRIMARY evidence, but multiple unresolved design decisions should be captured as gaps rather than operative rules. Filtered abstract or low-relevance operative statements: Report output must remain consistent with the currently supported identifier model | Report generation must account for historical data representations that may differ from present-day operational terminology | Rent report generation logic is implemented as per I71",1,0,0,0
+86b3a621,R71b,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71b_2,Unauthorized user cannot generate rent report,"Feature: Rent Report Generation
+  Scenario: Unauthorized user is denied rent report generation
+    Given a user without rent report generation permissions
+    When the user attempts to request a rent report
+    Then the request is denied
+    And an authorization error is returned","Ensures that rent report generation is restricted to authorized users only, supporting the access control requirement implicit in the operative context.",E1|E2,Rent report generation must allow authorized users to review rental records with core identifying and timing information,9dd628a82a09c2ba|D21|G63|G74|G93c|I24|I71|I72|R25|R71b|R79b,Rent report generation rule,Rent report generation rule,"[1] source=R71b type=Requirement hops=0 rel=TARGET
+Rent report generation rule
+
+[2] source=R71b type=Requirement/SrcChunk hops=0 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[3] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[4] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[5] source=R79b type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[6] source=I71 type=Implementation hops=1 rel=IMPLEMENTS
+Rent report generation logic
+
+[7] source=R79b type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=R25 type=Requirement hops=1 rel=AFFECTS
+End-of-rent lifecycle transition
+
+[10] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[11] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[12] source=D21 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Rent Lifecycle v1.0
+
+[13] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[14] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[15] source=I24 type=Implementation hops=2 rel=AFFECTS > IMPLEMENTS
+Manual rent completion
+
+[16] source=I72 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Financial report accuracy","Rent report generation rule (R71b) test suite covering authorized user access to rental records, identifier consistency, rounding discrepancies, and historical data handling. Tests address the core operative context that rent reports must allow authorized users to review rental records with core identifying and timing information, while accounting for identifier representation exceptions and potential legacy data inconsistencies.",Rent report generation must allow authorized users to review rental records with core identifying and timing information || Export/report rounding discrepancy,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used","Historical rental records may use earlier identifier representations, creating potential inconsistency in report output unless legacy handling is defined",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R71b targets rent report generation with focus on authorized user access to rental records and identifier consistency. Primary evidence E2 reveals unresolved design questions about identifier representation (warehouse-facing vs. formal specification terms) and historical data compatibility. E3 and E10 provide lifecycle context (rent validation, approval, activation, completion). E5, E8, E9 indicate related gaps in financial reporting, rounding, and multi-currency handling. E13-E14 (CONTEXT) highlight audit visibility and source-of-truth concerns that may refine reporting requirements. No direct conflicts with PRIMARY evidence, but multiple unresolved design decisions should be captured as gaps rather than operative rules. Filtered abstract or low-relevance operative statements: Report output must remain consistent with the currently supported identifier model | Report generation must account for historical data representations that may differ from present-day operational terminology | Rent report generation logic is implemented as per I71",1,0,0,0
+86b3a621,R71b,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71b_3,Report output uses warehouse-facing identifier terminology,"Feature: Rent Report Generation
+  Scenario: Report output uses warehouse-facing identifier terminology
+    Given an authorized user requests a rent report
+    And the system is configured to use warehouse-facing identifier terminology
+    When the report is generated
+    Then all identifiers in the report use warehouse-facing terminology
+    And identifiers are consistent across all rental records in the report",Addresses the exception that report output identifier representation may differ between warehouse-facing terminology and formal specification terms. This test confirms warehouse-facing terminology is used when configured.,E2,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used",9dd628a82a09c2ba|D21|G63|G74|G93c|I24|I71|I72|R25|R71b|R79b,Rent report generation rule,Rent report generation rule,"[1] source=R71b type=Requirement hops=0 rel=TARGET
+Rent report generation rule
+
+[2] source=R71b type=Requirement/SrcChunk hops=0 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[3] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[4] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[5] source=R79b type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[6] source=I71 type=Implementation hops=1 rel=IMPLEMENTS
+Rent report generation logic
+
+[7] source=R79b type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=R25 type=Requirement hops=1 rel=AFFECTS
+End-of-rent lifecycle transition
+
+[10] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[11] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[12] source=D21 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Rent Lifecycle v1.0
+
+[13] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[14] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[15] source=I24 type=Implementation hops=2 rel=AFFECTS > IMPLEMENTS
+Manual rent completion
+
+[16] source=I72 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Financial report accuracy","Rent report generation rule (R71b) test suite covering authorized user access to rental records, identifier consistency, rounding discrepancies, and historical data handling. Tests address the core operative context that rent reports must allow authorized users to review rental records with core identifying and timing information, while accounting for identifier representation exceptions and potential legacy data inconsistencies.",Rent report generation must allow authorized users to review rental records with core identifying and timing information || Export/report rounding discrepancy,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used","Historical rental records may use earlier identifier representations, creating potential inconsistency in report output unless legacy handling is defined",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R71b targets rent report generation with focus on authorized user access to rental records and identifier consistency. Primary evidence E2 reveals unresolved design questions about identifier representation (warehouse-facing vs. formal specification terms) and historical data compatibility. E3 and E10 provide lifecycle context (rent validation, approval, activation, completion). E5, E8, E9 indicate related gaps in financial reporting, rounding, and multi-currency handling. E13-E14 (CONTEXT) highlight audit visibility and source-of-truth concerns that may refine reporting requirements. No direct conflicts with PRIMARY evidence, but multiple unresolved design decisions should be captured as gaps rather than operative rules. Filtered abstract or low-relevance operative statements: Report output must remain consistent with the currently supported identifier model | Report generation must account for historical data representations that may differ from present-day operational terminology | Rent report generation logic is implemented as per I71",1,0,0,0
+86b3a621,R71b,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71b_4,Report output uses formal specification identifier terminology,"Feature: Rent Report Generation
+  Scenario: Report output uses formal specification identifier terminology
+    Given an authorized user requests a rent report
+    And the system is configured to use formal specification identifier terminology
+    When the report is generated
+    Then all identifiers in the report use formal specification terminology
+    And identifiers are consistent across all rental records in the report",Addresses the exception that report output identifier representation may differ between warehouse-facing terminology and formal specification terms. This test confirms formal specification terminology is used when configured.,E2,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used",9dd628a82a09c2ba|D21|G63|G74|G93c|I24|I71|I72|R25|R71b|R79b,Rent report generation rule,Rent report generation rule,"[1] source=R71b type=Requirement hops=0 rel=TARGET
+Rent report generation rule
+
+[2] source=R71b type=Requirement/SrcChunk hops=0 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[3] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[4] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[5] source=R79b type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[6] source=I71 type=Implementation hops=1 rel=IMPLEMENTS
+Rent report generation logic
+
+[7] source=R79b type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=R25 type=Requirement hops=1 rel=AFFECTS
+End-of-rent lifecycle transition
+
+[10] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[11] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[12] source=D21 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Rent Lifecycle v1.0
+
+[13] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[14] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[15] source=I24 type=Implementation hops=2 rel=AFFECTS > IMPLEMENTS
+Manual rent completion
+
+[16] source=I72 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Financial report accuracy","Rent report generation rule (R71b) test suite covering authorized user access to rental records, identifier consistency, rounding discrepancies, and historical data handling. Tests address the core operative context that rent reports must allow authorized users to review rental records with core identifying and timing information, while accounting for identifier representation exceptions and potential legacy data inconsistencies.",Rent report generation must allow authorized users to review rental records with core identifying and timing information || Export/report rounding discrepancy,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used","Historical rental records may use earlier identifier representations, creating potential inconsistency in report output unless legacy handling is defined",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R71b targets rent report generation with focus on authorized user access to rental records and identifier consistency. Primary evidence E2 reveals unresolved design questions about identifier representation (warehouse-facing vs. formal specification terms) and historical data compatibility. E3 and E10 provide lifecycle context (rent validation, approval, activation, completion). E5, E8, E9 indicate related gaps in financial reporting, rounding, and multi-currency handling. E13-E14 (CONTEXT) highlight audit visibility and source-of-truth concerns that may refine reporting requirements. No direct conflicts with PRIMARY evidence, but multiple unresolved design decisions should be captured as gaps rather than operative rules. Filtered abstract or low-relevance operative statements: Report output must remain consistent with the currently supported identifier model | Report generation must account for historical data representations that may differ from present-day operational terminology | Rent report generation logic is implemented as per I71",1,0,0,0
+86b3a621,R71b,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71b_5,Historical rental records with legacy identifiers are included in report,"Feature: Rent Report Generation
+  Scenario: Report includes historical rental records with legacy identifiers
+    Given an authorized user requests a rent report
+    And the rental database contains both current and historical records
+    And historical records use earlier identifier representations
+    When the report is generated
+    Then the report includes both current and historical rental records
+    And historical records are properly represented in the report output","Addresses the conflict that historical rental records may use earlier identifier representations, creating potential inconsistency in report output. This test ensures legacy data is handled and included in reports.",E3|E10,"Historical rental records may use earlier identifier representations, creating potential inconsistency in report output unless legacy handling is defined",9dd628a82a09c2ba|D21|G63|G74|G93c|I24|I71|I72|R25|R71b|R79b,Rent report generation rule,Rent report generation rule,"[1] source=R71b type=Requirement hops=0 rel=TARGET
+Rent report generation rule
+
+[2] source=R71b type=Requirement/SrcChunk hops=0 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[3] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[4] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[5] source=R79b type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[6] source=I71 type=Implementation hops=1 rel=IMPLEMENTS
+Rent report generation logic
+
+[7] source=R79b type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=R25 type=Requirement hops=1 rel=AFFECTS
+End-of-rent lifecycle transition
+
+[10] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[11] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[12] source=D21 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Rent Lifecycle v1.0
+
+[13] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[14] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[15] source=I24 type=Implementation hops=2 rel=AFFECTS > IMPLEMENTS
+Manual rent completion
+
+[16] source=I72 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Financial report accuracy","Rent report generation rule (R71b) test suite covering authorized user access to rental records, identifier consistency, rounding discrepancies, and historical data handling. Tests address the core operative context that rent reports must allow authorized users to review rental records with core identifying and timing information, while accounting for identifier representation exceptions and potential legacy data inconsistencies.",Rent report generation must allow authorized users to review rental records with core identifying and timing information || Export/report rounding discrepancy,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used","Historical rental records may use earlier identifier representations, creating potential inconsistency in report output unless legacy handling is defined",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R71b targets rent report generation with focus on authorized user access to rental records and identifier consistency. Primary evidence E2 reveals unresolved design questions about identifier representation (warehouse-facing vs. formal specification terms) and historical data compatibility. E3 and E10 provide lifecycle context (rent validation, approval, activation, completion). E5, E8, E9 indicate related gaps in financial reporting, rounding, and multi-currency handling. E13-E14 (CONTEXT) highlight audit visibility and source-of-truth concerns that may refine reporting requirements. No direct conflicts with PRIMARY evidence, but multiple unresolved design decisions should be captured as gaps rather than operative rules. Filtered abstract or low-relevance operative statements: Report output must remain consistent with the currently supported identifier model | Report generation must account for historical data representations that may differ from present-day operational terminology | Rent report generation logic is implemented as per I71",1,0,0,0
+86b3a621,R71b,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71b_6,Report handles rounding discrepancies in financial amounts,"Feature: Rent Report Generation
+  Scenario: Report correctly handles rounding discrepancies in rent amounts
+    Given an authorized user requests a rent report
+    And rental records contain amounts with decimal precision that may cause rounding discrepancies
+    When the report is generated
+    Then all financial amounts are rounded consistently
+    And rounding rules are applied uniformly across all records
+    And the rounding method is documented or configurable",Addresses the operative context item 'Export/report rounding discrepancy' by ensuring rent reports handle rounding of financial amounts consistently and predictably.,E5|E8|E9,Export/report rounding discrepancy,9dd628a82a09c2ba|D21|G63|G74|G93c|I24|I71|I72|R25|R71b|R79b,Rent report generation rule,Rent report generation rule,"[1] source=R71b type=Requirement hops=0 rel=TARGET
+Rent report generation rule
+
+[2] source=R71b type=Requirement/SrcChunk hops=0 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[3] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[4] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[5] source=R79b type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[6] source=I71 type=Implementation hops=1 rel=IMPLEMENTS
+Rent report generation logic
+
+[7] source=R79b type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=R25 type=Requirement hops=1 rel=AFFECTS
+End-of-rent lifecycle transition
+
+[10] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[11] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[12] source=D21 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Rent Lifecycle v1.0
+
+[13] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[14] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[15] source=I24 type=Implementation hops=2 rel=AFFECTS > IMPLEMENTS
+Manual rent completion
+
+[16] source=I72 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Financial report accuracy","Rent report generation rule (R71b) test suite covering authorized user access to rental records, identifier consistency, rounding discrepancies, and historical data handling. Tests address the core operative context that rent reports must allow authorized users to review rental records with core identifying and timing information, while accounting for identifier representation exceptions and potential legacy data inconsistencies.",Rent report generation must allow authorized users to review rental records with core identifying and timing information || Export/report rounding discrepancy,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used","Historical rental records may use earlier identifier representations, creating potential inconsistency in report output unless legacy handling is defined",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R71b targets rent report generation with focus on authorized user access to rental records and identifier consistency. Primary evidence E2 reveals unresolved design questions about identifier representation (warehouse-facing vs. formal specification terms) and historical data compatibility. E3 and E10 provide lifecycle context (rent validation, approval, activation, completion). E5, E8, E9 indicate related gaps in financial reporting, rounding, and multi-currency handling. E13-E14 (CONTEXT) highlight audit visibility and source-of-truth concerns that may refine reporting requirements. No direct conflicts with PRIMARY evidence, but multiple unresolved design decisions should be captured as gaps rather than operative rules. Filtered abstract or low-relevance operative statements: Report output must remain consistent with the currently supported identifier model | Report generation must account for historical data representations that may differ from present-day operational terminology | Rent report generation logic is implemented as per I71",1,0,0,0
+86b3a621,R71b,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71b_7,Report includes rental lifecycle information (validation through completion),"Feature: Rent Report Generation
+  Scenario: Report includes rental lifecycle information
+    Given an authorized user requests a rent report
+    And rental records have progressed through lifecycle stages (validation, approval, activation, completion)
+    When the report is generated
+    Then the report includes lifecycle status for each rental record
+    And timing information reflects each lifecycle stage","Incorporates lifecycle context from evidence E3 and E10 (rent validation, approval, activation, completion) to ensure reports capture the full rental record lifecycle.",E3|E10,Rent report generation must allow authorized users to review rental records with core identifying and timing information,9dd628a82a09c2ba|D21|G63|G74|G93c|I24|I71|I72|R25|R71b|R79b,Rent report generation rule,Rent report generation rule,"[1] source=R71b type=Requirement hops=0 rel=TARGET
+Rent report generation rule
+
+[2] source=R71b type=Requirement/SrcChunk hops=0 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[3] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[4] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[5] source=R79b type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[6] source=I71 type=Implementation hops=1 rel=IMPLEMENTS
+Rent report generation logic
+
+[7] source=R79b type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=R25 type=Requirement hops=1 rel=AFFECTS
+End-of-rent lifecycle transition
+
+[10] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[11] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[12] source=D21 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Rent Lifecycle v1.0
+
+[13] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[14] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[15] source=I24 type=Implementation hops=2 rel=AFFECTS > IMPLEMENTS
+Manual rent completion
+
+[16] source=I72 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Financial report accuracy","Rent report generation rule (R71b) test suite covering authorized user access to rental records, identifier consistency, rounding discrepancies, and historical data handling. Tests address the core operative context that rent reports must allow authorized users to review rental records with core identifying and timing information, while accounting for identifier representation exceptions and potential legacy data inconsistencies.",Rent report generation must allow authorized users to review rental records with core identifying and timing information || Export/report rounding discrepancy,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used","Historical rental records may use earlier identifier representations, creating potential inconsistency in report output unless legacy handling is defined",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R71b targets rent report generation with focus on authorized user access to rental records and identifier consistency. Primary evidence E2 reveals unresolved design questions about identifier representation (warehouse-facing vs. formal specification terms) and historical data compatibility. E3 and E10 provide lifecycle context (rent validation, approval, activation, completion). E5, E8, E9 indicate related gaps in financial reporting, rounding, and multi-currency handling. E13-E14 (CONTEXT) highlight audit visibility and source-of-truth concerns that may refine reporting requirements. No direct conflicts with PRIMARY evidence, but multiple unresolved design decisions should be captured as gaps rather than operative rules. Filtered abstract or low-relevance operative statements: Report output must remain consistent with the currently supported identifier model | Report generation must account for historical data representations that may differ from present-day operational terminology | Rent report generation logic is implemented as per I71",1,0,0,0
+86b3a621,R71b,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71b_8,Report generation maintains audit visibility of access and modifications,"Feature: Rent Report Generation
+  Scenario: Report generation is auditable
+    Given an authorized user generates a rent report
+    When the report is generated
+    Then the report generation event is logged
+    And the log includes user identity, timestamp, and report parameters
+    And audit records are retained for compliance review",Addresses audit visibility concerns highlighted in the context (E13-E14) to ensure rent report generation can be audited and traced for compliance purposes.,E1|E2,Rent report generation must allow authorized users to review rental records with core identifying and timing information,9dd628a82a09c2ba|D21|G63|G74|G93c|I24|I71|I72|R25|R71b|R79b,Rent report generation rule,Rent report generation rule,"[1] source=R71b type=Requirement hops=0 rel=TARGET
+Rent report generation rule
+
+[2] source=R71b type=Requirement/SrcChunk hops=0 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[3] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[4] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[5] source=R79b type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[6] source=I71 type=Implementation hops=1 rel=IMPLEMENTS
+Rent report generation logic
+
+[7] source=R79b type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=R25 type=Requirement hops=1 rel=AFFECTS
+End-of-rent lifecycle transition
+
+[10] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[11] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[12] source=D21 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Rent Lifecycle v1.0
+
+[13] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[14] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[15] source=I24 type=Implementation hops=2 rel=AFFECTS > IMPLEMENTS
+Manual rent completion
+
+[16] source=I72 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Financial report accuracy","Rent report generation rule (R71b) test suite covering authorized user access to rental records, identifier consistency, rounding discrepancies, and historical data handling. Tests address the core operative context that rent reports must allow authorized users to review rental records with core identifying and timing information, while accounting for identifier representation exceptions and potential legacy data inconsistencies.",Rent report generation must allow authorized users to review rental records with core identifying and timing information || Export/report rounding discrepancy,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used","Historical rental records may use earlier identifier representations, creating potential inconsistency in report output unless legacy handling is defined",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R71b targets rent report generation with focus on authorized user access to rental records and identifier consistency. Primary evidence E2 reveals unresolved design questions about identifier representation (warehouse-facing vs. formal specification terms) and historical data compatibility. E3 and E10 provide lifecycle context (rent validation, approval, activation, completion). E5, E8, E9 indicate related gaps in financial reporting, rounding, and multi-currency handling. E13-E14 (CONTEXT) highlight audit visibility and source-of-truth concerns that may refine reporting requirements. No direct conflicts with PRIMARY evidence, but multiple unresolved design decisions should be captured as gaps rather than operative rules. Filtered abstract or low-relevance operative statements: Report output must remain consistent with the currently supported identifier model | Report generation must account for historical data representations that may differ from present-day operational terminology | Rent report generation logic is implemented as per I71",1,0,0,0
+86b3a621,R71b,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71b_9,Report output is consistent with current identifier model,"Feature: Rent Report Generation
+  Scenario: Report output remains consistent with current identifier model
+    Given an authorized user requests a rent report
+    And the system has a defined current identifier model
+    When the report is generated
+    Then all identifiers in the report conform to the current identifier model
+    And identifier format is consistent across all records
+    And no mixed identifier formats appear in the same report","Ensures that rent report output maintains consistency with the currently supported identifier model, addressing the design decision about identifier representation.",E2,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used",9dd628a82a09c2ba|D21|G63|G74|G93c|I24|I71|I72|R25|R71b|R79b,Rent report generation rule,Rent report generation rule,"[1] source=R71b type=Requirement hops=0 rel=TARGET
+Rent report generation rule
+
+[2] source=R71b type=Requirement/SrcChunk hops=0 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[3] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[4] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[5] source=R79b type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[6] source=I71 type=Implementation hops=1 rel=IMPLEMENTS
+Rent report generation logic
+
+[7] source=R79b type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=R25 type=Requirement hops=1 rel=AFFECTS
+End-of-rent lifecycle transition
+
+[10] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[11] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[12] source=D21 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Rent Lifecycle v1.0
+
+[13] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[14] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[15] source=I24 type=Implementation hops=2 rel=AFFECTS > IMPLEMENTS
+Manual rent completion
+
+[16] source=I72 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Financial report accuracy","Rent report generation rule (R71b) test suite covering authorized user access to rental records, identifier consistency, rounding discrepancies, and historical data handling. Tests address the core operative context that rent reports must allow authorized users to review rental records with core identifying and timing information, while accounting for identifier representation exceptions and potential legacy data inconsistencies.",Rent report generation must allow authorized users to review rental records with core identifying and timing information || Export/report rounding discrepancy,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used","Historical rental records may use earlier identifier representations, creating potential inconsistency in report output unless legacy handling is defined",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R71b targets rent report generation with focus on authorized user access to rental records and identifier consistency. Primary evidence E2 reveals unresolved design questions about identifier representation (warehouse-facing vs. formal specification terms) and historical data compatibility. E3 and E10 provide lifecycle context (rent validation, approval, activation, completion). E5, E8, E9 indicate related gaps in financial reporting, rounding, and multi-currency handling. E13-E14 (CONTEXT) highlight audit visibility and source-of-truth concerns that may refine reporting requirements. No direct conflicts with PRIMARY evidence, but multiple unresolved design decisions should be captured as gaps rather than operative rules. Filtered abstract or low-relevance operative statements: Report output must remain consistent with the currently supported identifier model | Report generation must account for historical data representations that may differ from present-day operational terminology | Rent report generation logic is implemented as per I71",1,0,0,0
+86b3a621,R71b,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71b_10,Report generation handles multi-currency rental amounts,"Feature: Rent Report Generation
+  Scenario: Report correctly handles multi-currency rental amounts
+    Given an authorized user requests a rent report
+    And rental records include amounts in multiple currencies
+    When the report is generated
+    Then the report clearly identifies the currency for each amount
+    And currency conversion (if applicable) is documented
+    And rounding is applied consistently within each currency","Addresses the gap in multi-currency handling (E5, E8, E9) by ensuring rent reports properly represent and handle rental amounts in different currencies.",E5|E8|E9,Export/report rounding discrepancy,9dd628a82a09c2ba|D21|G63|G74|G93c|I24|I71|I72|R25|R71b|R79b,Rent report generation rule,Rent report generation rule,"[1] source=R71b type=Requirement hops=0 rel=TARGET
+Rent report generation rule
+
+[2] source=R71b type=Requirement/SrcChunk hops=0 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega
+
+[3] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[4] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[5] source=R79b type=Requirement/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[6] source=I71 type=Implementation hops=1 rel=IMPLEMENTS
+Rent report generation logic
+
+[7] source=R79b type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=REFINES
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[9] source=R25 type=Requirement hops=1 rel=AFFECTS
+End-of-rent lifecycle transition
+
+[10] source=R25 type=Requirement/SrcChunk hops=1 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[11] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[12] source=D21 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Rent Lifecycle v1.0
+
+[13] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[14] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[15] source=I24 type=Implementation hops=2 rel=AFFECTS > IMPLEMENTS
+Manual rent completion
+
+[16] source=I72 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Financial report accuracy","Rent report generation rule (R71b) test suite covering authorized user access to rental records, identifier consistency, rounding discrepancies, and historical data handling. Tests address the core operative context that rent reports must allow authorized users to review rental records with core identifying and timing information, while accounting for identifier representation exceptions and potential legacy data inconsistencies.",Rent report generation must allow authorized users to review rental records with core identifying and timing information || Export/report rounding discrepancy,"Report output identifier representation may differ between warehouse-facing terminology and formal specification terms, requiring confirmation of which should be used","Historical rental records may use earlier identifier representations, creating potential inconsistency in report output unless legacy handling is defined",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R71b targets rent report generation with focus on authorized user access to rental records and identifier consistency. Primary evidence E2 reveals unresolved design questions about identifier representation (warehouse-facing vs. formal specification terms) and historical data compatibility. E3 and E10 provide lifecycle context (rent validation, approval, activation, completion). E5, E8, E9 indicate related gaps in financial reporting, rounding, and multi-currency handling. E13-E14 (CONTEXT) highlight audit visibility and source-of-truth concerns that may refine reporting requirements. No direct conflicts with PRIMARY evidence, but multiple unresolved design decisions should be captured as gaps rather than operative rules. Filtered abstract or low-relevance operative statements: Report output must remain consistent with the currently supported identifier model | Report generation must account for historical data representations that may differ from present-day operational terminology | Rent report generation logic is implemented as per I71",1,0,0,0

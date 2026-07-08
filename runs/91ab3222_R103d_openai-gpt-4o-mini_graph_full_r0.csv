@@ -1,0 +1,1765 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+91ab3222,R103d,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R103d_1,Loyalty Points Assignment on Completed Rent and Paid Status,"Feature: Loyalty Points Assignment
+  Scenario: Assign loyalty points when rent status is completed and payment status is paid
+    Given the rent status is ""Completed""
+    And the payment status is ""Paid""
+    When the system processes the loyalty points
+    Then the user should receive loyalty points according to the configured business rules","This test ensures that loyalty points are only assigned when both the rent and payment statuses meet the required conditions, maintaining consistency in loyalty currency assignment.",E1|E2,The system shall assign loyalty points only when rent status is Completed and payment status is Paid.|The system shall allow users to earn loyalty points based on completed rents.,G91c|G93c|I91b|R100b|R103d|R91d|R93c,Loyalty currency consistency,Loyalty currency consistency,"[1] source=R103d type=Requirement hops=0 rel=TARGET
+Loyalty currency consistency
+
+[2] source=R103d type=Requirement/SrcChunk hops=0 chunk=fdb6d8e7e523c75b doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-REWARDS&PANELTIES-01
+# Description: Rewards and Penalties Management
+# Status: Effective
+
+## 9. Rewards and Penalties Management
+
+## 9.1 Loyalty Points Accrual
+## 9.1.1 The system shall allow users to earn loyalty points based on completed rents.
+## 9.1.2 The system shall calculate loyalty points according to configured business rules.
+## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.
+## 9.1.4 The system shall store loyalty point balances in the user account.
+## 9.1.5 The system shall update loyalty balances immediately after points are awarded.
+
+## 9.2 Loyalty Points Redemption
+## 9.2.1 The system shall allow users to redeem loyalty points for discounts.
+## 9.2.2 The system shall validate sufficient loyalty point balance before redemption.
+## 9.2.3 The system shall apply loyalty discounts to the invoice total.
+## 9.2.4 The system shall prevent redemption after invoice payment is completed.
+## 9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty ti
+
+[3] source=R103d type=Requirement/SrcChunk hops=0 chunk=cb19aeaad55d5a74 doc=JIRA-Rewards.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REW-901"",
+    ""summary"": ""Loyalty Points Accrual Logic"",
+    ""description"": ""Implement loyalty point accrual for completed and successfully settled rental activity, and ensure awarded points are applied to the user account according to the configurable reward policy."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-15T10:00:00Z"",
+        ""text"": ""Implementation note: the specification refers to configurable business rules for point awards, but the exact reward formula is not yet finalized. I need confirmation on whether beta should use a temporary default rule or wait for the configurable policy source.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-902"",
+    ""summary"": ""Points Redemption and Discount Handling"",
+    ""description"": ""Allow loyalty point redemption during billing, validate that the user has sufficient balance, and ensure redemption is recorded consistently together with the related financial outcome."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-903"",
+    ""summary"": ""Loyalty Tier Automation"",
+    ""description"": ""Implement configurable loyalty tier a
+
+[4] source=R103d type=Requirement/SrcChunk hops=0 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[5] source=G93c type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G93c type=Gap/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=AFFECTS
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=G93c type=Gap/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G93c type=Gap hops=1 rel=AFFECTS
+Currency consistency gap
+
+[9] source=R100b type=Requirement/SrcChunk hops=2 chunk=a4a287abb143e79a doc=JIRA-Rewards.md rel=IN_DOC > IN_DOC
+nal buffer before charges apply.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-905"",
+    ""summary"": ""Penalty Dispute Workflow"",
+    ""description"": ""Implement penalty dispute submission and resolution so users can challenge penalty outcomes and authorized staff can record the final decision together with any resulting adjustment."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-906"",
+    ""summary"": ""Adjustment Audit Logging"",
+    ""description"": ""Log loyalty and penalty adjustments in a way that preserves traceability, supports controlled review, and remains compatible with the platform's broader privacy and auditability expectations."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-17T09:00:00Z"",
+        ""text"": ""Auditability note: the requirement expects user-linked traceability for adjustments, but we should confirm whether direct user-identifying values belong in the raw adjustment log or whether authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[10] source=I91b type=Implementation hops=1 rel=CONFLICTS_WITH
+Loyalty points accrual logic
+
+[11] source=G91c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Loyalty business rule definition gap
+
+[12] source=R91d type=Requirement hops=2 rel=CONFLICTS_WITH > IMPLEMENTS
+Loyalty points accrual rule
+
+[13] source=R93c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Loyalty eligibility condition rule",This document outlines the Gherkin tests for ensuring loyalty currency consistency based on the resolved operational context.,The system shall assign loyalty points only when rent status is Completed and payment status is Paid. || ## 9.1.1 The system shall allow users to earn loyalty points based on completed rents. || The system shall calculate loyalty points according to configured business rules. || The system shall update loyalty balances immediately after points are awarded. || The system shall allow users to redeem loyalty points for discounts. || The system shall validate sufficient loyalty point balance before redemption. || The system shall prevent redemption after invoice payment is completed. || The system shall apply loyalty discounts to the invoice total.,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,Loyalty points accrual logic || Loyalty points accrual rule,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall store loyalty point balances in the user account. | The system shall record loyalty redemption transactions.,1,1,0,0
+91ab3222,R103d,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R103d_2,Loyalty Points Calculation Based on Business Rules,"Feature: Loyalty Points Calculation
+  Scenario: Calculate loyalty points based on configured business rules
+    Given the rent status is ""Completed""
+    And the payment status is ""Paid""
+    When the system calculates loyalty points
+    Then the loyalty points should be calculated according to the configured business rules","This test verifies that the loyalty points are calculated correctly based on the business rules, ensuring consistency in the loyalty currency system.",E3,The system shall calculate loyalty points according to configured business rules.,G91c|G93c|I91b|R100b|R103d|R91d|R93c,Loyalty currency consistency,Loyalty currency consistency,"[1] source=R103d type=Requirement hops=0 rel=TARGET
+Loyalty currency consistency
+
+[2] source=R103d type=Requirement/SrcChunk hops=0 chunk=fdb6d8e7e523c75b doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-REWARDS&PANELTIES-01
+# Description: Rewards and Penalties Management
+# Status: Effective
+
+## 9. Rewards and Penalties Management
+
+## 9.1 Loyalty Points Accrual
+## 9.1.1 The system shall allow users to earn loyalty points based on completed rents.
+## 9.1.2 The system shall calculate loyalty points according to configured business rules.
+## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.
+## 9.1.4 The system shall store loyalty point balances in the user account.
+## 9.1.5 The system shall update loyalty balances immediately after points are awarded.
+
+## 9.2 Loyalty Points Redemption
+## 9.2.1 The system shall allow users to redeem loyalty points for discounts.
+## 9.2.2 The system shall validate sufficient loyalty point balance before redemption.
+## 9.2.3 The system shall apply loyalty discounts to the invoice total.
+## 9.2.4 The system shall prevent redemption after invoice payment is completed.
+## 9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty ti
+
+[3] source=R103d type=Requirement/SrcChunk hops=0 chunk=cb19aeaad55d5a74 doc=JIRA-Rewards.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REW-901"",
+    ""summary"": ""Loyalty Points Accrual Logic"",
+    ""description"": ""Implement loyalty point accrual for completed and successfully settled rental activity, and ensure awarded points are applied to the user account according to the configurable reward policy."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-15T10:00:00Z"",
+        ""text"": ""Implementation note: the specification refers to configurable business rules for point awards, but the exact reward formula is not yet finalized. I need confirmation on whether beta should use a temporary default rule or wait for the configurable policy source.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-902"",
+    ""summary"": ""Points Redemption and Discount Handling"",
+    ""description"": ""Allow loyalty point redemption during billing, validate that the user has sufficient balance, and ensure redemption is recorded consistently together with the related financial outcome."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-903"",
+    ""summary"": ""Loyalty Tier Automation"",
+    ""description"": ""Implement configurable loyalty tier a
+
+[4] source=R103d type=Requirement/SrcChunk hops=0 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[5] source=G93c type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G93c type=Gap/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=AFFECTS
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=G93c type=Gap/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G93c type=Gap hops=1 rel=AFFECTS
+Currency consistency gap
+
+[9] source=R100b type=Requirement/SrcChunk hops=2 chunk=a4a287abb143e79a doc=JIRA-Rewards.md rel=IN_DOC > IN_DOC
+nal buffer before charges apply.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-905"",
+    ""summary"": ""Penalty Dispute Workflow"",
+    ""description"": ""Implement penalty dispute submission and resolution so users can challenge penalty outcomes and authorized staff can record the final decision together with any resulting adjustment."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-906"",
+    ""summary"": ""Adjustment Audit Logging"",
+    ""description"": ""Log loyalty and penalty adjustments in a way that preserves traceability, supports controlled review, and remains compatible with the platform's broader privacy and auditability expectations."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-17T09:00:00Z"",
+        ""text"": ""Auditability note: the requirement expects user-linked traceability for adjustments, but we should confirm whether direct user-identifying values belong in the raw adjustment log or whether authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[10] source=I91b type=Implementation hops=1 rel=CONFLICTS_WITH
+Loyalty points accrual logic
+
+[11] source=G91c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Loyalty business rule definition gap
+
+[12] source=R91d type=Requirement hops=2 rel=CONFLICTS_WITH > IMPLEMENTS
+Loyalty points accrual rule
+
+[13] source=R93c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Loyalty eligibility condition rule",This document outlines the Gherkin tests for ensuring loyalty currency consistency based on the resolved operational context.,The system shall assign loyalty points only when rent status is Completed and payment status is Paid. || ## 9.1.1 The system shall allow users to earn loyalty points based on completed rents. || The system shall calculate loyalty points according to configured business rules. || The system shall update loyalty balances immediately after points are awarded. || The system shall allow users to redeem loyalty points for discounts. || The system shall validate sufficient loyalty point balance before redemption. || The system shall prevent redemption after invoice payment is completed. || The system shall apply loyalty discounts to the invoice total.,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,Loyalty points accrual logic || Loyalty points accrual rule,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall store loyalty point balances in the user account. | The system shall record loyalty redemption transactions.,1,1,0,0
+91ab3222,R103d,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R103d_3,Immediate Update of Loyalty Balances After Points Awarded,"Feature: Loyalty Balance Update
+  Scenario: Update loyalty balances immediately after points are awarded
+    Given the user has earned loyalty points
+    When the system awards the loyalty points
+    Then the loyalty balance should be updated immediately","This test checks that the loyalty balance reflects the awarded points immediately, ensuring users have accurate information about their loyalty currency.",E4,The system shall update loyalty balances immediately after points are awarded.,G91c|G93c|I91b|R100b|R103d|R91d|R93c,Loyalty currency consistency,Loyalty currency consistency,"[1] source=R103d type=Requirement hops=0 rel=TARGET
+Loyalty currency consistency
+
+[2] source=R103d type=Requirement/SrcChunk hops=0 chunk=fdb6d8e7e523c75b doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-REWARDS&PANELTIES-01
+# Description: Rewards and Penalties Management
+# Status: Effective
+
+## 9. Rewards and Penalties Management
+
+## 9.1 Loyalty Points Accrual
+## 9.1.1 The system shall allow users to earn loyalty points based on completed rents.
+## 9.1.2 The system shall calculate loyalty points according to configured business rules.
+## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.
+## 9.1.4 The system shall store loyalty point balances in the user account.
+## 9.1.5 The system shall update loyalty balances immediately after points are awarded.
+
+## 9.2 Loyalty Points Redemption
+## 9.2.1 The system shall allow users to redeem loyalty points for discounts.
+## 9.2.2 The system shall validate sufficient loyalty point balance before redemption.
+## 9.2.3 The system shall apply loyalty discounts to the invoice total.
+## 9.2.4 The system shall prevent redemption after invoice payment is completed.
+## 9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty ti
+
+[3] source=R103d type=Requirement/SrcChunk hops=0 chunk=cb19aeaad55d5a74 doc=JIRA-Rewards.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REW-901"",
+    ""summary"": ""Loyalty Points Accrual Logic"",
+    ""description"": ""Implement loyalty point accrual for completed and successfully settled rental activity, and ensure awarded points are applied to the user account according to the configurable reward policy."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-15T10:00:00Z"",
+        ""text"": ""Implementation note: the specification refers to configurable business rules for point awards, but the exact reward formula is not yet finalized. I need confirmation on whether beta should use a temporary default rule or wait for the configurable policy source.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-902"",
+    ""summary"": ""Points Redemption and Discount Handling"",
+    ""description"": ""Allow loyalty point redemption during billing, validate that the user has sufficient balance, and ensure redemption is recorded consistently together with the related financial outcome."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-903"",
+    ""summary"": ""Loyalty Tier Automation"",
+    ""description"": ""Implement configurable loyalty tier a
+
+[4] source=R103d type=Requirement/SrcChunk hops=0 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[5] source=G93c type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G93c type=Gap/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=AFFECTS
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=G93c type=Gap/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G93c type=Gap hops=1 rel=AFFECTS
+Currency consistency gap
+
+[9] source=R100b type=Requirement/SrcChunk hops=2 chunk=a4a287abb143e79a doc=JIRA-Rewards.md rel=IN_DOC > IN_DOC
+nal buffer before charges apply.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-905"",
+    ""summary"": ""Penalty Dispute Workflow"",
+    ""description"": ""Implement penalty dispute submission and resolution so users can challenge penalty outcomes and authorized staff can record the final decision together with any resulting adjustment."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-906"",
+    ""summary"": ""Adjustment Audit Logging"",
+    ""description"": ""Log loyalty and penalty adjustments in a way that preserves traceability, supports controlled review, and remains compatible with the platform's broader privacy and auditability expectations."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-17T09:00:00Z"",
+        ""text"": ""Auditability note: the requirement expects user-linked traceability for adjustments, but we should confirm whether direct user-identifying values belong in the raw adjustment log or whether authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[10] source=I91b type=Implementation hops=1 rel=CONFLICTS_WITH
+Loyalty points accrual logic
+
+[11] source=G91c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Loyalty business rule definition gap
+
+[12] source=R91d type=Requirement hops=2 rel=CONFLICTS_WITH > IMPLEMENTS
+Loyalty points accrual rule
+
+[13] source=R93c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Loyalty eligibility condition rule",This document outlines the Gherkin tests for ensuring loyalty currency consistency based on the resolved operational context.,The system shall assign loyalty points only when rent status is Completed and payment status is Paid. || ## 9.1.1 The system shall allow users to earn loyalty points based on completed rents. || The system shall calculate loyalty points according to configured business rules. || The system shall update loyalty balances immediately after points are awarded. || The system shall allow users to redeem loyalty points for discounts. || The system shall validate sufficient loyalty point balance before redemption. || The system shall prevent redemption after invoice payment is completed. || The system shall apply loyalty discounts to the invoice total.,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,Loyalty points accrual logic || Loyalty points accrual rule,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall store loyalty point balances in the user account. | The system shall record loyalty redemption transactions.,1,1,0,0
+91ab3222,R103d,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R103d_4,Redemption of Loyalty Points for Discounts,"Feature: Loyalty Points Redemption
+  Scenario: Redeem loyalty points for discounts
+    Given the user has sufficient loyalty points
+    When the user redeems loyalty points for a discount
+    Then the discount should be applied to the invoice total","This test ensures that users can redeem their loyalty points for discounts, maintaining the functionality of the loyalty currency system.",E5,The system shall allow users to redeem loyalty points for discounts.|The system shall apply loyalty discounts to the invoice total.,G91c|G93c|I91b|R100b|R103d|R91d|R93c,Loyalty currency consistency,Loyalty currency consistency,"[1] source=R103d type=Requirement hops=0 rel=TARGET
+Loyalty currency consistency
+
+[2] source=R103d type=Requirement/SrcChunk hops=0 chunk=fdb6d8e7e523c75b doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-REWARDS&PANELTIES-01
+# Description: Rewards and Penalties Management
+# Status: Effective
+
+## 9. Rewards and Penalties Management
+
+## 9.1 Loyalty Points Accrual
+## 9.1.1 The system shall allow users to earn loyalty points based on completed rents.
+## 9.1.2 The system shall calculate loyalty points according to configured business rules.
+## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.
+## 9.1.4 The system shall store loyalty point balances in the user account.
+## 9.1.5 The system shall update loyalty balances immediately after points are awarded.
+
+## 9.2 Loyalty Points Redemption
+## 9.2.1 The system shall allow users to redeem loyalty points for discounts.
+## 9.2.2 The system shall validate sufficient loyalty point balance before redemption.
+## 9.2.3 The system shall apply loyalty discounts to the invoice total.
+## 9.2.4 The system shall prevent redemption after invoice payment is completed.
+## 9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty ti
+
+[3] source=R103d type=Requirement/SrcChunk hops=0 chunk=cb19aeaad55d5a74 doc=JIRA-Rewards.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REW-901"",
+    ""summary"": ""Loyalty Points Accrual Logic"",
+    ""description"": ""Implement loyalty point accrual for completed and successfully settled rental activity, and ensure awarded points are applied to the user account according to the configurable reward policy."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-15T10:00:00Z"",
+        ""text"": ""Implementation note: the specification refers to configurable business rules for point awards, but the exact reward formula is not yet finalized. I need confirmation on whether beta should use a temporary default rule or wait for the configurable policy source.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-902"",
+    ""summary"": ""Points Redemption and Discount Handling"",
+    ""description"": ""Allow loyalty point redemption during billing, validate that the user has sufficient balance, and ensure redemption is recorded consistently together with the related financial outcome."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-903"",
+    ""summary"": ""Loyalty Tier Automation"",
+    ""description"": ""Implement configurable loyalty tier a
+
+[4] source=R103d type=Requirement/SrcChunk hops=0 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[5] source=G93c type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G93c type=Gap/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=AFFECTS
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=G93c type=Gap/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G93c type=Gap hops=1 rel=AFFECTS
+Currency consistency gap
+
+[9] source=R100b type=Requirement/SrcChunk hops=2 chunk=a4a287abb143e79a doc=JIRA-Rewards.md rel=IN_DOC > IN_DOC
+nal buffer before charges apply.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-905"",
+    ""summary"": ""Penalty Dispute Workflow"",
+    ""description"": ""Implement penalty dispute submission and resolution so users can challenge penalty outcomes and authorized staff can record the final decision together with any resulting adjustment."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-906"",
+    ""summary"": ""Adjustment Audit Logging"",
+    ""description"": ""Log loyalty and penalty adjustments in a way that preserves traceability, supports controlled review, and remains compatible with the platform's broader privacy and auditability expectations."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-17T09:00:00Z"",
+        ""text"": ""Auditability note: the requirement expects user-linked traceability for adjustments, but we should confirm whether direct user-identifying values belong in the raw adjustment log or whether authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[10] source=I91b type=Implementation hops=1 rel=CONFLICTS_WITH
+Loyalty points accrual logic
+
+[11] source=G91c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Loyalty business rule definition gap
+
+[12] source=R91d type=Requirement hops=2 rel=CONFLICTS_WITH > IMPLEMENTS
+Loyalty points accrual rule
+
+[13] source=R93c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Loyalty eligibility condition rule",This document outlines the Gherkin tests for ensuring loyalty currency consistency based on the resolved operational context.,The system shall assign loyalty points only when rent status is Completed and payment status is Paid. || ## 9.1.1 The system shall allow users to earn loyalty points based on completed rents. || The system shall calculate loyalty points according to configured business rules. || The system shall update loyalty balances immediately after points are awarded. || The system shall allow users to redeem loyalty points for discounts. || The system shall validate sufficient loyalty point balance before redemption. || The system shall prevent redemption after invoice payment is completed. || The system shall apply loyalty discounts to the invoice total.,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,Loyalty points accrual logic || Loyalty points accrual rule,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall store loyalty point balances in the user account. | The system shall record loyalty redemption transactions.,1,1,0,0
+91ab3222,R103d,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R103d_5,Validation of Sufficient Loyalty Points Before Redemption,"Feature: Loyalty Points Validation
+  Scenario: Validate sufficient loyalty point balance before redemption
+    Given the user has insufficient loyalty points
+    When the user attempts to redeem loyalty points
+    Then the system should prevent the redemption and display an error message","This test ensures that the system correctly validates the user's loyalty point balance before allowing redemption, preventing unauthorized discounts.",E6,The system shall validate sufficient loyalty point balance before redemption.,G91c|G93c|I91b|R100b|R103d|R91d|R93c,Loyalty currency consistency,Loyalty currency consistency,"[1] source=R103d type=Requirement hops=0 rel=TARGET
+Loyalty currency consistency
+
+[2] source=R103d type=Requirement/SrcChunk hops=0 chunk=fdb6d8e7e523c75b doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-REWARDS&PANELTIES-01
+# Description: Rewards and Penalties Management
+# Status: Effective
+
+## 9. Rewards and Penalties Management
+
+## 9.1 Loyalty Points Accrual
+## 9.1.1 The system shall allow users to earn loyalty points based on completed rents.
+## 9.1.2 The system shall calculate loyalty points according to configured business rules.
+## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.
+## 9.1.4 The system shall store loyalty point balances in the user account.
+## 9.1.5 The system shall update loyalty balances immediately after points are awarded.
+
+## 9.2 Loyalty Points Redemption
+## 9.2.1 The system shall allow users to redeem loyalty points for discounts.
+## 9.2.2 The system shall validate sufficient loyalty point balance before redemption.
+## 9.2.3 The system shall apply loyalty discounts to the invoice total.
+## 9.2.4 The system shall prevent redemption after invoice payment is completed.
+## 9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty ti
+
+[3] source=R103d type=Requirement/SrcChunk hops=0 chunk=cb19aeaad55d5a74 doc=JIRA-Rewards.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REW-901"",
+    ""summary"": ""Loyalty Points Accrual Logic"",
+    ""description"": ""Implement loyalty point accrual for completed and successfully settled rental activity, and ensure awarded points are applied to the user account according to the configurable reward policy."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-15T10:00:00Z"",
+        ""text"": ""Implementation note: the specification refers to configurable business rules for point awards, but the exact reward formula is not yet finalized. I need confirmation on whether beta should use a temporary default rule or wait for the configurable policy source.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-902"",
+    ""summary"": ""Points Redemption and Discount Handling"",
+    ""description"": ""Allow loyalty point redemption during billing, validate that the user has sufficient balance, and ensure redemption is recorded consistently together with the related financial outcome."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-903"",
+    ""summary"": ""Loyalty Tier Automation"",
+    ""description"": ""Implement configurable loyalty tier a
+
+[4] source=R103d type=Requirement/SrcChunk hops=0 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[5] source=G93c type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G93c type=Gap/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=AFFECTS
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=G93c type=Gap/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G93c type=Gap hops=1 rel=AFFECTS
+Currency consistency gap
+
+[9] source=R100b type=Requirement/SrcChunk hops=2 chunk=a4a287abb143e79a doc=JIRA-Rewards.md rel=IN_DOC > IN_DOC
+nal buffer before charges apply.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-905"",
+    ""summary"": ""Penalty Dispute Workflow"",
+    ""description"": ""Implement penalty dispute submission and resolution so users can challenge penalty outcomes and authorized staff can record the final decision together with any resulting adjustment."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-906"",
+    ""summary"": ""Adjustment Audit Logging"",
+    ""description"": ""Log loyalty and penalty adjustments in a way that preserves traceability, supports controlled review, and remains compatible with the platform's broader privacy and auditability expectations."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-17T09:00:00Z"",
+        ""text"": ""Auditability note: the requirement expects user-linked traceability for adjustments, but we should confirm whether direct user-identifying values belong in the raw adjustment log or whether authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[10] source=I91b type=Implementation hops=1 rel=CONFLICTS_WITH
+Loyalty points accrual logic
+
+[11] source=G91c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Loyalty business rule definition gap
+
+[12] source=R91d type=Requirement hops=2 rel=CONFLICTS_WITH > IMPLEMENTS
+Loyalty points accrual rule
+
+[13] source=R93c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Loyalty eligibility condition rule",This document outlines the Gherkin tests for ensuring loyalty currency consistency based on the resolved operational context.,The system shall assign loyalty points only when rent status is Completed and payment status is Paid. || ## 9.1.1 The system shall allow users to earn loyalty points based on completed rents. || The system shall calculate loyalty points according to configured business rules. || The system shall update loyalty balances immediately after points are awarded. || The system shall allow users to redeem loyalty points for discounts. || The system shall validate sufficient loyalty point balance before redemption. || The system shall prevent redemption after invoice payment is completed. || The system shall apply loyalty discounts to the invoice total.,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,Loyalty points accrual logic || Loyalty points accrual rule,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall store loyalty point balances in the user account. | The system shall record loyalty redemption transactions.,1,1,0,0
+91ab3222,R103d,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R103d_6,Prevention of Redemption After Invoice Payment Completion,"Feature: Redemption Prevention
+  Scenario: Prevent redemption after invoice payment is completed
+    Given the invoice payment status is ""Completed""
+    When the user attempts to redeem loyalty points
+    Then the system should prevent the redemption","This test checks that the system prevents loyalty point redemption after the invoice has been paid, ensuring compliance with the operational rules.",E7,The system shall prevent redemption after invoice payment is completed.,G91c|G93c|I91b|R100b|R103d|R91d|R93c,Loyalty currency consistency,Loyalty currency consistency,"[1] source=R103d type=Requirement hops=0 rel=TARGET
+Loyalty currency consistency
+
+[2] source=R103d type=Requirement/SrcChunk hops=0 chunk=fdb6d8e7e523c75b doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-REWARDS&PANELTIES-01
+# Description: Rewards and Penalties Management
+# Status: Effective
+
+## 9. Rewards and Penalties Management
+
+## 9.1 Loyalty Points Accrual
+## 9.1.1 The system shall allow users to earn loyalty points based on completed rents.
+## 9.1.2 The system shall calculate loyalty points according to configured business rules.
+## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.
+## 9.1.4 The system shall store loyalty point balances in the user account.
+## 9.1.5 The system shall update loyalty balances immediately after points are awarded.
+
+## 9.2 Loyalty Points Redemption
+## 9.2.1 The system shall allow users to redeem loyalty points for discounts.
+## 9.2.2 The system shall validate sufficient loyalty point balance before redemption.
+## 9.2.3 The system shall apply loyalty discounts to the invoice total.
+## 9.2.4 The system shall prevent redemption after invoice payment is completed.
+## 9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty ti
+
+[3] source=R103d type=Requirement/SrcChunk hops=0 chunk=cb19aeaad55d5a74 doc=JIRA-Rewards.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REW-901"",
+    ""summary"": ""Loyalty Points Accrual Logic"",
+    ""description"": ""Implement loyalty point accrual for completed and successfully settled rental activity, and ensure awarded points are applied to the user account according to the configurable reward policy."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-15T10:00:00Z"",
+        ""text"": ""Implementation note: the specification refers to configurable business rules for point awards, but the exact reward formula is not yet finalized. I need confirmation on whether beta should use a temporary default rule or wait for the configurable policy source.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-902"",
+    ""summary"": ""Points Redemption and Discount Handling"",
+    ""description"": ""Allow loyalty point redemption during billing, validate that the user has sufficient balance, and ensure redemption is recorded consistently together with the related financial outcome."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-903"",
+    ""summary"": ""Loyalty Tier Automation"",
+    ""description"": ""Implement configurable loyalty tier a
+
+[4] source=R103d type=Requirement/SrcChunk hops=0 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[5] source=G93c type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G93c type=Gap/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=AFFECTS
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=G93c type=Gap/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G93c type=Gap hops=1 rel=AFFECTS
+Currency consistency gap
+
+[9] source=R100b type=Requirement/SrcChunk hops=2 chunk=a4a287abb143e79a doc=JIRA-Rewards.md rel=IN_DOC > IN_DOC
+nal buffer before charges apply.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-905"",
+    ""summary"": ""Penalty Dispute Workflow"",
+    ""description"": ""Implement penalty dispute submission and resolution so users can challenge penalty outcomes and authorized staff can record the final decision together with any resulting adjustment."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-906"",
+    ""summary"": ""Adjustment Audit Logging"",
+    ""description"": ""Log loyalty and penalty adjustments in a way that preserves traceability, supports controlled review, and remains compatible with the platform's broader privacy and auditability expectations."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-17T09:00:00Z"",
+        ""text"": ""Auditability note: the requirement expects user-linked traceability for adjustments, but we should confirm whether direct user-identifying values belong in the raw adjustment log or whether authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[10] source=I91b type=Implementation hops=1 rel=CONFLICTS_WITH
+Loyalty points accrual logic
+
+[11] source=G91c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Loyalty business rule definition gap
+
+[12] source=R91d type=Requirement hops=2 rel=CONFLICTS_WITH > IMPLEMENTS
+Loyalty points accrual rule
+
+[13] source=R93c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Loyalty eligibility condition rule",This document outlines the Gherkin tests for ensuring loyalty currency consistency based on the resolved operational context.,The system shall assign loyalty points only when rent status is Completed and payment status is Paid. || ## 9.1.1 The system shall allow users to earn loyalty points based on completed rents. || The system shall calculate loyalty points according to configured business rules. || The system shall update loyalty balances immediately after points are awarded. || The system shall allow users to redeem loyalty points for discounts. || The system shall validate sufficient loyalty point balance before redemption. || The system shall prevent redemption after invoice payment is completed. || The system shall apply loyalty discounts to the invoice total.,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,Loyalty points accrual logic || Loyalty points accrual rule,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall store loyalty point balances in the user account. | The system shall record loyalty redemption transactions.,1,1,0,0
+91ab3222,R103d,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R103d_7,Loyalty Points Assignment Exception Handling,"Feature: Loyalty Points Assignment Exception
+  Scenario: Handle exception for loyalty points assignment
+    Given the rent status is not ""Completed""
+    And the payment status is not ""Paid""
+    When the system processes the loyalty points
+    Then the user should not receive loyalty points","This test verifies that the system correctly handles exceptions where loyalty points should not be assigned, maintaining consistency in the loyalty currency system.",E8,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,G91c|G93c|I91b|R100b|R103d|R91d|R93c,Loyalty currency consistency,Loyalty currency consistency,"[1] source=R103d type=Requirement hops=0 rel=TARGET
+Loyalty currency consistency
+
+[2] source=R103d type=Requirement/SrcChunk hops=0 chunk=fdb6d8e7e523c75b doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-REWARDS&PANELTIES-01
+# Description: Rewards and Penalties Management
+# Status: Effective
+
+## 9. Rewards and Penalties Management
+
+## 9.1 Loyalty Points Accrual
+## 9.1.1 The system shall allow users to earn loyalty points based on completed rents.
+## 9.1.2 The system shall calculate loyalty points according to configured business rules.
+## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.
+## 9.1.4 The system shall store loyalty point balances in the user account.
+## 9.1.5 The system shall update loyalty balances immediately after points are awarded.
+
+## 9.2 Loyalty Points Redemption
+## 9.2.1 The system shall allow users to redeem loyalty points for discounts.
+## 9.2.2 The system shall validate sufficient loyalty point balance before redemption.
+## 9.2.3 The system shall apply loyalty discounts to the invoice total.
+## 9.2.4 The system shall prevent redemption after invoice payment is completed.
+## 9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty ti
+
+[3] source=R103d type=Requirement/SrcChunk hops=0 chunk=cb19aeaad55d5a74 doc=JIRA-Rewards.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REW-901"",
+    ""summary"": ""Loyalty Points Accrual Logic"",
+    ""description"": ""Implement loyalty point accrual for completed and successfully settled rental activity, and ensure awarded points are applied to the user account according to the configurable reward policy."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-15T10:00:00Z"",
+        ""text"": ""Implementation note: the specification refers to configurable business rules for point awards, but the exact reward formula is not yet finalized. I need confirmation on whether beta should use a temporary default rule or wait for the configurable policy source.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-902"",
+    ""summary"": ""Points Redemption and Discount Handling"",
+    ""description"": ""Allow loyalty point redemption during billing, validate that the user has sufficient balance, and ensure redemption is recorded consistently together with the related financial outcome."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-903"",
+    ""summary"": ""Loyalty Tier Automation"",
+    ""description"": ""Implement configurable loyalty tier a
+
+[4] source=R103d type=Requirement/SrcChunk hops=0 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[5] source=G93c type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G93c type=Gap/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=AFFECTS
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=G93c type=Gap/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G93c type=Gap hops=1 rel=AFFECTS
+Currency consistency gap
+
+[9] source=R100b type=Requirement/SrcChunk hops=2 chunk=a4a287abb143e79a doc=JIRA-Rewards.md rel=IN_DOC > IN_DOC
+nal buffer before charges apply.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-905"",
+    ""summary"": ""Penalty Dispute Workflow"",
+    ""description"": ""Implement penalty dispute submission and resolution so users can challenge penalty outcomes and authorized staff can record the final decision together with any resulting adjustment."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-906"",
+    ""summary"": ""Adjustment Audit Logging"",
+    ""description"": ""Log loyalty and penalty adjustments in a way that preserves traceability, supports controlled review, and remains compatible with the platform's broader privacy and auditability expectations."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-17T09:00:00Z"",
+        ""text"": ""Auditability note: the requirement expects user-linked traceability for adjustments, but we should confirm whether direct user-identifying values belong in the raw adjustment log or whether authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[10] source=I91b type=Implementation hops=1 rel=CONFLICTS_WITH
+Loyalty points accrual logic
+
+[11] source=G91c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Loyalty business rule definition gap
+
+[12] source=R91d type=Requirement hops=2 rel=CONFLICTS_WITH > IMPLEMENTS
+Loyalty points accrual rule
+
+[13] source=R93c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Loyalty eligibility condition rule",This document outlines the Gherkin tests for ensuring loyalty currency consistency based on the resolved operational context.,The system shall assign loyalty points only when rent status is Completed and payment status is Paid. || ## 9.1.1 The system shall allow users to earn loyalty points based on completed rents. || The system shall calculate loyalty points according to configured business rules. || The system shall update loyalty balances immediately after points are awarded. || The system shall allow users to redeem loyalty points for discounts. || The system shall validate sufficient loyalty point balance before redemption. || The system shall prevent redemption after invoice payment is completed. || The system shall apply loyalty discounts to the invoice total.,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,Loyalty points accrual logic || Loyalty points accrual rule,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall store loyalty point balances in the user account. | The system shall record loyalty redemption transactions.,1,1,0,0
+91ab3222,R103d,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R103d_8,Loyalty Points Calculation Exception Handling,"Feature: Loyalty Points Calculation Exception
+  Scenario: Handle exception for loyalty points calculation
+    Given the rent status is not ""Completed""
+    And the payment status is not ""Paid""
+    When the system calculates loyalty points
+    Then the loyalty points should not be calculated","This test ensures that loyalty points are not calculated when the required conditions are not met, preserving the integrity of the loyalty currency system.",E9,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,G91c|G93c|I91b|R100b|R103d|R91d|R93c,Loyalty currency consistency,Loyalty currency consistency,"[1] source=R103d type=Requirement hops=0 rel=TARGET
+Loyalty currency consistency
+
+[2] source=R103d type=Requirement/SrcChunk hops=0 chunk=fdb6d8e7e523c75b doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-REWARDS&PANELTIES-01
+# Description: Rewards and Penalties Management
+# Status: Effective
+
+## 9. Rewards and Penalties Management
+
+## 9.1 Loyalty Points Accrual
+## 9.1.1 The system shall allow users to earn loyalty points based on completed rents.
+## 9.1.2 The system shall calculate loyalty points according to configured business rules.
+## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.
+## 9.1.4 The system shall store loyalty point balances in the user account.
+## 9.1.5 The system shall update loyalty balances immediately after points are awarded.
+
+## 9.2 Loyalty Points Redemption
+## 9.2.1 The system shall allow users to redeem loyalty points for discounts.
+## 9.2.2 The system shall validate sufficient loyalty point balance before redemption.
+## 9.2.3 The system shall apply loyalty discounts to the invoice total.
+## 9.2.4 The system shall prevent redemption after invoice payment is completed.
+## 9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty ti
+
+[3] source=R103d type=Requirement/SrcChunk hops=0 chunk=cb19aeaad55d5a74 doc=JIRA-Rewards.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REW-901"",
+    ""summary"": ""Loyalty Points Accrual Logic"",
+    ""description"": ""Implement loyalty point accrual for completed and successfully settled rental activity, and ensure awarded points are applied to the user account according to the configurable reward policy."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-15T10:00:00Z"",
+        ""text"": ""Implementation note: the specification refers to configurable business rules for point awards, but the exact reward formula is not yet finalized. I need confirmation on whether beta should use a temporary default rule or wait for the configurable policy source.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-902"",
+    ""summary"": ""Points Redemption and Discount Handling"",
+    ""description"": ""Allow loyalty point redemption during billing, validate that the user has sufficient balance, and ensure redemption is recorded consistently together with the related financial outcome."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-903"",
+    ""summary"": ""Loyalty Tier Automation"",
+    ""description"": ""Implement configurable loyalty tier a
+
+[4] source=R103d type=Requirement/SrcChunk hops=0 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[5] source=G93c type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G93c type=Gap/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=AFFECTS
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=G93c type=Gap/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G93c type=Gap hops=1 rel=AFFECTS
+Currency consistency gap
+
+[9] source=R100b type=Requirement/SrcChunk hops=2 chunk=a4a287abb143e79a doc=JIRA-Rewards.md rel=IN_DOC > IN_DOC
+nal buffer before charges apply.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-905"",
+    ""summary"": ""Penalty Dispute Workflow"",
+    ""description"": ""Implement penalty dispute submission and resolution so users can challenge penalty outcomes and authorized staff can record the final decision together with any resulting adjustment."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-906"",
+    ""summary"": ""Adjustment Audit Logging"",
+    ""description"": ""Log loyalty and penalty adjustments in a way that preserves traceability, supports controlled review, and remains compatible with the platform's broader privacy and auditability expectations."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-17T09:00:00Z"",
+        ""text"": ""Auditability note: the requirement expects user-linked traceability for adjustments, but we should confirm whether direct user-identifying values belong in the raw adjustment log or whether authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[10] source=I91b type=Implementation hops=1 rel=CONFLICTS_WITH
+Loyalty points accrual logic
+
+[11] source=G91c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Loyalty business rule definition gap
+
+[12] source=R91d type=Requirement hops=2 rel=CONFLICTS_WITH > IMPLEMENTS
+Loyalty points accrual rule
+
+[13] source=R93c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Loyalty eligibility condition rule",This document outlines the Gherkin tests for ensuring loyalty currency consistency based on the resolved operational context.,The system shall assign loyalty points only when rent status is Completed and payment status is Paid. || ## 9.1.1 The system shall allow users to earn loyalty points based on completed rents. || The system shall calculate loyalty points according to configured business rules. || The system shall update loyalty balances immediately after points are awarded. || The system shall allow users to redeem loyalty points for discounts. || The system shall validate sufficient loyalty point balance before redemption. || The system shall prevent redemption after invoice payment is completed. || The system shall apply loyalty discounts to the invoice total.,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,Loyalty points accrual logic || Loyalty points accrual rule,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall store loyalty point balances in the user account. | The system shall record loyalty redemption transactions.,1,1,0,0
+91ab3222,R103d,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R103d_9,Loyalty Points Update Consistency,"Feature: Loyalty Points Update Consistency
+  Scenario: Ensure loyalty points update is consistent
+    Given the user has earned loyalty points
+    When the system updates the loyalty balance
+    Then the updated balance should reflect the correct total of loyalty points","This test checks that the loyalty points update process is consistent and accurate, ensuring users have the correct balance at all times.",E10,The system shall update loyalty balances immediately after points are awarded.,G91c|G93c|I91b|R100b|R103d|R91d|R93c,Loyalty currency consistency,Loyalty currency consistency,"[1] source=R103d type=Requirement hops=0 rel=TARGET
+Loyalty currency consistency
+
+[2] source=R103d type=Requirement/SrcChunk hops=0 chunk=fdb6d8e7e523c75b doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-REWARDS&PANELTIES-01
+# Description: Rewards and Penalties Management
+# Status: Effective
+
+## 9. Rewards and Penalties Management
+
+## 9.1 Loyalty Points Accrual
+## 9.1.1 The system shall allow users to earn loyalty points based on completed rents.
+## 9.1.2 The system shall calculate loyalty points according to configured business rules.
+## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.
+## 9.1.4 The system shall store loyalty point balances in the user account.
+## 9.1.5 The system shall update loyalty balances immediately after points are awarded.
+
+## 9.2 Loyalty Points Redemption
+## 9.2.1 The system shall allow users to redeem loyalty points for discounts.
+## 9.2.2 The system shall validate sufficient loyalty point balance before redemption.
+## 9.2.3 The system shall apply loyalty discounts to the invoice total.
+## 9.2.4 The system shall prevent redemption after invoice payment is completed.
+## 9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty ti
+
+[3] source=R103d type=Requirement/SrcChunk hops=0 chunk=cb19aeaad55d5a74 doc=JIRA-Rewards.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REW-901"",
+    ""summary"": ""Loyalty Points Accrual Logic"",
+    ""description"": ""Implement loyalty point accrual for completed and successfully settled rental activity, and ensure awarded points are applied to the user account according to the configurable reward policy."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-15T10:00:00Z"",
+        ""text"": ""Implementation note: the specification refers to configurable business rules for point awards, but the exact reward formula is not yet finalized. I need confirmation on whether beta should use a temporary default rule or wait for the configurable policy source.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-902"",
+    ""summary"": ""Points Redemption and Discount Handling"",
+    ""description"": ""Allow loyalty point redemption during billing, validate that the user has sufficient balance, and ensure redemption is recorded consistently together with the related financial outcome."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-903"",
+    ""summary"": ""Loyalty Tier Automation"",
+    ""description"": ""Implement configurable loyalty tier a
+
+[4] source=R103d type=Requirement/SrcChunk hops=0 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[5] source=G93c type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G93c type=Gap/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=AFFECTS
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=G93c type=Gap/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G93c type=Gap hops=1 rel=AFFECTS
+Currency consistency gap
+
+[9] source=R100b type=Requirement/SrcChunk hops=2 chunk=a4a287abb143e79a doc=JIRA-Rewards.md rel=IN_DOC > IN_DOC
+nal buffer before charges apply.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-905"",
+    ""summary"": ""Penalty Dispute Workflow"",
+    ""description"": ""Implement penalty dispute submission and resolution so users can challenge penalty outcomes and authorized staff can record the final decision together with any resulting adjustment."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-906"",
+    ""summary"": ""Adjustment Audit Logging"",
+    ""description"": ""Log loyalty and penalty adjustments in a way that preserves traceability, supports controlled review, and remains compatible with the platform's broader privacy and auditability expectations."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-17T09:00:00Z"",
+        ""text"": ""Auditability note: the requirement expects user-linked traceability for adjustments, but we should confirm whether direct user-identifying values belong in the raw adjustment log or whether authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[10] source=I91b type=Implementation hops=1 rel=CONFLICTS_WITH
+Loyalty points accrual logic
+
+[11] source=G91c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Loyalty business rule definition gap
+
+[12] source=R91d type=Requirement hops=2 rel=CONFLICTS_WITH > IMPLEMENTS
+Loyalty points accrual rule
+
+[13] source=R93c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Loyalty eligibility condition rule",This document outlines the Gherkin tests for ensuring loyalty currency consistency based on the resolved operational context.,The system shall assign loyalty points only when rent status is Completed and payment status is Paid. || ## 9.1.1 The system shall allow users to earn loyalty points based on completed rents. || The system shall calculate loyalty points according to configured business rules. || The system shall update loyalty balances immediately after points are awarded. || The system shall allow users to redeem loyalty points for discounts. || The system shall validate sufficient loyalty point balance before redemption. || The system shall prevent redemption after invoice payment is completed. || The system shall apply loyalty discounts to the invoice total.,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,Loyalty points accrual logic || Loyalty points accrual rule,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall store loyalty point balances in the user account. | The system shall record loyalty redemption transactions.,1,1,0,0
+91ab3222,R103d,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R103d_10,Loyalty Discounts Application Consistency,"Feature: Loyalty Discounts Application
+  Scenario: Ensure loyalty discounts are applied consistently
+    Given the user has redeemed loyalty points
+    When the invoice total is calculated
+    Then the loyalty discount should be applied correctly to the invoice total","This test ensures that loyalty discounts are applied consistently to the invoice total, maintaining the integrity of the loyalty currency system.",E11,The system shall apply loyalty discounts to the invoice total.,G91c|G93c|I91b|R100b|R103d|R91d|R93c,Loyalty currency consistency,Loyalty currency consistency,"[1] source=R103d type=Requirement hops=0 rel=TARGET
+Loyalty currency consistency
+
+[2] source=R103d type=Requirement/SrcChunk hops=0 chunk=fdb6d8e7e523c75b doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-REWARDS&PANELTIES-01
+# Description: Rewards and Penalties Management
+# Status: Effective
+
+## 9. Rewards and Penalties Management
+
+## 9.1 Loyalty Points Accrual
+## 9.1.1 The system shall allow users to earn loyalty points based on completed rents.
+## 9.1.2 The system shall calculate loyalty points according to configured business rules.
+## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.
+## 9.1.4 The system shall store loyalty point balances in the user account.
+## 9.1.5 The system shall update loyalty balances immediately after points are awarded.
+
+## 9.2 Loyalty Points Redemption
+## 9.2.1 The system shall allow users to redeem loyalty points for discounts.
+## 9.2.2 The system shall validate sufficient loyalty point balance before redemption.
+## 9.2.3 The system shall apply loyalty discounts to the invoice total.
+## 9.2.4 The system shall prevent redemption after invoice payment is completed.
+## 9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty ti
+
+[3] source=R103d type=Requirement/SrcChunk hops=0 chunk=cb19aeaad55d5a74 doc=JIRA-Rewards.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-REW-901"",
+    ""summary"": ""Loyalty Points Accrual Logic"",
+    ""description"": ""Implement loyalty point accrual for completed and successfully settled rental activity, and ensure awarded points are applied to the user account according to the configurable reward policy."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-15T10:00:00Z"",
+        ""text"": ""Implementation note: the specification refers to configurable business rules for point awards, but the exact reward formula is not yet finalized. I need confirmation on whether beta should use a temporary default rule or wait for the configurable policy source.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-902"",
+    ""summary"": ""Points Redemption and Discount Handling"",
+    ""description"": ""Allow loyalty point redemption during billing, validate that the user has sufficient balance, and ensure redemption is recorded consistently together with the related financial outcome."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-903"",
+    ""summary"": ""Loyalty Tier Automation"",
+    ""description"": ""Implement configurable loyalty tier a
+
+[4] source=R103d type=Requirement/SrcChunk hops=0 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=TARGET
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[5] source=G93c type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G93c type=Gap/SrcChunk hops=1 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=AFFECTS
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=G93c type=Gap/SrcChunk hops=1 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G93c type=Gap hops=1 rel=AFFECTS
+Currency consistency gap
+
+[9] source=R100b type=Requirement/SrcChunk hops=2 chunk=a4a287abb143e79a doc=JIRA-Rewards.md rel=IN_DOC > IN_DOC
+nal buffer before charges apply.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-905"",
+    ""summary"": ""Penalty Dispute Workflow"",
+    ""description"": ""Implement penalty dispute submission and resolution so users can challenge penalty outcomes and authorized staff can record the final decision together with any resulting adjustment."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-REW-906"",
+    ""summary"": ""Adjustment Audit Logging"",
+    ""description"": ""Log loyalty and penalty adjustments in a way that preserves traceability, supports controlled review, and remains compatible with the platform's broader privacy and auditability expectations."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-17T09:00:00Z"",
+        ""text"": ""Auditability note: the requirement expects user-linked traceability for adjustments, but we should confirm whether direct user-identifying values belong in the raw adjustment log or whether authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[10] source=I91b type=Implementation hops=1 rel=CONFLICTS_WITH
+Loyalty points accrual logic
+
+[11] source=G91c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Loyalty business rule definition gap
+
+[12] source=R91d type=Requirement hops=2 rel=CONFLICTS_WITH > IMPLEMENTS
+Loyalty points accrual rule
+
+[13] source=R93c type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Loyalty eligibility condition rule",This document outlines the Gherkin tests for ensuring loyalty currency consistency based on the resolved operational context.,The system shall assign loyalty points only when rent status is Completed and payment status is Paid. || ## 9.1.1 The system shall allow users to earn loyalty points based on completed rents. || The system shall calculate loyalty points according to configured business rules. || The system shall update loyalty balances immediately after points are awarded. || The system shall allow users to redeem loyalty points for discounts. || The system shall validate sufficient loyalty point balance before redemption. || The system shall prevent redemption after invoice payment is completed. || The system shall apply loyalty discounts to the invoice total.,## 9.1.3 The system shall assign loyalty points only when rent status is Completed and payment status is Paid.,Loyalty points accrual logic || Loyalty points accrual rule,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall store loyalty point balances in the user account. | The system shall record loyalty redemption transactions.,1,1,0,0

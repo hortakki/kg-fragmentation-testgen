@@ -1,0 +1,980 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+651997e8,R37,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R37_1,Soft deletion marks item as deleted without physical removal,"Feature: Soft Deletion Rule
+  Scenario: Item is soft-deleted and remains in database
+    Given an item exists in the system with ID ""ITEM-001""
+    When the item is soft-deleted
+    Then the item record still exists in the database
+    And the item is marked with a deleted status
+    And the item is no longer visible in active item listings",Validates core soft deletion requirement: items must be logically deleted (status change) rather than physically removed from the database. This ensures data integrity and audit trails.,E1|E2,Soft deletion approach must be used instead of physical removal of items,G1|G33|I35|R37,Soft deletion rule,Soft deletion rule,"[1] source=R37 type=Requirement/SrcChunk hops=0 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=TARGET
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[2] source=R37 type=Requirement hops=0 rel=TARGET
+Soft deletion rule
+
+[3] source=R37 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[4] source=R37 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[5] source=G33 type=Gap hops=1 rel=AFFECTS
+Deletion status mismatch
+
+[6] source=I35 type=Implementation hops=1 rel=IMPLEMENTS
+Item deletion logic
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making ","R37 Soft Deletion Rule - 10 test cases covering soft deletion mechanics, prevention during active rentals, status mapping, and edge cases. Tests validate that items are soft-deleted (not physically removed), deletion is blocked when items are referenced by active rental activity, and deleted items correctly map to a technical status model in the database.","Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."" || Deleted items must map to a technical status model in the database",,,,E1|E2|E3|E4|E5|E6|E7,"R37 targets soft deletion rule for items. PRIMARY evidence (E1-E6) establishes the core requirement: soft-delete approach, prevention during active rental, and status mapping uncertainty. E5 indicates implementation I35 exists. E7 (CONTEXT) references a related gap on deletion status mismatch. Key uncertainty: the technical status representation for deleted items remains unresolved per E3 and E6 comments from Backend Engineer Tomas and Security Engineer Viktor. Filtered abstract or low-relevance operative statements: Soft deletion approach must be used instead of physical removal of items | Deletion is prevented when the item is still referenced by active rental activity",1,0,0,0
+651997e8,R37,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R37_2,Deletion prevented when item is referenced by active rental,"Feature: Soft Deletion Rule
+  Scenario: Deletion blocked for item with active rental
+    Given an item with ID ""ITEM-002"" exists
+    And the item is currently referenced by an active rental activity
+    When a deletion request is submitted for the item
+    Then the deletion is rejected
+    And an error message indicates the item cannot be deleted due to active rental
+    And the item status remains unchanged","Enforces business rule preventing deletion of items still in use. Active rental references must be resolved before soft deletion is allowed, protecting data consistency.",E1|E3,Deletion is prevented when the item is still referenced by active rental activity,G1|G33|I35|R37,Soft deletion rule,Soft deletion rule,"[1] source=R37 type=Requirement/SrcChunk hops=0 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=TARGET
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[2] source=R37 type=Requirement hops=0 rel=TARGET
+Soft deletion rule
+
+[3] source=R37 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[4] source=R37 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[5] source=G33 type=Gap hops=1 rel=AFFECTS
+Deletion status mismatch
+
+[6] source=I35 type=Implementation hops=1 rel=IMPLEMENTS
+Item deletion logic
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making ","R37 Soft Deletion Rule - 10 test cases covering soft deletion mechanics, prevention during active rentals, status mapping, and edge cases. Tests validate that items are soft-deleted (not physically removed), deletion is blocked when items are referenced by active rental activity, and deleted items correctly map to a technical status model in the database.","Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."" || Deleted items must map to a technical status model in the database",,,,E1|E2|E3|E4|E5|E6|E7,"R37 targets soft deletion rule for items. PRIMARY evidence (E1-E6) establishes the core requirement: soft-delete approach, prevention during active rental, and status mapping uncertainty. E5 indicates implementation I35 exists. E7 (CONTEXT) references a related gap on deletion status mismatch. Key uncertainty: the technical status representation for deleted items remains unresolved per E3 and E6 comments from Backend Engineer Tomas and Security Engineer Viktor. Filtered abstract or low-relevance operative statements: Soft deletion approach must be used instead of physical removal of items | Deletion is prevented when the item is still referenced by active rental activity",1,0,0,0
+651997e8,R37,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R37_3,Deletion succeeds when no active rental references exist,"Feature: Soft Deletion Rule
+  Scenario: Item with completed rental can be soft-deleted
+    Given an item with ID ""ITEM-003"" exists
+    And all rental activities referencing this item are completed or cancelled
+    When a deletion request is submitted for the item
+    Then the deletion is accepted
+    And the item status is updated to deleted
+    And the item record persists in the database",Confirms that soft deletion is allowed once active rental references are cleared. Validates the positive path for deletion eligibility.,E1|E4,Deletion is prevented when the item is still referenced by active rental activity,G1|G33|I35|R37,Soft deletion rule,Soft deletion rule,"[1] source=R37 type=Requirement/SrcChunk hops=0 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=TARGET
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[2] source=R37 type=Requirement hops=0 rel=TARGET
+Soft deletion rule
+
+[3] source=R37 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[4] source=R37 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[5] source=G33 type=Gap hops=1 rel=AFFECTS
+Deletion status mismatch
+
+[6] source=I35 type=Implementation hops=1 rel=IMPLEMENTS
+Item deletion logic
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making ","R37 Soft Deletion Rule - 10 test cases covering soft deletion mechanics, prevention during active rentals, status mapping, and edge cases. Tests validate that items are soft-deleted (not physically removed), deletion is blocked when items are referenced by active rental activity, and deleted items correctly map to a technical status model in the database.","Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."" || Deleted items must map to a technical status model in the database",,,,E1|E2|E3|E4|E5|E6|E7,"R37 targets soft deletion rule for items. PRIMARY evidence (E1-E6) establishes the core requirement: soft-delete approach, prevention during active rental, and status mapping uncertainty. E5 indicates implementation I35 exists. E7 (CONTEXT) references a related gap on deletion status mismatch. Key uncertainty: the technical status representation for deleted items remains unresolved per E3 and E6 comments from Backend Engineer Tomas and Security Engineer Viktor. Filtered abstract or low-relevance operative statements: Soft deletion approach must be used instead of physical removal of items | Deletion is prevented when the item is still referenced by active rental activity",1,0,0,0
+651997e8,R37,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R37_4,Deleted item maps to technical status model in database,"Feature: Soft Deletion Rule
+  Scenario: Deleted item has correct status representation
+    Given an item with ID ""ITEM-004"" is soft-deleted
+    When the item record is queried from the database
+    Then the item has a status field set to a defined deleted status value
+    And the status value is consistent with the technical status model
+    And the status can be used to filter deleted items from active listings","Validates that deleted items are properly represented in the technical status model. Status mapping is critical for querying, filtering, and audit purposes.",E2|E6,Deleted items must map to a technical status model in the database,G1|G33|I35|R37,Soft deletion rule,Soft deletion rule,"[1] source=R37 type=Requirement/SrcChunk hops=0 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=TARGET
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[2] source=R37 type=Requirement hops=0 rel=TARGET
+Soft deletion rule
+
+[3] source=R37 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[4] source=R37 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[5] source=G33 type=Gap hops=1 rel=AFFECTS
+Deletion status mismatch
+
+[6] source=I35 type=Implementation hops=1 rel=IMPLEMENTS
+Item deletion logic
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making ","R37 Soft Deletion Rule - 10 test cases covering soft deletion mechanics, prevention during active rentals, status mapping, and edge cases. Tests validate that items are soft-deleted (not physically removed), deletion is blocked when items are referenced by active rental activity, and deleted items correctly map to a technical status model in the database.","Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."" || Deleted items must map to a technical status model in the database",,,,E1|E2|E3|E4|E5|E6|E7,"R37 targets soft deletion rule for items. PRIMARY evidence (E1-E6) establishes the core requirement: soft-delete approach, prevention during active rental, and status mapping uncertainty. E5 indicates implementation I35 exists. E7 (CONTEXT) references a related gap on deletion status mismatch. Key uncertainty: the technical status representation for deleted items remains unresolved per E3 and E6 comments from Backend Engineer Tomas and Security Engineer Viktor. Filtered abstract or low-relevance operative statements: Soft deletion approach must be used instead of physical removal of items | Deletion is prevented when the item is still referenced by active rental activity",1,0,0,0
+651997e8,R37,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R37_5,Multiple items can be soft-deleted independently,"Feature: Soft Deletion Rule
+  Scenario: Bulk soft deletion of eligible items
+    Given items with IDs ""ITEM-005"", ""ITEM-006"", ""ITEM-007"" exist
+    And none of these items are referenced by active rentals
+    When soft deletion is requested for all three items
+    Then all three items are marked as deleted
+    And all three items remain in the database
+    And each item has the correct deleted status in the technical status model",Ensures soft deletion logic scales correctly and maintains consistency across multiple items. Tests that deletion rules apply uniformly.,E1|E2,Soft deletion approach must be used instead of physical removal of items|Deleted items must map to a technical status model in the database,G1|G33|I35|R37,Soft deletion rule,Soft deletion rule,"[1] source=R37 type=Requirement/SrcChunk hops=0 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=TARGET
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[2] source=R37 type=Requirement hops=0 rel=TARGET
+Soft deletion rule
+
+[3] source=R37 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[4] source=R37 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[5] source=G33 type=Gap hops=1 rel=AFFECTS
+Deletion status mismatch
+
+[6] source=I35 type=Implementation hops=1 rel=IMPLEMENTS
+Item deletion logic
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making ","R37 Soft Deletion Rule - 10 test cases covering soft deletion mechanics, prevention during active rentals, status mapping, and edge cases. Tests validate that items are soft-deleted (not physically removed), deletion is blocked when items are referenced by active rental activity, and deleted items correctly map to a technical status model in the database.","Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."" || Deleted items must map to a technical status model in the database",,,,E1|E2|E3|E4|E5|E6|E7,"R37 targets soft deletion rule for items. PRIMARY evidence (E1-E6) establishes the core requirement: soft-delete approach, prevention during active rental, and status mapping uncertainty. E5 indicates implementation I35 exists. E7 (CONTEXT) references a related gap on deletion status mismatch. Key uncertainty: the technical status representation for deleted items remains unresolved per E3 and E6 comments from Backend Engineer Tomas and Security Engineer Viktor. Filtered abstract or low-relevance operative statements: Soft deletion approach must be used instead of physical removal of items | Deletion is prevented when the item is still referenced by active rental activity",1,0,0,0
+651997e8,R37,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R37_6,Soft-deleted item cannot be rented,"Feature: Soft Deletion Rule
+  Scenario: Deleted item is unavailable for rental
+    Given an item with ID ""ITEM-008"" is soft-deleted
+    When a rental request is submitted for this item
+    Then the rental request is rejected
+    And the system indicates the item is not available
+    And no rental activity is created for the deleted item",Validates that soft deletion prevents business operations on deleted items. Deleted items should be excluded from rental availability.,E1|E4,Soft deletion approach must be used instead of physical removal of items,G1|G33|I35|R37,Soft deletion rule,Soft deletion rule,"[1] source=R37 type=Requirement/SrcChunk hops=0 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=TARGET
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[2] source=R37 type=Requirement hops=0 rel=TARGET
+Soft deletion rule
+
+[3] source=R37 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[4] source=R37 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[5] source=G33 type=Gap hops=1 rel=AFFECTS
+Deletion status mismatch
+
+[6] source=I35 type=Implementation hops=1 rel=IMPLEMENTS
+Item deletion logic
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making ","R37 Soft Deletion Rule - 10 test cases covering soft deletion mechanics, prevention during active rentals, status mapping, and edge cases. Tests validate that items are soft-deleted (not physically removed), deletion is blocked when items are referenced by active rental activity, and deleted items correctly map to a technical status model in the database.","Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."" || Deleted items must map to a technical status model in the database",,,,E1|E2|E3|E4|E5|E6|E7,"R37 targets soft deletion rule for items. PRIMARY evidence (E1-E6) establishes the core requirement: soft-delete approach, prevention during active rental, and status mapping uncertainty. E5 indicates implementation I35 exists. E7 (CONTEXT) references a related gap on deletion status mismatch. Key uncertainty: the technical status representation for deleted items remains unresolved per E3 and E6 comments from Backend Engineer Tomas and Security Engineer Viktor. Filtered abstract or low-relevance operative statements: Soft deletion approach must be used instead of physical removal of items | Deletion is prevented when the item is still referenced by active rental activity",1,0,0,0
+651997e8,R37,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R37_7,Deletion attempt with active rental returns appropriate error,"Feature: Soft Deletion Rule
+  Scenario: Error handling for deletion with active rental
+    Given an item with ID ""ITEM-009"" exists
+    And the item is referenced by an active rental with ID ""RENTAL-001""
+    When a deletion request is submitted for the item
+    Then the system returns an error response
+    And the error code indicates a conflict or constraint violation
+    And the error message references the active rental ID
+    And the item status remains unchanged",Tests error handling and messaging when deletion is blocked. Proper error responses help clients understand why deletion failed and what action is needed.,E3|E5,Deletion is prevented when the item is still referenced by active rental activity,G1|G33|I35|R37,Soft deletion rule,Soft deletion rule,"[1] source=R37 type=Requirement/SrcChunk hops=0 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=TARGET
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[2] source=R37 type=Requirement hops=0 rel=TARGET
+Soft deletion rule
+
+[3] source=R37 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[4] source=R37 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[5] source=G33 type=Gap hops=1 rel=AFFECTS
+Deletion status mismatch
+
+[6] source=I35 type=Implementation hops=1 rel=IMPLEMENTS
+Item deletion logic
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making ","R37 Soft Deletion Rule - 10 test cases covering soft deletion mechanics, prevention during active rentals, status mapping, and edge cases. Tests validate that items are soft-deleted (not physically removed), deletion is blocked when items are referenced by active rental activity, and deleted items correctly map to a technical status model in the database.","Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."" || Deleted items must map to a technical status model in the database",,,,E1|E2|E3|E4|E5|E6|E7,"R37 targets soft deletion rule for items. PRIMARY evidence (E1-E6) establishes the core requirement: soft-delete approach, prevention during active rental, and status mapping uncertainty. E5 indicates implementation I35 exists. E7 (CONTEXT) references a related gap on deletion status mismatch. Key uncertainty: the technical status representation for deleted items remains unresolved per E3 and E6 comments from Backend Engineer Tomas and Security Engineer Viktor. Filtered abstract or low-relevance operative statements: Soft deletion approach must be used instead of physical removal of items | Deletion is prevented when the item is still referenced by active rental activity",1,0,0,0
+651997e8,R37,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R37_8,Soft-deleted item audit trail is preserved,"Feature: Soft Deletion Rule
+  Scenario: Deletion metadata is recorded for audit
+    Given an item with ID ""ITEM-010"" is soft-deleted
+    When the item record is examined
+    Then the item contains a deletion timestamp
+    And the item contains information about who initiated the deletion
+    And the item's previous status is retrievable from audit logs
+    And the deletion event is traceable for compliance purposes",Soft deletion must preserve audit trails for compliance and troubleshooting. Deletion metadata enables recovery and accountability.,E2|E6,Soft deletion approach must be used instead of physical removal of items|Deleted items must map to a technical status model in the database,G1|G33|I35|R37,Soft deletion rule,Soft deletion rule,"[1] source=R37 type=Requirement/SrcChunk hops=0 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=TARGET
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[2] source=R37 type=Requirement hops=0 rel=TARGET
+Soft deletion rule
+
+[3] source=R37 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[4] source=R37 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[5] source=G33 type=Gap hops=1 rel=AFFECTS
+Deletion status mismatch
+
+[6] source=I35 type=Implementation hops=1 rel=IMPLEMENTS
+Item deletion logic
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making ","R37 Soft Deletion Rule - 10 test cases covering soft deletion mechanics, prevention during active rentals, status mapping, and edge cases. Tests validate that items are soft-deleted (not physically removed), deletion is blocked when items are referenced by active rental activity, and deleted items correctly map to a technical status model in the database.","Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."" || Deleted items must map to a technical status model in the database",,,,E1|E2|E3|E4|E5|E6|E7,"R37 targets soft deletion rule for items. PRIMARY evidence (E1-E6) establishes the core requirement: soft-delete approach, prevention during active rental, and status mapping uncertainty. E5 indicates implementation I35 exists. E7 (CONTEXT) references a related gap on deletion status mismatch. Key uncertainty: the technical status representation for deleted items remains unresolved per E3 and E6 comments from Backend Engineer Tomas and Security Engineer Viktor. Filtered abstract or low-relevance operative statements: Soft deletion approach must be used instead of physical removal of items | Deletion is prevented when the item is still referenced by active rental activity",1,0,0,0
+651997e8,R37,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R37_9,Status model correctly distinguishes deleted from active items,"Feature: Soft Deletion Rule
+  Scenario: Status model differentiates item states
+    Given items with IDs ""ITEM-011"" (active) and ""ITEM-012"" (deleted) exist
+    When both items are queried from the database
+    Then the active item has a status indicating it is available
+    And the deleted item has a distinct status indicating it is deleted
+    And the two status values are mutually exclusive
+    And filtering by status correctly separates active from deleted items",Validates that the technical status model provides clear distinction between item states. This is essential for business logic and reporting.,E3|E6,Deleted items must map to a technical status model in the database,G1|G33|I35|R37,Soft deletion rule,Soft deletion rule,"[1] source=R37 type=Requirement/SrcChunk hops=0 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=TARGET
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[2] source=R37 type=Requirement hops=0 rel=TARGET
+Soft deletion rule
+
+[3] source=R37 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[4] source=R37 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[5] source=G33 type=Gap hops=1 rel=AFFECTS
+Deletion status mismatch
+
+[6] source=I35 type=Implementation hops=1 rel=IMPLEMENTS
+Item deletion logic
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making ","R37 Soft Deletion Rule - 10 test cases covering soft deletion mechanics, prevention during active rentals, status mapping, and edge cases. Tests validate that items are soft-deleted (not physically removed), deletion is blocked when items are referenced by active rental activity, and deleted items correctly map to a technical status model in the database.","Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."" || Deleted items must map to a technical status model in the database",,,,E1|E2|E3|E4|E5|E6|E7,"R37 targets soft deletion rule for items. PRIMARY evidence (E1-E6) establishes the core requirement: soft-delete approach, prevention during active rental, and status mapping uncertainty. E5 indicates implementation I35 exists. E7 (CONTEXT) references a related gap on deletion status mismatch. Key uncertainty: the technical status representation for deleted items remains unresolved per E3 and E6 comments from Backend Engineer Tomas and Security Engineer Viktor. Filtered abstract or low-relevance operative statements: Soft deletion approach must be used instead of physical removal of items | Deletion is prevented when the item is still referenced by active rental activity",1,0,0,0
+651997e8,R37,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R37_10,Soft deletion respects referential integrity with completed rentals,"Feature: Soft Deletion Rule
+  Scenario: Item with historical rental references can be deleted
+    Given an item with ID ""ITEM-013"" exists
+    And the item has historical rental records that are completed
+    When the item is soft-deleted
+    Then the deletion succeeds
+    And the historical rental records remain intact
+    And the relationship between the deleted item and completed rentals is preserved
+    And the item status is updated in the technical status model",Ensures soft deletion maintains referential integrity with historical data. Completed rentals should not block deletion but should remain queryable for audit purposes.,E1|E4|E6,Soft deletion approach must be used instead of physical removal of items|Deleted items must map to a technical status model in the database,G1|G33|I35|R37,Soft deletion rule,Soft deletion rule,"[1] source=R37 type=Requirement/SrcChunk hops=0 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=TARGET
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[2] source=R37 type=Requirement hops=0 rel=TARGET
+Soft deletion rule
+
+[3] source=R37 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[4] source=R37 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[5] source=G33 type=Gap hops=1 rel=AFFECTS
+Deletion status mismatch
+
+[6] source=I35 type=Implementation hops=1 rel=IMPLEMENTS
+Item deletion logic
+
+[7] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making ","R37 Soft Deletion Rule - 10 test cases covering soft deletion mechanics, prevention during active rentals, status mapping, and edge cases. Tests validate that items are soft-deleted (not physically removed), deletion is blocked when items are referenced by active rental activity, and deleted items correctly map to a technical status model in the database.","Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."" || Deleted items must map to a technical status model in the database",,,,E1|E2|E3|E4|E5|E6|E7,"R37 targets soft deletion rule for items. PRIMARY evidence (E1-E6) establishes the core requirement: soft-delete approach, prevention during active rental, and status mapping uncertainty. E5 indicates implementation I35 exists. E7 (CONTEXT) references a related gap on deletion status mismatch. Key uncertainty: the technical status representation for deleted items remains unresolved per E3 and E6 comments from Backend Engineer Tomas and Security Engineer Viktor. Filtered abstract or low-relevance operative statements: Soft deletion approach must be used instead of physical removal of items | Deletion is prevented when the item is still referenced by active rental activity",1,0,0,0

@@ -1,0 +1,1981 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+a1aaaaee,R5,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R5_1,Valid activation link updates account status to Active,"Given a user has registered and received an activation email with a valid activation link
+When the user clicks on the activation link
+Then the account status should be updated to Active",To verify that the system correctly updates the account status when a valid activation link is used.,E1|E2,The system shall validate the activation link/token and update the account status from Pending to Active if valid.|The system shall send an account activation email containing a unique activation link after successful registration.,A3|C2|G1|I10|I1a|I4|R5,Activation link security,Activation link security,"[1] source=R5 type=Requirement/SrcChunk hops=0 chunk=d1f9814887e95dcd doc=JIRA-Auth.md rel=TARGET
+n - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall contain a unique activation link."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-15T13:40:00Z"",
+        ""text"": ""Activation tokens must be cryptographically secure and time-limited. If stored, store hashed tokens.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-106"",
+    ""summary"": ""Activation - Validate activation link and activate account"",
+    ""description"": ""Implement activation flow. The system shall validate the activation link/token. If valid, the system shall update the account status from Pending to Active and allow platform access."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-107"",
+    ""summary"": ""Activation - Reject invalid or expired tokens"",
+    ""description"": ""The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Preven
+
+[2] source=R5 type=Requirement/SrcChunk hops=0 chunk=e633209b9a702ede doc=CONF-AUTH-01.md rel=TARGET
+ion link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not in Active status.
+
+## 1.2. User Authentication and Login
+## 1.2.1. The system shall allow access to the platform only for authenticated users with an account status of Active.
+## 1.2.2. The system shall require the user to provide their registered email address and password in order to authenticate.
+## 1.2.3. The system shall validate the provided credentials against the stored account data.
+## 1.2.4. If the provided credentials are valid and the account status is Active, the system shall authenticate the user and grant access to the platform.
+## 1.2.5. If the provided credentials are invalid, the system shall deny access and display an appropriate error message.
+## 1.2.6. The system shall deny authentication if the account status is not Active, including but not limited to Pending, Suspended, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated sess
+
+[3] source=R5 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R5 type=Requirement hops=0 rel=TARGET
+Activation link security
+
+[5] source=I4 type=Implementation/SrcChunk hops=2 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G1 type=Gap/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=AFFECTS
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=AFFECTS
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[8] source=I1a type=Implementation/SrcChunk hops=2 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[9] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[10] source=I10 type=Implementation hops=1 rel=REFINES
+Activation token hashing and expiry
+
+[11] source=A3 type=Actor/SrcChunk hops=2 chunk=4c32feaa92e54f29 doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+ stored securely.
+## 1.8.10 The system shall ensure that audit logs are available for administrative review.
+## 1.8.11 The system shall ensure that audit logging does not expose sensitive information such as passwords.
+## 1.8.12 The system shall retain audit logs according to the defined audit log retention policy.
+
+## 1.9. Multi-Factor Authentication (MFA)
+## 1.9.1 The system shall support multi-factor authentication as an additional security layer during user authentication.
+## 1.9.2 The system shall allow users to enable or disable multi-factor authentication for their account.
+## 1.9.3 The system shall require users to verify their identity using a second authentication factor when MFA is enabled.
+## 1.9.4 The system shall support one-time password (OTP) verification using a time-based authentication method.
+## 1.9.5 The system shall require the user to provide a valid OTP code during login when MFA is enabled.
+## 1.9.6 The system shall deny authentication if the provided OTP code is invalid or expired.
+## 1.9.7 The system shall allow users to complete authentication only after successful verification of both primary and secondary authentication factors.
+## 1.9.8 The system sha
+
+[12] source=A3 type=Actor hops=2 rel=IN_DOC > IN_DOC
+Viktor
+Security Engineer
+
+[13] source=C2 type=Communication hops=2 rel=IN_DOC > IN_DOC
+EMAIL_CTO_Security_Update.txt","This document outlines the Gherkin tests for the activation link security requirement, ensuring that the system correctly validates activation links and updates account statuses accordingly.","The system shall validate the activation link/token and update the account status from Pending to Active if valid. || The system shall send an account activation email containing a unique activation link after successful registration. || Upon successful activation, the system shall update the account status to Active.",The system shall allow access to the platform only for authenticated users with an account status of Active.,,,E1|E2|E3|E4|E5|E6|E7|E8|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state. | Activation tokens must be cryptographically secure and time-limited.,1,1,0,0
+a1aaaaee,R5,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R5_2,Invalid activation link does not update account status,"Given a user has registered and received an activation email with an invalid activation link
+When the user clicks on the activation link
+Then the account status should remain Pending",To ensure that the system does not update the account status when an invalid activation link is used.,E3,The system shall validate the activation link/token and update the account status from Pending to Active if valid.,A3|C2|G1|I10|I1a|I4|R5,Activation link security,Activation link security,"[1] source=R5 type=Requirement/SrcChunk hops=0 chunk=d1f9814887e95dcd doc=JIRA-Auth.md rel=TARGET
+n - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall contain a unique activation link."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-15T13:40:00Z"",
+        ""text"": ""Activation tokens must be cryptographically secure and time-limited. If stored, store hashed tokens.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-106"",
+    ""summary"": ""Activation - Validate activation link and activate account"",
+    ""description"": ""Implement activation flow. The system shall validate the activation link/token. If valid, the system shall update the account status from Pending to Active and allow platform access."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-107"",
+    ""summary"": ""Activation - Reject invalid or expired tokens"",
+    ""description"": ""The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Preven
+
+[2] source=R5 type=Requirement/SrcChunk hops=0 chunk=e633209b9a702ede doc=CONF-AUTH-01.md rel=TARGET
+ion link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not in Active status.
+
+## 1.2. User Authentication and Login
+## 1.2.1. The system shall allow access to the platform only for authenticated users with an account status of Active.
+## 1.2.2. The system shall require the user to provide their registered email address and password in order to authenticate.
+## 1.2.3. The system shall validate the provided credentials against the stored account data.
+## 1.2.4. If the provided credentials are valid and the account status is Active, the system shall authenticate the user and grant access to the platform.
+## 1.2.5. If the provided credentials are invalid, the system shall deny access and display an appropriate error message.
+## 1.2.6. The system shall deny authentication if the account status is not Active, including but not limited to Pending, Suspended, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated sess
+
+[3] source=R5 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R5 type=Requirement hops=0 rel=TARGET
+Activation link security
+
+[5] source=I4 type=Implementation/SrcChunk hops=2 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G1 type=Gap/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=AFFECTS
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=AFFECTS
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[8] source=I1a type=Implementation/SrcChunk hops=2 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[9] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[10] source=I10 type=Implementation hops=1 rel=REFINES
+Activation token hashing and expiry
+
+[11] source=A3 type=Actor/SrcChunk hops=2 chunk=4c32feaa92e54f29 doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+ stored securely.
+## 1.8.10 The system shall ensure that audit logs are available for administrative review.
+## 1.8.11 The system shall ensure that audit logging does not expose sensitive information such as passwords.
+## 1.8.12 The system shall retain audit logs according to the defined audit log retention policy.
+
+## 1.9. Multi-Factor Authentication (MFA)
+## 1.9.1 The system shall support multi-factor authentication as an additional security layer during user authentication.
+## 1.9.2 The system shall allow users to enable or disable multi-factor authentication for their account.
+## 1.9.3 The system shall require users to verify their identity using a second authentication factor when MFA is enabled.
+## 1.9.4 The system shall support one-time password (OTP) verification using a time-based authentication method.
+## 1.9.5 The system shall require the user to provide a valid OTP code during login when MFA is enabled.
+## 1.9.6 The system shall deny authentication if the provided OTP code is invalid or expired.
+## 1.9.7 The system shall allow users to complete authentication only after successful verification of both primary and secondary authentication factors.
+## 1.9.8 The system sha
+
+[12] source=A3 type=Actor hops=2 rel=IN_DOC > IN_DOC
+Viktor
+Security Engineer
+
+[13] source=C2 type=Communication hops=2 rel=IN_DOC > IN_DOC
+EMAIL_CTO_Security_Update.txt","This document outlines the Gherkin tests for the activation link security requirement, ensuring that the system correctly validates activation links and updates account statuses accordingly.","The system shall validate the activation link/token and update the account status from Pending to Active if valid. || The system shall send an account activation email containing a unique activation link after successful registration. || Upon successful activation, the system shall update the account status to Active.",The system shall allow access to the platform only for authenticated users with an account status of Active.,,,E1|E2|E3|E4|E5|E6|E7|E8|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state. | Activation tokens must be cryptographically secure and time-limited.,1,1,0,0
+a1aaaaee,R5,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R5_3,Successful activation sends confirmation email,"Given a user has activated their account using a valid activation link
+When the activation is successful
+Then a confirmation email should be sent to the user",To confirm that the system sends a notification after successful activation of the account.,E4,"Upon successful activation, the system shall update the account status to Active.",A3|C2|G1|I10|I1a|I4|R5,Activation link security,Activation link security,"[1] source=R5 type=Requirement/SrcChunk hops=0 chunk=d1f9814887e95dcd doc=JIRA-Auth.md rel=TARGET
+n - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall contain a unique activation link."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-15T13:40:00Z"",
+        ""text"": ""Activation tokens must be cryptographically secure and time-limited. If stored, store hashed tokens.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-106"",
+    ""summary"": ""Activation - Validate activation link and activate account"",
+    ""description"": ""Implement activation flow. The system shall validate the activation link/token. If valid, the system shall update the account status from Pending to Active and allow platform access."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-107"",
+    ""summary"": ""Activation - Reject invalid or expired tokens"",
+    ""description"": ""The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Preven
+
+[2] source=R5 type=Requirement/SrcChunk hops=0 chunk=e633209b9a702ede doc=CONF-AUTH-01.md rel=TARGET
+ion link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not in Active status.
+
+## 1.2. User Authentication and Login
+## 1.2.1. The system shall allow access to the platform only for authenticated users with an account status of Active.
+## 1.2.2. The system shall require the user to provide their registered email address and password in order to authenticate.
+## 1.2.3. The system shall validate the provided credentials against the stored account data.
+## 1.2.4. If the provided credentials are valid and the account status is Active, the system shall authenticate the user and grant access to the platform.
+## 1.2.5. If the provided credentials are invalid, the system shall deny access and display an appropriate error message.
+## 1.2.6. The system shall deny authentication if the account status is not Active, including but not limited to Pending, Suspended, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated sess
+
+[3] source=R5 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R5 type=Requirement hops=0 rel=TARGET
+Activation link security
+
+[5] source=I4 type=Implementation/SrcChunk hops=2 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G1 type=Gap/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=AFFECTS
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=AFFECTS
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[8] source=I1a type=Implementation/SrcChunk hops=2 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[9] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[10] source=I10 type=Implementation hops=1 rel=REFINES
+Activation token hashing and expiry
+
+[11] source=A3 type=Actor/SrcChunk hops=2 chunk=4c32feaa92e54f29 doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+ stored securely.
+## 1.8.10 The system shall ensure that audit logs are available for administrative review.
+## 1.8.11 The system shall ensure that audit logging does not expose sensitive information such as passwords.
+## 1.8.12 The system shall retain audit logs according to the defined audit log retention policy.
+
+## 1.9. Multi-Factor Authentication (MFA)
+## 1.9.1 The system shall support multi-factor authentication as an additional security layer during user authentication.
+## 1.9.2 The system shall allow users to enable or disable multi-factor authentication for their account.
+## 1.9.3 The system shall require users to verify their identity using a second authentication factor when MFA is enabled.
+## 1.9.4 The system shall support one-time password (OTP) verification using a time-based authentication method.
+## 1.9.5 The system shall require the user to provide a valid OTP code during login when MFA is enabled.
+## 1.9.6 The system shall deny authentication if the provided OTP code is invalid or expired.
+## 1.9.7 The system shall allow users to complete authentication only after successful verification of both primary and secondary authentication factors.
+## 1.9.8 The system sha
+
+[12] source=A3 type=Actor hops=2 rel=IN_DOC > IN_DOC
+Viktor
+Security Engineer
+
+[13] source=C2 type=Communication hops=2 rel=IN_DOC > IN_DOC
+EMAIL_CTO_Security_Update.txt","This document outlines the Gherkin tests for the activation link security requirement, ensuring that the system correctly validates activation links and updates account statuses accordingly.","The system shall validate the activation link/token and update the account status from Pending to Active if valid. || The system shall send an account activation email containing a unique activation link after successful registration. || Upon successful activation, the system shall update the account status to Active.",The system shall allow access to the platform only for authenticated users with an account status of Active.,,,E1|E2|E3|E4|E5|E6|E7|E8|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state. | Activation tokens must be cryptographically secure and time-limited.,1,1,0,0
+a1aaaaee,R5,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R5_4,Access denied for non-authenticated users,"Given a user is not authenticated
+When the user attempts to access the platform
+Then access should be denied",To ensure that only authenticated users with an Active account status can access the platform.,E5,The system shall allow access to the platform only for authenticated users with an account status of Active.,A3|C2|G1|I10|I1a|I4|R5,Activation link security,Activation link security,"[1] source=R5 type=Requirement/SrcChunk hops=0 chunk=d1f9814887e95dcd doc=JIRA-Auth.md rel=TARGET
+n - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall contain a unique activation link."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-15T13:40:00Z"",
+        ""text"": ""Activation tokens must be cryptographically secure and time-limited. If stored, store hashed tokens.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-106"",
+    ""summary"": ""Activation - Validate activation link and activate account"",
+    ""description"": ""Implement activation flow. The system shall validate the activation link/token. If valid, the system shall update the account status from Pending to Active and allow platform access."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-107"",
+    ""summary"": ""Activation - Reject invalid or expired tokens"",
+    ""description"": ""The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Preven
+
+[2] source=R5 type=Requirement/SrcChunk hops=0 chunk=e633209b9a702ede doc=CONF-AUTH-01.md rel=TARGET
+ion link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not in Active status.
+
+## 1.2. User Authentication and Login
+## 1.2.1. The system shall allow access to the platform only for authenticated users with an account status of Active.
+## 1.2.2. The system shall require the user to provide their registered email address and password in order to authenticate.
+## 1.2.3. The system shall validate the provided credentials against the stored account data.
+## 1.2.4. If the provided credentials are valid and the account status is Active, the system shall authenticate the user and grant access to the platform.
+## 1.2.5. If the provided credentials are invalid, the system shall deny access and display an appropriate error message.
+## 1.2.6. The system shall deny authentication if the account status is not Active, including but not limited to Pending, Suspended, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated sess
+
+[3] source=R5 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R5 type=Requirement hops=0 rel=TARGET
+Activation link security
+
+[5] source=I4 type=Implementation/SrcChunk hops=2 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G1 type=Gap/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=AFFECTS
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=AFFECTS
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[8] source=I1a type=Implementation/SrcChunk hops=2 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[9] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[10] source=I10 type=Implementation hops=1 rel=REFINES
+Activation token hashing and expiry
+
+[11] source=A3 type=Actor/SrcChunk hops=2 chunk=4c32feaa92e54f29 doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+ stored securely.
+## 1.8.10 The system shall ensure that audit logs are available for administrative review.
+## 1.8.11 The system shall ensure that audit logging does not expose sensitive information such as passwords.
+## 1.8.12 The system shall retain audit logs according to the defined audit log retention policy.
+
+## 1.9. Multi-Factor Authentication (MFA)
+## 1.9.1 The system shall support multi-factor authentication as an additional security layer during user authentication.
+## 1.9.2 The system shall allow users to enable or disable multi-factor authentication for their account.
+## 1.9.3 The system shall require users to verify their identity using a second authentication factor when MFA is enabled.
+## 1.9.4 The system shall support one-time password (OTP) verification using a time-based authentication method.
+## 1.9.5 The system shall require the user to provide a valid OTP code during login when MFA is enabled.
+## 1.9.6 The system shall deny authentication if the provided OTP code is invalid or expired.
+## 1.9.7 The system shall allow users to complete authentication only after successful verification of both primary and secondary authentication factors.
+## 1.9.8 The system sha
+
+[12] source=A3 type=Actor hops=2 rel=IN_DOC > IN_DOC
+Viktor
+Security Engineer
+
+[13] source=C2 type=Communication hops=2 rel=IN_DOC > IN_DOC
+EMAIL_CTO_Security_Update.txt","This document outlines the Gherkin tests for the activation link security requirement, ensuring that the system correctly validates activation links and updates account statuses accordingly.","The system shall validate the activation link/token and update the account status from Pending to Active if valid. || The system shall send an account activation email containing a unique activation link after successful registration. || Upon successful activation, the system shall update the account status to Active.",The system shall allow access to the platform only for authenticated users with an account status of Active.,,,E1|E2|E3|E4|E5|E6|E7|E8|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state. | Activation tokens must be cryptographically secure and time-limited.,1,1,0,0
+a1aaaaee,R5,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R5_5,Expired activation link does not update account status,"Given a user has registered and received an activation email with an expired activation link
+When the user clicks on the activation link
+Then the account status should remain Pending",To verify that the system does not update the account status when an expired activation link is used.,E6,The system shall validate the activation link/token and update the account status from Pending to Active if valid.,A3|C2|G1|I10|I1a|I4|R5,Activation link security,Activation link security,"[1] source=R5 type=Requirement/SrcChunk hops=0 chunk=d1f9814887e95dcd doc=JIRA-Auth.md rel=TARGET
+n - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall contain a unique activation link."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-15T13:40:00Z"",
+        ""text"": ""Activation tokens must be cryptographically secure and time-limited. If stored, store hashed tokens.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-106"",
+    ""summary"": ""Activation - Validate activation link and activate account"",
+    ""description"": ""Implement activation flow. The system shall validate the activation link/token. If valid, the system shall update the account status from Pending to Active and allow platform access."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-107"",
+    ""summary"": ""Activation - Reject invalid or expired tokens"",
+    ""description"": ""The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Preven
+
+[2] source=R5 type=Requirement/SrcChunk hops=0 chunk=e633209b9a702ede doc=CONF-AUTH-01.md rel=TARGET
+ion link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not in Active status.
+
+## 1.2. User Authentication and Login
+## 1.2.1. The system shall allow access to the platform only for authenticated users with an account status of Active.
+## 1.2.2. The system shall require the user to provide their registered email address and password in order to authenticate.
+## 1.2.3. The system shall validate the provided credentials against the stored account data.
+## 1.2.4. If the provided credentials are valid and the account status is Active, the system shall authenticate the user and grant access to the platform.
+## 1.2.5. If the provided credentials are invalid, the system shall deny access and display an appropriate error message.
+## 1.2.6. The system shall deny authentication if the account status is not Active, including but not limited to Pending, Suspended, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated sess
+
+[3] source=R5 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R5 type=Requirement hops=0 rel=TARGET
+Activation link security
+
+[5] source=I4 type=Implementation/SrcChunk hops=2 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G1 type=Gap/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=AFFECTS
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=AFFECTS
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[8] source=I1a type=Implementation/SrcChunk hops=2 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[9] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[10] source=I10 type=Implementation hops=1 rel=REFINES
+Activation token hashing and expiry
+
+[11] source=A3 type=Actor/SrcChunk hops=2 chunk=4c32feaa92e54f29 doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+ stored securely.
+## 1.8.10 The system shall ensure that audit logs are available for administrative review.
+## 1.8.11 The system shall ensure that audit logging does not expose sensitive information such as passwords.
+## 1.8.12 The system shall retain audit logs according to the defined audit log retention policy.
+
+## 1.9. Multi-Factor Authentication (MFA)
+## 1.9.1 The system shall support multi-factor authentication as an additional security layer during user authentication.
+## 1.9.2 The system shall allow users to enable or disable multi-factor authentication for their account.
+## 1.9.3 The system shall require users to verify their identity using a second authentication factor when MFA is enabled.
+## 1.9.4 The system shall support one-time password (OTP) verification using a time-based authentication method.
+## 1.9.5 The system shall require the user to provide a valid OTP code during login when MFA is enabled.
+## 1.9.6 The system shall deny authentication if the provided OTP code is invalid or expired.
+## 1.9.7 The system shall allow users to complete authentication only after successful verification of both primary and secondary authentication factors.
+## 1.9.8 The system sha
+
+[12] source=A3 type=Actor hops=2 rel=IN_DOC > IN_DOC
+Viktor
+Security Engineer
+
+[13] source=C2 type=Communication hops=2 rel=IN_DOC > IN_DOC
+EMAIL_CTO_Security_Update.txt","This document outlines the Gherkin tests for the activation link security requirement, ensuring that the system correctly validates activation links and updates account statuses accordingly.","The system shall validate the activation link/token and update the account status from Pending to Active if valid. || The system shall send an account activation email containing a unique activation link after successful registration. || Upon successful activation, the system shall update the account status to Active.",The system shall allow access to the platform only for authenticated users with an account status of Active.,,,E1|E2|E3|E4|E5|E6|E7|E8|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state. | Activation tokens must be cryptographically secure and time-limited.,1,1,0,0
+a1aaaaee,R5,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R5_6,Activation link must be unique for each user,"Given a user has registered and received an activation email with a unique activation link
+When another user registers
+Then the new user should receive a different activation link",To ensure that each user receives a unique activation link for account activation.,E7,The system shall send an account activation email containing a unique activation link after successful registration.,A3|C2|G1|I10|I1a|I4|R5,Activation link security,Activation link security,"[1] source=R5 type=Requirement/SrcChunk hops=0 chunk=d1f9814887e95dcd doc=JIRA-Auth.md rel=TARGET
+n - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall contain a unique activation link."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-15T13:40:00Z"",
+        ""text"": ""Activation tokens must be cryptographically secure and time-limited. If stored, store hashed tokens.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-106"",
+    ""summary"": ""Activation - Validate activation link and activate account"",
+    ""description"": ""Implement activation flow. The system shall validate the activation link/token. If valid, the system shall update the account status from Pending to Active and allow platform access."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-107"",
+    ""summary"": ""Activation - Reject invalid or expired tokens"",
+    ""description"": ""The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Preven
+
+[2] source=R5 type=Requirement/SrcChunk hops=0 chunk=e633209b9a702ede doc=CONF-AUTH-01.md rel=TARGET
+ion link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not in Active status.
+
+## 1.2. User Authentication and Login
+## 1.2.1. The system shall allow access to the platform only for authenticated users with an account status of Active.
+## 1.2.2. The system shall require the user to provide their registered email address and password in order to authenticate.
+## 1.2.3. The system shall validate the provided credentials against the stored account data.
+## 1.2.4. If the provided credentials are valid and the account status is Active, the system shall authenticate the user and grant access to the platform.
+## 1.2.5. If the provided credentials are invalid, the system shall deny access and display an appropriate error message.
+## 1.2.6. The system shall deny authentication if the account status is not Active, including but not limited to Pending, Suspended, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated sess
+
+[3] source=R5 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R5 type=Requirement hops=0 rel=TARGET
+Activation link security
+
+[5] source=I4 type=Implementation/SrcChunk hops=2 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G1 type=Gap/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=AFFECTS
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=AFFECTS
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[8] source=I1a type=Implementation/SrcChunk hops=2 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[9] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[10] source=I10 type=Implementation hops=1 rel=REFINES
+Activation token hashing and expiry
+
+[11] source=A3 type=Actor/SrcChunk hops=2 chunk=4c32feaa92e54f29 doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+ stored securely.
+## 1.8.10 The system shall ensure that audit logs are available for administrative review.
+## 1.8.11 The system shall ensure that audit logging does not expose sensitive information such as passwords.
+## 1.8.12 The system shall retain audit logs according to the defined audit log retention policy.
+
+## 1.9. Multi-Factor Authentication (MFA)
+## 1.9.1 The system shall support multi-factor authentication as an additional security layer during user authentication.
+## 1.9.2 The system shall allow users to enable or disable multi-factor authentication for their account.
+## 1.9.3 The system shall require users to verify their identity using a second authentication factor when MFA is enabled.
+## 1.9.4 The system shall support one-time password (OTP) verification using a time-based authentication method.
+## 1.9.5 The system shall require the user to provide a valid OTP code during login when MFA is enabled.
+## 1.9.6 The system shall deny authentication if the provided OTP code is invalid or expired.
+## 1.9.7 The system shall allow users to complete authentication only after successful verification of both primary and secondary authentication factors.
+## 1.9.8 The system sha
+
+[12] source=A3 type=Actor hops=2 rel=IN_DOC > IN_DOC
+Viktor
+Security Engineer
+
+[13] source=C2 type=Communication hops=2 rel=IN_DOC > IN_DOC
+EMAIL_CTO_Security_Update.txt","This document outlines the Gherkin tests for the activation link security requirement, ensuring that the system correctly validates activation links and updates account statuses accordingly.","The system shall validate the activation link/token and update the account status from Pending to Active if valid. || The system shall send an account activation email containing a unique activation link after successful registration. || Upon successful activation, the system shall update the account status to Active.",The system shall allow access to the platform only for authenticated users with an account status of Active.,,,E1|E2|E3|E4|E5|E6|E7|E8|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state. | Activation tokens must be cryptographically secure and time-limited.,1,1,0,0
+a1aaaaee,R5,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R5_7,Account status remains Pending if activation link is not clicked,"Given a user has registered and received an activation email
+When the user does not click on the activation link
+Then the account status should remain Pending",To confirm that the account status does not change if the activation link is not used.,E8,The system shall validate the activation link/token and update the account status from Pending to Active if valid.,A3|C2|G1|I10|I1a|I4|R5,Activation link security,Activation link security,"[1] source=R5 type=Requirement/SrcChunk hops=0 chunk=d1f9814887e95dcd doc=JIRA-Auth.md rel=TARGET
+n - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall contain a unique activation link."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-15T13:40:00Z"",
+        ""text"": ""Activation tokens must be cryptographically secure and time-limited. If stored, store hashed tokens.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-106"",
+    ""summary"": ""Activation - Validate activation link and activate account"",
+    ""description"": ""Implement activation flow. The system shall validate the activation link/token. If valid, the system shall update the account status from Pending to Active and allow platform access."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-107"",
+    ""summary"": ""Activation - Reject invalid or expired tokens"",
+    ""description"": ""The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Preven
+
+[2] source=R5 type=Requirement/SrcChunk hops=0 chunk=e633209b9a702ede doc=CONF-AUTH-01.md rel=TARGET
+ion link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not in Active status.
+
+## 1.2. User Authentication and Login
+## 1.2.1. The system shall allow access to the platform only for authenticated users with an account status of Active.
+## 1.2.2. The system shall require the user to provide their registered email address and password in order to authenticate.
+## 1.2.3. The system shall validate the provided credentials against the stored account data.
+## 1.2.4. If the provided credentials are valid and the account status is Active, the system shall authenticate the user and grant access to the platform.
+## 1.2.5. If the provided credentials are invalid, the system shall deny access and display an appropriate error message.
+## 1.2.6. The system shall deny authentication if the account status is not Active, including but not limited to Pending, Suspended, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated sess
+
+[3] source=R5 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R5 type=Requirement hops=0 rel=TARGET
+Activation link security
+
+[5] source=I4 type=Implementation/SrcChunk hops=2 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G1 type=Gap/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=AFFECTS
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=AFFECTS
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[8] source=I1a type=Implementation/SrcChunk hops=2 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[9] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[10] source=I10 type=Implementation hops=1 rel=REFINES
+Activation token hashing and expiry
+
+[11] source=A3 type=Actor/SrcChunk hops=2 chunk=4c32feaa92e54f29 doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+ stored securely.
+## 1.8.10 The system shall ensure that audit logs are available for administrative review.
+## 1.8.11 The system shall ensure that audit logging does not expose sensitive information such as passwords.
+## 1.8.12 The system shall retain audit logs according to the defined audit log retention policy.
+
+## 1.9. Multi-Factor Authentication (MFA)
+## 1.9.1 The system shall support multi-factor authentication as an additional security layer during user authentication.
+## 1.9.2 The system shall allow users to enable or disable multi-factor authentication for their account.
+## 1.9.3 The system shall require users to verify their identity using a second authentication factor when MFA is enabled.
+## 1.9.4 The system shall support one-time password (OTP) verification using a time-based authentication method.
+## 1.9.5 The system shall require the user to provide a valid OTP code during login when MFA is enabled.
+## 1.9.6 The system shall deny authentication if the provided OTP code is invalid or expired.
+## 1.9.7 The system shall allow users to complete authentication only after successful verification of both primary and secondary authentication factors.
+## 1.9.8 The system sha
+
+[12] source=A3 type=Actor hops=2 rel=IN_DOC > IN_DOC
+Viktor
+Security Engineer
+
+[13] source=C2 type=Communication hops=2 rel=IN_DOC > IN_DOC
+EMAIL_CTO_Security_Update.txt","This document outlines the Gherkin tests for the activation link security requirement, ensuring that the system correctly validates activation links and updates account statuses accordingly.","The system shall validate the activation link/token and update the account status from Pending to Active if valid. || The system shall send an account activation email containing a unique activation link after successful registration. || Upon successful activation, the system shall update the account status to Active.",The system shall allow access to the platform only for authenticated users with an account status of Active.,,,E1|E2|E3|E4|E5|E6|E7|E8|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state. | Activation tokens must be cryptographically secure and time-limited.,1,1,0,0
+a1aaaaee,R5,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R5_8,System logs activation attempts,"Given a user attempts to activate their account using an activation link
+When the activation attempt is made
+Then the system should log the activation attempt",To ensure that all activation attempts are logged for security and auditing purposes.,E11,The system shall validate the activation link/token and update the account status from Pending to Active if valid.,A3|C2|G1|I10|I1a|I4|R5,Activation link security,Activation link security,"[1] source=R5 type=Requirement/SrcChunk hops=0 chunk=d1f9814887e95dcd doc=JIRA-Auth.md rel=TARGET
+n - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall contain a unique activation link."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-15T13:40:00Z"",
+        ""text"": ""Activation tokens must be cryptographically secure and time-limited. If stored, store hashed tokens.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-106"",
+    ""summary"": ""Activation - Validate activation link and activate account"",
+    ""description"": ""Implement activation flow. The system shall validate the activation link/token. If valid, the system shall update the account status from Pending to Active and allow platform access."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-107"",
+    ""summary"": ""Activation - Reject invalid or expired tokens"",
+    ""description"": ""The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Preven
+
+[2] source=R5 type=Requirement/SrcChunk hops=0 chunk=e633209b9a702ede doc=CONF-AUTH-01.md rel=TARGET
+ion link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not in Active status.
+
+## 1.2. User Authentication and Login
+## 1.2.1. The system shall allow access to the platform only for authenticated users with an account status of Active.
+## 1.2.2. The system shall require the user to provide their registered email address and password in order to authenticate.
+## 1.2.3. The system shall validate the provided credentials against the stored account data.
+## 1.2.4. If the provided credentials are valid and the account status is Active, the system shall authenticate the user and grant access to the platform.
+## 1.2.5. If the provided credentials are invalid, the system shall deny access and display an appropriate error message.
+## 1.2.6. The system shall deny authentication if the account status is not Active, including but not limited to Pending, Suspended, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated sess
+
+[3] source=R5 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R5 type=Requirement hops=0 rel=TARGET
+Activation link security
+
+[5] source=I4 type=Implementation/SrcChunk hops=2 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G1 type=Gap/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=AFFECTS
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=AFFECTS
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[8] source=I1a type=Implementation/SrcChunk hops=2 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[9] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[10] source=I10 type=Implementation hops=1 rel=REFINES
+Activation token hashing and expiry
+
+[11] source=A3 type=Actor/SrcChunk hops=2 chunk=4c32feaa92e54f29 doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+ stored securely.
+## 1.8.10 The system shall ensure that audit logs are available for administrative review.
+## 1.8.11 The system shall ensure that audit logging does not expose sensitive information such as passwords.
+## 1.8.12 The system shall retain audit logs according to the defined audit log retention policy.
+
+## 1.9. Multi-Factor Authentication (MFA)
+## 1.9.1 The system shall support multi-factor authentication as an additional security layer during user authentication.
+## 1.9.2 The system shall allow users to enable or disable multi-factor authentication for their account.
+## 1.9.3 The system shall require users to verify their identity using a second authentication factor when MFA is enabled.
+## 1.9.4 The system shall support one-time password (OTP) verification using a time-based authentication method.
+## 1.9.5 The system shall require the user to provide a valid OTP code during login when MFA is enabled.
+## 1.9.6 The system shall deny authentication if the provided OTP code is invalid or expired.
+## 1.9.7 The system shall allow users to complete authentication only after successful verification of both primary and secondary authentication factors.
+## 1.9.8 The system sha
+
+[12] source=A3 type=Actor hops=2 rel=IN_DOC > IN_DOC
+Viktor
+Security Engineer
+
+[13] source=C2 type=Communication hops=2 rel=IN_DOC > IN_DOC
+EMAIL_CTO_Security_Update.txt","This document outlines the Gherkin tests for the activation link security requirement, ensuring that the system correctly validates activation links and updates account statuses accordingly.","The system shall validate the activation link/token and update the account status from Pending to Active if valid. || The system shall send an account activation email containing a unique activation link after successful registration. || Upon successful activation, the system shall update the account status to Active.",The system shall allow access to the platform only for authenticated users with an account status of Active.,,,E1|E2|E3|E4|E5|E6|E7|E8|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state. | Activation tokens must be cryptographically secure and time-limited.,1,1,0,0
+a1aaaaee,R5,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R5_9,Activation link is cryptographically secure,"Given a user has received an activation link
+When the link is generated
+Then the link should be cryptographically secure",To ensure that the activation link is secure and cannot be easily guessed or forged.,E12,The system shall validate the activation link/token and update the account status from Pending to Active if valid.,A3|C2|G1|I10|I1a|I4|R5,Activation link security,Activation link security,"[1] source=R5 type=Requirement/SrcChunk hops=0 chunk=d1f9814887e95dcd doc=JIRA-Auth.md rel=TARGET
+n - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall contain a unique activation link."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-15T13:40:00Z"",
+        ""text"": ""Activation tokens must be cryptographically secure and time-limited. If stored, store hashed tokens.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-106"",
+    ""summary"": ""Activation - Validate activation link and activate account"",
+    ""description"": ""Implement activation flow. The system shall validate the activation link/token. If valid, the system shall update the account status from Pending to Active and allow platform access."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-107"",
+    ""summary"": ""Activation - Reject invalid or expired tokens"",
+    ""description"": ""The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Preven
+
+[2] source=R5 type=Requirement/SrcChunk hops=0 chunk=e633209b9a702ede doc=CONF-AUTH-01.md rel=TARGET
+ion link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not in Active status.
+
+## 1.2. User Authentication and Login
+## 1.2.1. The system shall allow access to the platform only for authenticated users with an account status of Active.
+## 1.2.2. The system shall require the user to provide their registered email address and password in order to authenticate.
+## 1.2.3. The system shall validate the provided credentials against the stored account data.
+## 1.2.4. If the provided credentials are valid and the account status is Active, the system shall authenticate the user and grant access to the platform.
+## 1.2.5. If the provided credentials are invalid, the system shall deny access and display an appropriate error message.
+## 1.2.6. The system shall deny authentication if the account status is not Active, including but not limited to Pending, Suspended, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated sess
+
+[3] source=R5 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R5 type=Requirement hops=0 rel=TARGET
+Activation link security
+
+[5] source=I4 type=Implementation/SrcChunk hops=2 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G1 type=Gap/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=AFFECTS
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=AFFECTS
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[8] source=I1a type=Implementation/SrcChunk hops=2 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[9] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[10] source=I10 type=Implementation hops=1 rel=REFINES
+Activation token hashing and expiry
+
+[11] source=A3 type=Actor/SrcChunk hops=2 chunk=4c32feaa92e54f29 doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+ stored securely.
+## 1.8.10 The system shall ensure that audit logs are available for administrative review.
+## 1.8.11 The system shall ensure that audit logging does not expose sensitive information such as passwords.
+## 1.8.12 The system shall retain audit logs according to the defined audit log retention policy.
+
+## 1.9. Multi-Factor Authentication (MFA)
+## 1.9.1 The system shall support multi-factor authentication as an additional security layer during user authentication.
+## 1.9.2 The system shall allow users to enable or disable multi-factor authentication for their account.
+## 1.9.3 The system shall require users to verify their identity using a second authentication factor when MFA is enabled.
+## 1.9.4 The system shall support one-time password (OTP) verification using a time-based authentication method.
+## 1.9.5 The system shall require the user to provide a valid OTP code during login when MFA is enabled.
+## 1.9.6 The system shall deny authentication if the provided OTP code is invalid or expired.
+## 1.9.7 The system shall allow users to complete authentication only after successful verification of both primary and secondary authentication factors.
+## 1.9.8 The system sha
+
+[12] source=A3 type=Actor hops=2 rel=IN_DOC > IN_DOC
+Viktor
+Security Engineer
+
+[13] source=C2 type=Communication hops=2 rel=IN_DOC > IN_DOC
+EMAIL_CTO_Security_Update.txt","This document outlines the Gherkin tests for the activation link security requirement, ensuring that the system correctly validates activation links and updates account statuses accordingly.","The system shall validate the activation link/token and update the account status from Pending to Active if valid. || The system shall send an account activation email containing a unique activation link after successful registration. || Upon successful activation, the system shall update the account status to Active.",The system shall allow access to the platform only for authenticated users with an account status of Active.,,,E1|E2|E3|E4|E5|E6|E7|E8|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state. | Activation tokens must be cryptographically secure and time-limited.,1,1,0,0
+a1aaaaee,R5,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R5_10,Activation link is time-limited,"Given a user has received an activation link
+When the link is generated
+Then the link should expire after a certain time period",To ensure that activation links are time-limited to enhance security.,E13,The system shall validate the activation link/token and update the account status from Pending to Active if valid.,A3|C2|G1|I10|I1a|I4|R5,Activation link security,Activation link security,"[1] source=R5 type=Requirement/SrcChunk hops=0 chunk=d1f9814887e95dcd doc=JIRA-Auth.md rel=TARGET
+n - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall contain a unique activation link."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-15T13:40:00Z"",
+        ""text"": ""Activation tokens must be cryptographically secure and time-limited. If stored, store hashed tokens.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-106"",
+    ""summary"": ""Activation - Validate activation link and activate account"",
+    ""description"": ""Implement activation flow. The system shall validate the activation link/token. If valid, the system shall update the account status from Pending to Active and allow platform access."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-107"",
+    ""summary"": ""Activation - Reject invalid or expired tokens"",
+    ""description"": ""The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Preven
+
+[2] source=R5 type=Requirement/SrcChunk hops=0 chunk=e633209b9a702ede doc=CONF-AUTH-01.md rel=TARGET
+ion link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not in Active status.
+
+## 1.2. User Authentication and Login
+## 1.2.1. The system shall allow access to the platform only for authenticated users with an account status of Active.
+## 1.2.2. The system shall require the user to provide their registered email address and password in order to authenticate.
+## 1.2.3. The system shall validate the provided credentials against the stored account data.
+## 1.2.4. If the provided credentials are valid and the account status is Active, the system shall authenticate the user and grant access to the platform.
+## 1.2.5. If the provided credentials are invalid, the system shall deny access and display an appropriate error message.
+## 1.2.6. The system shall deny authentication if the account status is not Active, including but not limited to Pending, Suspended, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated sess
+
+[3] source=R5 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R5 type=Requirement hops=0 rel=TARGET
+Activation link security
+
+[5] source=I4 type=Implementation/SrcChunk hops=2 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G1 type=Gap/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=AFFECTS
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=AFFECTS
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[8] source=I1a type=Implementation/SrcChunk hops=2 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[9] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[10] source=I10 type=Implementation hops=1 rel=REFINES
+Activation token hashing and expiry
+
+[11] source=A3 type=Actor/SrcChunk hops=2 chunk=4c32feaa92e54f29 doc=CONF-AUTH-01.md rel=IN_DOC > IN_DOC
+ stored securely.
+## 1.8.10 The system shall ensure that audit logs are available for administrative review.
+## 1.8.11 The system shall ensure that audit logging does not expose sensitive information such as passwords.
+## 1.8.12 The system shall retain audit logs according to the defined audit log retention policy.
+
+## 1.9. Multi-Factor Authentication (MFA)
+## 1.9.1 The system shall support multi-factor authentication as an additional security layer during user authentication.
+## 1.9.2 The system shall allow users to enable or disable multi-factor authentication for their account.
+## 1.9.3 The system shall require users to verify their identity using a second authentication factor when MFA is enabled.
+## 1.9.4 The system shall support one-time password (OTP) verification using a time-based authentication method.
+## 1.9.5 The system shall require the user to provide a valid OTP code during login when MFA is enabled.
+## 1.9.6 The system shall deny authentication if the provided OTP code is invalid or expired.
+## 1.9.7 The system shall allow users to complete authentication only after successful verification of both primary and secondary authentication factors.
+## 1.9.8 The system sha
+
+[12] source=A3 type=Actor hops=2 rel=IN_DOC > IN_DOC
+Viktor
+Security Engineer
+
+[13] source=C2 type=Communication hops=2 rel=IN_DOC > IN_DOC
+EMAIL_CTO_Security_Update.txt","This document outlines the Gherkin tests for the activation link security requirement, ensuring that the system correctly validates activation links and updates account statuses accordingly.","The system shall validate the activation link/token and update the account status from Pending to Active if valid. || The system shall send an account activation email containing a unique activation link after successful registration. || Upon successful activation, the system shall update the account status to Active.",The system shall allow access to the platform only for authenticated users with an account status of Active.,,,E1|E2|E3|E4|E5|E6|E7|E8|E11|E12|E13,Filtered abstract or low-relevance operative statements: The system shall reject activation requests that use invalid or expired activation tokens and show an appropriate error state. | Activation tokens must be cryptographically secure and time-limited.,1,1,0,0

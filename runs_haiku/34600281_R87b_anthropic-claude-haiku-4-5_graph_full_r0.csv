@@ -1,0 +1,2476 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+34600281,R87b,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R87b_1,Delivery fee is calculated when delivery method is selected,"Feature: Delivery Fee Calculation
+  Scenario: Calculate delivery fee for delivery method selection
+    Given a rental order is created
+    When the user selects ""delivery"" as the delivery method
+    Then a delivery fee is calculated and applied to the order
+    And the delivery fee amount is stored with the rent record",Validates the core requirement that delivery fees are calculated when delivery method is selected. Confirms integration with rent record storage as indicated in operative context.,E3|E4|E5,"The system shall allow users to choose a delivery method for a rent, including pickup and delivery|Delivery fee calculation applies only when delivery method is selected (not for pickup)|Delivery fee amounts must be stored with rent records and included in invoices",2eee991de900fd57|G63|G64|G72|I41|I61|I62|I63|I81|I84|R87b,Delivery fee calculation rule,Delivery fee calculation rule,"[1] source=R87b type=Requirement hops=0 rel=TARGET
+Delivery fee calculation rule
+
+[2] source=R87b type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R87b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[4] source=I84 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[5] source=I84 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery fee calculation
+
+[6] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[9] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[11] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[12] source=I41 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[13] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[14] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[15] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[16] source=I62 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Price calculation logic
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection","Generated 10 executable Gherkin test cases for R87b (Delivery fee calculation rule). Tests focus on the core requirement that delivery fees are calculated and applied only when delivery method is selected, integrated with billing/invoicing, and subject to precision/consistency requirements. Tests avoid unsupported detail on the unspecified calculation formula/matrix and do not cover pickup scenarios (where delivery fees do not apply). Exception-focused tests address the delivery-method-specific applicability and precision requirements.","## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.",Delivery fee calculation applies only when delivery method is selected (not for pickup) || Delivery fees are subject to the same precision and consistency requirements as rental pricing,No conflicting delivery fee rules identified in primary evidence,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E3|E4|E5|E6|E11,"Target R87b is a delivery fee calculation rule. Primary evidence confirms delivery fee calculation exists as a requirement (E3, E4, E5) and must integrate with billing and invoice generation (E6, E11). However, the specific calculation logic, formula, or fee matrix is not detailed in the provided evidence. The evidence indicates delivery fees are part of the broader payment and billing system, subject to consistency and precision requirements similar to rental pricing. Multiple gaps exist around edge cases, tax treatment, display consistency, and lifecycle interactions that should be resolved before test generation."" Filtered abstract or low-relevance operative statements: Delivery fees are calculated based on configured logistics rules | Delivery fee calculation is part of the billing flow and must integrate with payment processing | Delivery fee amounts must be stored with rent records and included in invoices",1,0,0,0
+34600281,R87b,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R87b_2,No delivery fee is calculated when pickup method is selected,"Feature: Delivery Fee Calculation
+  Scenario: No delivery fee for pickup method
+    Given a rental order is created
+    When the user selects ""pickup"" as the delivery method
+    Then no delivery fee is calculated
+    And the order total does not include a delivery fee component","Exception test confirming that delivery fees apply only to delivery method, not pickup. Ensures the system correctly excludes delivery fees for non-delivery scenarios.",E3,Delivery fee calculation applies only when delivery method is selected (not for pickup),2eee991de900fd57|G63|G64|G72|I41|I61|I62|I63|I81|I84|R87b,Delivery fee calculation rule,Delivery fee calculation rule,"[1] source=R87b type=Requirement hops=0 rel=TARGET
+Delivery fee calculation rule
+
+[2] source=R87b type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R87b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[4] source=I84 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[5] source=I84 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery fee calculation
+
+[6] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[9] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[11] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[12] source=I41 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[13] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[14] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[15] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[16] source=I62 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Price calculation logic
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection","Generated 10 executable Gherkin test cases for R87b (Delivery fee calculation rule). Tests focus on the core requirement that delivery fees are calculated and applied only when delivery method is selected, integrated with billing/invoicing, and subject to precision/consistency requirements. Tests avoid unsupported detail on the unspecified calculation formula/matrix and do not cover pickup scenarios (where delivery fees do not apply). Exception-focused tests address the delivery-method-specific applicability and precision requirements.","## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.",Delivery fee calculation applies only when delivery method is selected (not for pickup) || Delivery fees are subject to the same precision and consistency requirements as rental pricing,No conflicting delivery fee rules identified in primary evidence,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E3|E4|E5|E6|E11,"Target R87b is a delivery fee calculation rule. Primary evidence confirms delivery fee calculation exists as a requirement (E3, E4, E5) and must integrate with billing and invoice generation (E6, E11). However, the specific calculation logic, formula, or fee matrix is not detailed in the provided evidence. The evidence indicates delivery fees are part of the broader payment and billing system, subject to consistency and precision requirements similar to rental pricing. Multiple gaps exist around edge cases, tax treatment, display consistency, and lifecycle interactions that should be resolved before test generation."" Filtered abstract or low-relevance operative statements: Delivery fees are calculated based on configured logistics rules | Delivery fee calculation is part of the billing flow and must integrate with payment processing | Delivery fee amounts must be stored with rent records and included in invoices",1,0,0,0
+34600281,R87b,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R87b_3,Delivery fee is included in invoice generation,"Feature: Delivery Fee Calculation
+  Scenario: Delivery fee appears in generated invoice
+    Given a rental order with delivery method selected
+    And a delivery fee has been calculated
+    When an invoice is generated for the order
+    Then the delivery fee amount is included in the invoice
+    And the invoice total reflects the delivery fee","Validates integration of delivery fee calculation with billing and invoice generation (E6, E11). Confirms delivery fees are properly surfaced in financial documents.",E6|E11,Delivery fee calculation is part of the billing flow and must integrate with payment processing|Delivery fee amounts must be stored with rent records and included in invoices,2eee991de900fd57|G63|G64|G72|I41|I61|I62|I63|I81|I84|R87b,Delivery fee calculation rule,Delivery fee calculation rule,"[1] source=R87b type=Requirement hops=0 rel=TARGET
+Delivery fee calculation rule
+
+[2] source=R87b type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R87b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[4] source=I84 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[5] source=I84 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery fee calculation
+
+[6] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[9] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[11] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[12] source=I41 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[13] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[14] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[15] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[16] source=I62 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Price calculation logic
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection","Generated 10 executable Gherkin test cases for R87b (Delivery fee calculation rule). Tests focus on the core requirement that delivery fees are calculated and applied only when delivery method is selected, integrated with billing/invoicing, and subject to precision/consistency requirements. Tests avoid unsupported detail on the unspecified calculation formula/matrix and do not cover pickup scenarios (where delivery fees do not apply). Exception-focused tests address the delivery-method-specific applicability and precision requirements.","## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.",Delivery fee calculation applies only when delivery method is selected (not for pickup) || Delivery fees are subject to the same precision and consistency requirements as rental pricing,No conflicting delivery fee rules identified in primary evidence,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E3|E4|E5|E6|E11,"Target R87b is a delivery fee calculation rule. Primary evidence confirms delivery fee calculation exists as a requirement (E3, E4, E5) and must integrate with billing and invoice generation (E6, E11). However, the specific calculation logic, formula, or fee matrix is not detailed in the provided evidence. The evidence indicates delivery fees are part of the broader payment and billing system, subject to consistency and precision requirements similar to rental pricing. Multiple gaps exist around edge cases, tax treatment, display consistency, and lifecycle interactions that should be resolved before test generation."" Filtered abstract or low-relevance operative statements: Delivery fees are calculated based on configured logistics rules | Delivery fee calculation is part of the billing flow and must integrate with payment processing | Delivery fee amounts must be stored with rent records and included in invoices",1,0,0,0
+34600281,R87b,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R87b_4,Delivery fee precision matches rental pricing precision,"Feature: Delivery Fee Calculation
+  Scenario: Delivery fee precision consistency
+    Given a rental order with delivery method selected
+    When a delivery fee is calculated
+    Then the delivery fee amount is stored with the same decimal precision as rental pricing
+    And the delivery fee is displayed with consistent formatting",Exception test addressing precision and consistency requirements. Ensures delivery fees meet the same precision standards as rental pricing to maintain data integrity and display consistency.,E4|E5,Delivery fees are subject to the same precision and consistency requirements as rental pricing,2eee991de900fd57|G63|G64|G72|I41|I61|I62|I63|I81|I84|R87b,Delivery fee calculation rule,Delivery fee calculation rule,"[1] source=R87b type=Requirement hops=0 rel=TARGET
+Delivery fee calculation rule
+
+[2] source=R87b type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R87b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[4] source=I84 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[5] source=I84 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery fee calculation
+
+[6] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[9] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[11] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[12] source=I41 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[13] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[14] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[15] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[16] source=I62 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Price calculation logic
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection","Generated 10 executable Gherkin test cases for R87b (Delivery fee calculation rule). Tests focus on the core requirement that delivery fees are calculated and applied only when delivery method is selected, integrated with billing/invoicing, and subject to precision/consistency requirements. Tests avoid unsupported detail on the unspecified calculation formula/matrix and do not cover pickup scenarios (where delivery fees do not apply). Exception-focused tests address the delivery-method-specific applicability and precision requirements.","## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.",Delivery fee calculation applies only when delivery method is selected (not for pickup) || Delivery fees are subject to the same precision and consistency requirements as rental pricing,No conflicting delivery fee rules identified in primary evidence,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E3|E4|E5|E6|E11,"Target R87b is a delivery fee calculation rule. Primary evidence confirms delivery fee calculation exists as a requirement (E3, E4, E5) and must integrate with billing and invoice generation (E6, E11). However, the specific calculation logic, formula, or fee matrix is not detailed in the provided evidence. The evidence indicates delivery fees are part of the broader payment and billing system, subject to consistency and precision requirements similar to rental pricing. Multiple gaps exist around edge cases, tax treatment, display consistency, and lifecycle interactions that should be resolved before test generation."" Filtered abstract or low-relevance operative statements: Delivery fees are calculated based on configured logistics rules | Delivery fee calculation is part of the billing flow and must integrate with payment processing | Delivery fee amounts must be stored with rent records and included in invoices",1,0,0,0
+34600281,R87b,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R87b_5,Delivery fee is applied based on configured logistics rules,"Feature: Delivery Fee Calculation
+  Scenario: Delivery fee calculation uses logistics configuration
+    Given a rental order with delivery method selected
+    And delivery logistics rules are configured in the system
+    When the delivery fee is calculated
+    Then the fee is determined according to the configured logistics rules
+    And the calculated fee is applied to the order",Validates that delivery fees are calculated based on configured logistics rules as indicated in operative context. Acknowledges the rule-based nature of fee calculation without specifying the exact formula.,E3|E4,Delivery fees are calculated based on configured logistics rules,2eee991de900fd57|G63|G64|G72|I41|I61|I62|I63|I81|I84|R87b,Delivery fee calculation rule,Delivery fee calculation rule,"[1] source=R87b type=Requirement hops=0 rel=TARGET
+Delivery fee calculation rule
+
+[2] source=R87b type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R87b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[4] source=I84 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[5] source=I84 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery fee calculation
+
+[6] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[9] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[11] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[12] source=I41 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[13] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[14] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[15] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[16] source=I62 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Price calculation logic
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection","Generated 10 executable Gherkin test cases for R87b (Delivery fee calculation rule). Tests focus on the core requirement that delivery fees are calculated and applied only when delivery method is selected, integrated with billing/invoicing, and subject to precision/consistency requirements. Tests avoid unsupported detail on the unspecified calculation formula/matrix and do not cover pickup scenarios (where delivery fees do not apply). Exception-focused tests address the delivery-method-specific applicability and precision requirements.","## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.",Delivery fee calculation applies only when delivery method is selected (not for pickup) || Delivery fees are subject to the same precision and consistency requirements as rental pricing,No conflicting delivery fee rules identified in primary evidence,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E3|E4|E5|E6|E11,"Target R87b is a delivery fee calculation rule. Primary evidence confirms delivery fee calculation exists as a requirement (E3, E4, E5) and must integrate with billing and invoice generation (E6, E11). However, the specific calculation logic, formula, or fee matrix is not detailed in the provided evidence. The evidence indicates delivery fees are part of the broader payment and billing system, subject to consistency and precision requirements similar to rental pricing. Multiple gaps exist around edge cases, tax treatment, display consistency, and lifecycle interactions that should be resolved before test generation."" Filtered abstract or low-relevance operative statements: Delivery fees are calculated based on configured logistics rules | Delivery fee calculation is part of the billing flow and must integrate with payment processing | Delivery fee amounts must be stored with rent records and included in invoices",1,0,0,0
+34600281,R87b,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R87b_6,Delivery fee is included in payment processing,"Feature: Delivery Fee Calculation
+  Scenario: Delivery fee integrated with payment processing
+    Given a rental order with delivery method selected
+    And a delivery fee has been calculated
+    When the order proceeds to payment processing
+    Then the delivery fee is included in the payment amount
+    And the payment system processes the total including delivery fee",Confirms integration of delivery fee calculation with payment processing as part of the broader billing flow. Ensures fees are properly handled in financial transactions.,E6|E11,Delivery fee calculation is part of the billing flow and must integrate with payment processing,2eee991de900fd57|G63|G64|G72|I41|I61|I62|I63|I81|I84|R87b,Delivery fee calculation rule,Delivery fee calculation rule,"[1] source=R87b type=Requirement hops=0 rel=TARGET
+Delivery fee calculation rule
+
+[2] source=R87b type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R87b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[4] source=I84 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[5] source=I84 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery fee calculation
+
+[6] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[9] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[11] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[12] source=I41 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[13] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[14] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[15] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[16] source=I62 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Price calculation logic
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection","Generated 10 executable Gherkin test cases for R87b (Delivery fee calculation rule). Tests focus on the core requirement that delivery fees are calculated and applied only when delivery method is selected, integrated with billing/invoicing, and subject to precision/consistency requirements. Tests avoid unsupported detail on the unspecified calculation formula/matrix and do not cover pickup scenarios (where delivery fees do not apply). Exception-focused tests address the delivery-method-specific applicability and precision requirements.","## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.",Delivery fee calculation applies only when delivery method is selected (not for pickup) || Delivery fees are subject to the same precision and consistency requirements as rental pricing,No conflicting delivery fee rules identified in primary evidence,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E3|E4|E5|E6|E11,"Target R87b is a delivery fee calculation rule. Primary evidence confirms delivery fee calculation exists as a requirement (E3, E4, E5) and must integrate with billing and invoice generation (E6, E11). However, the specific calculation logic, formula, or fee matrix is not detailed in the provided evidence. The evidence indicates delivery fees are part of the broader payment and billing system, subject to consistency and precision requirements similar to rental pricing. Multiple gaps exist around edge cases, tax treatment, display consistency, and lifecycle interactions that should be resolved before test generation."" Filtered abstract or low-relevance operative statements: Delivery fees are calculated based on configured logistics rules | Delivery fee calculation is part of the billing flow and must integrate with payment processing | Delivery fee amounts must be stored with rent records and included in invoices",1,0,0,0
+34600281,R87b,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R87b_7,Delivery fee calculation persists with rent record,"Feature: Delivery Fee Calculation
+  Scenario: Delivery fee stored with rent record
+    Given a rental order with delivery method selected
+    And a delivery fee has been calculated
+    When the rent record is saved
+    Then the delivery fee amount is persisted with the rent record
+    And the delivery fee can be retrieved with the rent record",Validates that delivery fee amounts are stored with rent records as required. Ensures data persistence and retrieval for billing and reporting purposes.,E3|E5,Delivery fee amounts must be stored with rent records and included in invoices,2eee991de900fd57|G63|G64|G72|I41|I61|I62|I63|I81|I84|R87b,Delivery fee calculation rule,Delivery fee calculation rule,"[1] source=R87b type=Requirement hops=0 rel=TARGET
+Delivery fee calculation rule
+
+[2] source=R87b type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R87b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[4] source=I84 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[5] source=I84 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery fee calculation
+
+[6] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[9] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[11] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[12] source=I41 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[13] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[14] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[15] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[16] source=I62 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Price calculation logic
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection","Generated 10 executable Gherkin test cases for R87b (Delivery fee calculation rule). Tests focus on the core requirement that delivery fees are calculated and applied only when delivery method is selected, integrated with billing/invoicing, and subject to precision/consistency requirements. Tests avoid unsupported detail on the unspecified calculation formula/matrix and do not cover pickup scenarios (where delivery fees do not apply). Exception-focused tests address the delivery-method-specific applicability and precision requirements.","## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.",Delivery fee calculation applies only when delivery method is selected (not for pickup) || Delivery fees are subject to the same precision and consistency requirements as rental pricing,No conflicting delivery fee rules identified in primary evidence,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E3|E4|E5|E6|E11,"Target R87b is a delivery fee calculation rule. Primary evidence confirms delivery fee calculation exists as a requirement (E3, E4, E5) and must integrate with billing and invoice generation (E6, E11). However, the specific calculation logic, formula, or fee matrix is not detailed in the provided evidence. The evidence indicates delivery fees are part of the broader payment and billing system, subject to consistency and precision requirements similar to rental pricing. Multiple gaps exist around edge cases, tax treatment, display consistency, and lifecycle interactions that should be resolved before test generation."" Filtered abstract or low-relevance operative statements: Delivery fees are calculated based on configured logistics rules | Delivery fee calculation is part of the billing flow and must integrate with payment processing | Delivery fee amounts must be stored with rent records and included in invoices",1,0,0,0
+34600281,R87b,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R87b_8,Delivery fee is calculated for each delivery method selection,"Feature: Delivery Fee Calculation
+  Scenario: Delivery fee recalculated on method change
+    Given a rental order with pickup method initially selected
+    When the user changes the delivery method to ""delivery""
+    Then a delivery fee is calculated
+    And the order total is updated to include the delivery fee","Validates that delivery fee calculation is triggered when delivery method is selected, including scenarios where the method is changed. Ensures dynamic fee application.",E3|E4,"The system shall allow users to choose a delivery method for a rent, including pickup and delivery|Delivery fee calculation applies only when delivery method is selected (not for pickup)",2eee991de900fd57|G63|G64|G72|I41|I61|I62|I63|I81|I84|R87b,Delivery fee calculation rule,Delivery fee calculation rule,"[1] source=R87b type=Requirement hops=0 rel=TARGET
+Delivery fee calculation rule
+
+[2] source=R87b type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R87b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[4] source=I84 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[5] source=I84 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery fee calculation
+
+[6] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[9] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[11] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[12] source=I41 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[13] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[14] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[15] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[16] source=I62 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Price calculation logic
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection","Generated 10 executable Gherkin test cases for R87b (Delivery fee calculation rule). Tests focus on the core requirement that delivery fees are calculated and applied only when delivery method is selected, integrated with billing/invoicing, and subject to precision/consistency requirements. Tests avoid unsupported detail on the unspecified calculation formula/matrix and do not cover pickup scenarios (where delivery fees do not apply). Exception-focused tests address the delivery-method-specific applicability and precision requirements.","## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.",Delivery fee calculation applies only when delivery method is selected (not for pickup) || Delivery fees are subject to the same precision and consistency requirements as rental pricing,No conflicting delivery fee rules identified in primary evidence,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E3|E4|E5|E6|E11,"Target R87b is a delivery fee calculation rule. Primary evidence confirms delivery fee calculation exists as a requirement (E3, E4, E5) and must integrate with billing and invoice generation (E6, E11). However, the specific calculation logic, formula, or fee matrix is not detailed in the provided evidence. The evidence indicates delivery fees are part of the broader payment and billing system, subject to consistency and precision requirements similar to rental pricing. Multiple gaps exist around edge cases, tax treatment, display consistency, and lifecycle interactions that should be resolved before test generation."" Filtered abstract or low-relevance operative statements: Delivery fees are calculated based on configured logistics rules | Delivery fee calculation is part of the billing flow and must integrate with payment processing | Delivery fee amounts must be stored with rent records and included in invoices",1,0,0,0
+34600281,R87b,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R87b_9,Delivery fee calculation maintains consistency across billing operations,"Feature: Delivery Fee Calculation
+  Scenario: Delivery fee consistency in billing operations
+    Given a rental order with delivery method selected
+    And a delivery fee has been calculated
+    When the order is billed and invoiced
+    Then the delivery fee amount remains consistent across billing operations
+    And the delivery fee in the invoice matches the calculated fee",Exception test addressing consistency requirements. Ensures delivery fees maintain integrity throughout the billing and invoicing lifecycle.,E4|E5|E6|E11,Delivery fees are subject to the same precision and consistency requirements as rental pricing|Delivery fee amounts must be stored with rent records and included in invoices,2eee991de900fd57|G63|G64|G72|I41|I61|I62|I63|I81|I84|R87b,Delivery fee calculation rule,Delivery fee calculation rule,"[1] source=R87b type=Requirement hops=0 rel=TARGET
+Delivery fee calculation rule
+
+[2] source=R87b type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R87b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[4] source=I84 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[5] source=I84 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery fee calculation
+
+[6] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[9] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[11] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[12] source=I41 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[13] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[14] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[15] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[16] source=I62 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Price calculation logic
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection","Generated 10 executable Gherkin test cases for R87b (Delivery fee calculation rule). Tests focus on the core requirement that delivery fees are calculated and applied only when delivery method is selected, integrated with billing/invoicing, and subject to precision/consistency requirements. Tests avoid unsupported detail on the unspecified calculation formula/matrix and do not cover pickup scenarios (where delivery fees do not apply). Exception-focused tests address the delivery-method-specific applicability and precision requirements.","## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.",Delivery fee calculation applies only when delivery method is selected (not for pickup) || Delivery fees are subject to the same precision and consistency requirements as rental pricing,No conflicting delivery fee rules identified in primary evidence,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E3|E4|E5|E6|E11,"Target R87b is a delivery fee calculation rule. Primary evidence confirms delivery fee calculation exists as a requirement (E3, E4, E5) and must integrate with billing and invoice generation (E6, E11). However, the specific calculation logic, formula, or fee matrix is not detailed in the provided evidence. The evidence indicates delivery fees are part of the broader payment and billing system, subject to consistency and precision requirements similar to rental pricing. Multiple gaps exist around edge cases, tax treatment, display consistency, and lifecycle interactions that should be resolved before test generation."" Filtered abstract or low-relevance operative statements: Delivery fees are calculated based on configured logistics rules | Delivery fee calculation is part of the billing flow and must integrate with payment processing | Delivery fee amounts must be stored with rent records and included in invoices",1,0,0,0
+34600281,R87b,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R87b_10,Delivery fee is not applied when delivery method is not selected,"Feature: Delivery Fee Calculation
+  Scenario: No delivery fee without delivery method selection
+    Given a rental order is created
+    When no delivery method is explicitly selected
+    Then no delivery fee is calculated
+    And the order total does not include a delivery fee",Validates the exception that delivery fees apply only when delivery method is selected. Ensures the system correctly handles scenarios where delivery is not chosen.,E3|E4,Delivery fee calculation applies only when delivery method is selected (not for pickup),2eee991de900fd57|G63|G64|G72|I41|I61|I62|I63|I81|I84|R87b,Delivery fee calculation rule,Delivery fee calculation rule,"[1] source=R87b type=Requirement hops=0 rel=TARGET
+Delivery fee calculation rule
+
+[2] source=R87b type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R87b type=Requirement/SrcChunk hops=0 chunk=94675d37d8c4a83d doc=TOOLCHAIN-CONF-DELIVERY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-DELIVERY-01
+# Description: Delivery Management
+# Status: Effective
+
+## 8. Delivery Management
+
+## 8.1 Delivery Options
+## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.
+## 8.1.2 The system shall require the user to provide a delivery address when delivery is selected.
+## 8.1.3 The system shall validate the delivery address before confirming the rent.
+
+## 8.2 Delivery Scheduling
+## 8.2.1 The system shall allow users to select a delivery time window.
+## 8.2.2 The system shall validate that the selected delivery time window is available.
+## 8.2.3 The system shall prevent scheduling delivery outside supported delivery hours.
+
+## 8.3 Delivery Lifecycle
+## 8.3.1 The system shall create a delivery record associated with the rent record when delivery is selected.
+## 8.3.2 The system shall support delivery status values including Scheduled, In Transit, Delivered, and Failed.
+## 8.3.3 The system shall allow authorized users to update delivery status.
+## 8.3.4 The system shall notify the user when delivery status changes.
+
+## 8.4 Delivery Fees
+## 8.4.1 The system shall calculate delivery fees based on c
+
+[4] source=I84 type=Implementation/SrcChunk hops=1 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IMPLEMENTS
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[5] source=I84 type=Implementation hops=1 rel=IMPLEMENTS
+Delivery fee calculation
+
+[6] source=I61 type=Implementation/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=I41 type=Implementation/SrcChunk hops=2 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[8] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[9] source=I81 type=Implementation/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[11] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[12] source=I41 type=Implementation/SrcChunk hops=2 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[13] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[14] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[15] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[16] source=I62 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Price calculation logic
+
+[17] source=I81 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Delivery option selection","Generated 10 executable Gherkin test cases for R87b (Delivery fee calculation rule). Tests focus on the core requirement that delivery fees are calculated and applied only when delivery method is selected, integrated with billing/invoicing, and subject to precision/consistency requirements. Tests avoid unsupported detail on the unspecified calculation formula/matrix and do not cover pickup scenarios (where delivery fees do not apply). Exception-focused tests address the delivery-method-specific applicability and precision requirements.","## 8.1.1 The system shall allow users to choose a delivery method for a rent, including pickup and delivery.",Delivery fee calculation applies only when delivery method is selected (not for pickup) || Delivery fees are subject to the same precision and consistency requirements as rental pricing,No conflicting delivery fee rules identified in primary evidence,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E3|E4|E5|E6|E11,"Target R87b is a delivery fee calculation rule. Primary evidence confirms delivery fee calculation exists as a requirement (E3, E4, E5) and must integrate with billing and invoice generation (E6, E11). However, the specific calculation logic, formula, or fee matrix is not detailed in the provided evidence. The evidence indicates delivery fees are part of the broader payment and billing system, subject to consistency and precision requirements similar to rental pricing. Multiple gaps exist around edge cases, tax treatment, display consistency, and lifecycle interactions that should be resolved before test generation."" Filtered abstract or low-relevance operative statements: Delivery fees are calculated based on configured logistics rules | Delivery fee calculation is part of the billing flow and must integrate with payment processing | Delivery fee amounts must be stored with rent records and included in invoices",1,0,0,0

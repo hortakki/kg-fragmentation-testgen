@@ -1,0 +1,971 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+f981c493,R70,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R70_1,Rounding consistency between calculation and storage layers,"Feature: Rounding Rule Consistency
+  Scenario: Calculated amount matches stored amount
+    Given a transaction with a base amount of 10.555 in a currency with 2 decimal places
+    When the amount is calculated and stored
+    Then the stored amount must equal the calculated amount
+    And the stored amount must be 10.56 (rounded consistently)","Verifies that rounding applied during calculation is preserved in storage, preventing divergence between computed and persisted values.",E1|E2,"Rounding behavior must be consistent across calculation, storage, and display layers",G61|G63|G74|G93c|I62|R63|R70|R80,Rounding rule consistency,Rounding rule consistency,"[1] source=R70 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R70 type=Requirement hops=0 rel=TARGET
+Rounding rule consistency
+
+[3] source=R70 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R70 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=CONFLICTS_WITH
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=G61 type=Gap hops=1 rel=AFFECTS
+Monetary rounding inconsistency
+
+[7] source=R63 type=Requirement hops=1 rel=REFINES
+Calculation accuracy rule
+
+[8] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[11] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R70 requires consistent rounding behavior across calculation, storage, and display layers. Tests verify that rounding rules do not diverge between these layers, that user-facing totals match persisted amounts, and that currency presentation does not compromise underlying financial record consistency. Exception handling for pilot-specific currency presentation is included where applicable. Conflicts with simplified partial-unit handling approaches are excluded from default test generation.","Rounding behavior must be consistent across calculation, storage, and display layers || Rounding rule consistency","Pilot-specific currency presentation may require clarification before implementation, but must not compromise consistency between customer-visible totals and underlying financial records",I62 (JIRA-PAY-602 comment): simplified approach for partial-unit handling conflicts with requirement for consistent rounding across all stages,,E1|E2|E3|E4|E5|E6|E7|E8,"R70 targets consistency of rounding rules across calculation, storage, and presentation layers. PRIMARY evidence (E1-E8) establishes that user-facing totals must match persisted amounts, and that currency/display simplifications must not compromise this alignment. E5 (I62 CONFLICTS_WITH) indicates that simplified partial-unit handling approaches conflict with consistency requirements. Multiple gaps (G63, G74, G93c) and related requirements (R63, R80) indicate that specific rounding algorithms, multi-currency rules, and authoritative source-of-truth models remain undefined. CONTEXT evidence (E9-E11) reinforces the broader consistency concern but does not override the primary target-specific statements."" Filtered abstract or low-relevance operative statements: User-facing totals must match persisted billing amounts exactly | Currency conversion and display format must not silently override core pricing logic | Financial outputs must align consistently across all billing contexts (reports, exports, billing records)",1,0,0,0
+f981c493,R70,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R70_2,Rounding consistency between storage and display layers,"Feature: Rounding Rule Consistency
+  Scenario: Stored amount matches displayed amount
+    Given a stored transaction amount of 10.56
+    When the amount is retrieved and displayed to the user
+    Then the displayed amount must equal the stored amount
+    And the displayed amount must be 10.56","Ensures that rounding rules applied during storage are not altered during display, maintaining consistency between persisted and user-visible values.",E3|E4,"Rounding behavior must be consistent across calculation, storage, and display layers",G61|G63|G74|G93c|I62|R63|R70|R80,Rounding rule consistency,Rounding rule consistency,"[1] source=R70 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R70 type=Requirement hops=0 rel=TARGET
+Rounding rule consistency
+
+[3] source=R70 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R70 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=CONFLICTS_WITH
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=G61 type=Gap hops=1 rel=AFFECTS
+Monetary rounding inconsistency
+
+[7] source=R63 type=Requirement hops=1 rel=REFINES
+Calculation accuracy rule
+
+[8] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[11] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R70 requires consistent rounding behavior across calculation, storage, and display layers. Tests verify that rounding rules do not diverge between these layers, that user-facing totals match persisted amounts, and that currency presentation does not compromise underlying financial record consistency. Exception handling for pilot-specific currency presentation is included where applicable. Conflicts with simplified partial-unit handling approaches are excluded from default test generation.","Rounding behavior must be consistent across calculation, storage, and display layers || Rounding rule consistency","Pilot-specific currency presentation may require clarification before implementation, but must not compromise consistency between customer-visible totals and underlying financial records",I62 (JIRA-PAY-602 comment): simplified approach for partial-unit handling conflicts with requirement for consistent rounding across all stages,,E1|E2|E3|E4|E5|E6|E7|E8,"R70 targets consistency of rounding rules across calculation, storage, and presentation layers. PRIMARY evidence (E1-E8) establishes that user-facing totals must match persisted amounts, and that currency/display simplifications must not compromise this alignment. E5 (I62 CONFLICTS_WITH) indicates that simplified partial-unit handling approaches conflict with consistency requirements. Multiple gaps (G63, G74, G93c) and related requirements (R63, R80) indicate that specific rounding algorithms, multi-currency rules, and authoritative source-of-truth models remain undefined. CONTEXT evidence (E9-E11) reinforces the broader consistency concern but does not override the primary target-specific statements."" Filtered abstract or low-relevance operative statements: User-facing totals must match persisted billing amounts exactly | Currency conversion and display format must not silently override core pricing logic | Financial outputs must align consistently across all billing contexts (reports, exports, billing records)",1,0,0,0
+f981c493,R70,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R70_3,User-facing total matches persisted billing amount,"Feature: Rounding Rule Consistency
+  Scenario: Customer-visible total aligns with financial records
+    Given a billing record with multiple line items
+    When the total is calculated and displayed to the customer
+    Then the customer-visible total must match the persisted billing amount exactly
+    And no rounding discrepancies must exist between display and storage","Validates the primary requirement that user-facing totals must match persisted billing amounts exactly, preventing customer confusion and financial record misalignment.",E1|E5,User-facing totals must match persisted billing amounts exactly,G61|G63|G74|G93c|I62|R63|R70|R80,Rounding rule consistency,Rounding rule consistency,"[1] source=R70 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R70 type=Requirement hops=0 rel=TARGET
+Rounding rule consistency
+
+[3] source=R70 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R70 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=CONFLICTS_WITH
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=G61 type=Gap hops=1 rel=AFFECTS
+Monetary rounding inconsistency
+
+[7] source=R63 type=Requirement hops=1 rel=REFINES
+Calculation accuracy rule
+
+[8] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[11] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R70 requires consistent rounding behavior across calculation, storage, and display layers. Tests verify that rounding rules do not diverge between these layers, that user-facing totals match persisted amounts, and that currency presentation does not compromise underlying financial record consistency. Exception handling for pilot-specific currency presentation is included where applicable. Conflicts with simplified partial-unit handling approaches are excluded from default test generation.","Rounding behavior must be consistent across calculation, storage, and display layers || Rounding rule consistency","Pilot-specific currency presentation may require clarification before implementation, but must not compromise consistency between customer-visible totals and underlying financial records",I62 (JIRA-PAY-602 comment): simplified approach for partial-unit handling conflicts with requirement for consistent rounding across all stages,,E1|E2|E3|E4|E5|E6|E7|E8,"R70 targets consistency of rounding rules across calculation, storage, and presentation layers. PRIMARY evidence (E1-E8) establishes that user-facing totals must match persisted amounts, and that currency/display simplifications must not compromise this alignment. E5 (I62 CONFLICTS_WITH) indicates that simplified partial-unit handling approaches conflict with consistency requirements. Multiple gaps (G63, G74, G93c) and related requirements (R63, R80) indicate that specific rounding algorithms, multi-currency rules, and authoritative source-of-truth models remain undefined. CONTEXT evidence (E9-E11) reinforces the broader consistency concern but does not override the primary target-specific statements."" Filtered abstract or low-relevance operative statements: User-facing totals must match persisted billing amounts exactly | Currency conversion and display format must not silently override core pricing logic | Financial outputs must align consistently across all billing contexts (reports, exports, billing records)",1,0,0,0
+f981c493,R70,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R70_4,Currency conversion does not override core pricing logic,"Feature: Rounding Rule Consistency
+  Scenario: Currency conversion preserves rounding consistency
+    Given a transaction in currency A with a calculated amount of 100.555
+    When the amount is converted to currency B
+    Then the converted amount must apply consistent rounding rules
+    And the rounding must not silently override the core pricing logic",Ensures that currency conversion and display formatting do not compromise the consistency of rounding rules or alter the underlying financial calculation.,E2|E6,Currency conversion and display format must not silently override core pricing logic,G61|G63|G74|G93c|I62|R63|R70|R80,Rounding rule consistency,Rounding rule consistency,"[1] source=R70 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R70 type=Requirement hops=0 rel=TARGET
+Rounding rule consistency
+
+[3] source=R70 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R70 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=CONFLICTS_WITH
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=G61 type=Gap hops=1 rel=AFFECTS
+Monetary rounding inconsistency
+
+[7] source=R63 type=Requirement hops=1 rel=REFINES
+Calculation accuracy rule
+
+[8] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[11] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R70 requires consistent rounding behavior across calculation, storage, and display layers. Tests verify that rounding rules do not diverge between these layers, that user-facing totals match persisted amounts, and that currency presentation does not compromise underlying financial record consistency. Exception handling for pilot-specific currency presentation is included where applicable. Conflicts with simplified partial-unit handling approaches are excluded from default test generation.","Rounding behavior must be consistent across calculation, storage, and display layers || Rounding rule consistency","Pilot-specific currency presentation may require clarification before implementation, but must not compromise consistency between customer-visible totals and underlying financial records",I62 (JIRA-PAY-602 comment): simplified approach for partial-unit handling conflicts with requirement for consistent rounding across all stages,,E1|E2|E3|E4|E5|E6|E7|E8,"R70 targets consistency of rounding rules across calculation, storage, and presentation layers. PRIMARY evidence (E1-E8) establishes that user-facing totals must match persisted amounts, and that currency/display simplifications must not compromise this alignment. E5 (I62 CONFLICTS_WITH) indicates that simplified partial-unit handling approaches conflict with consistency requirements. Multiple gaps (G63, G74, G93c) and related requirements (R63, R80) indicate that specific rounding algorithms, multi-currency rules, and authoritative source-of-truth models remain undefined. CONTEXT evidence (E9-E11) reinforces the broader consistency concern but does not override the primary target-specific statements."" Filtered abstract or low-relevance operative statements: User-facing totals must match persisted billing amounts exactly | Currency conversion and display format must not silently override core pricing logic | Financial outputs must align consistently across all billing contexts (reports, exports, billing records)",1,0,0,0
+f981c493,R70,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R70_5,Rounding consistency across billing contexts,"Feature: Rounding Rule Consistency
+  Scenario: Rounding aligns across reports, exports, and billing records
+    Given a transaction with a calculated amount of 25.125
+    When the amount is included in a report, export, and billing record
+    Then all three outputs must display the same rounded amount
+    And the rounding must be consistent across all billing contexts","Verifies that rounding rules remain consistent when the same transaction appears in different billing contexts (reports, exports, billing records), preventing discrepancies.",E3|E7,"Financial outputs must align consistently across all billing contexts (reports, exports, billing records)",G61|G63|G74|G93c|I62|R63|R70|R80,Rounding rule consistency,Rounding rule consistency,"[1] source=R70 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R70 type=Requirement hops=0 rel=TARGET
+Rounding rule consistency
+
+[3] source=R70 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R70 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=CONFLICTS_WITH
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=G61 type=Gap hops=1 rel=AFFECTS
+Monetary rounding inconsistency
+
+[7] source=R63 type=Requirement hops=1 rel=REFINES
+Calculation accuracy rule
+
+[8] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[11] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R70 requires consistent rounding behavior across calculation, storage, and display layers. Tests verify that rounding rules do not diverge between these layers, that user-facing totals match persisted amounts, and that currency presentation does not compromise underlying financial record consistency. Exception handling for pilot-specific currency presentation is included where applicable. Conflicts with simplified partial-unit handling approaches are excluded from default test generation.","Rounding behavior must be consistent across calculation, storage, and display layers || Rounding rule consistency","Pilot-specific currency presentation may require clarification before implementation, but must not compromise consistency between customer-visible totals and underlying financial records",I62 (JIRA-PAY-602 comment): simplified approach for partial-unit handling conflicts with requirement for consistent rounding across all stages,,E1|E2|E3|E4|E5|E6|E7|E8,"R70 targets consistency of rounding rules across calculation, storage, and presentation layers. PRIMARY evidence (E1-E8) establishes that user-facing totals must match persisted amounts, and that currency/display simplifications must not compromise this alignment. E5 (I62 CONFLICTS_WITH) indicates that simplified partial-unit handling approaches conflict with consistency requirements. Multiple gaps (G63, G74, G93c) and related requirements (R63, R80) indicate that specific rounding algorithms, multi-currency rules, and authoritative source-of-truth models remain undefined. CONTEXT evidence (E9-E11) reinforces the broader consistency concern but does not override the primary target-specific statements."" Filtered abstract or low-relevance operative statements: User-facing totals must match persisted billing amounts exactly | Currency conversion and display format must not silently override core pricing logic | Financial outputs must align consistently across all billing contexts (reports, exports, billing records)",1,0,0,0
+f981c493,R70,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R70_6,Rounding consistency with multiple decimal place currencies,"Feature: Rounding Rule Consistency
+  Scenario: Rounding applies correctly to currencies with varying decimal places
+    Given a transaction in a currency with 3 decimal places (e.g., KWD)
+    When the amount is calculated, stored, and displayed
+    Then the rounding rule must be applied consistently across all three layers
+    And the decimal places must match the currency specification","Ensures that rounding rules adapt consistently to different currency specifications while maintaining alignment across calculation, storage, and display.",E4|E8,"Rounding behavior must be consistent across calculation, storage, and display layers",G61|G63|G74|G93c|I62|R63|R70|R80,Rounding rule consistency,Rounding rule consistency,"[1] source=R70 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R70 type=Requirement hops=0 rel=TARGET
+Rounding rule consistency
+
+[3] source=R70 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R70 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=CONFLICTS_WITH
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=G61 type=Gap hops=1 rel=AFFECTS
+Monetary rounding inconsistency
+
+[7] source=R63 type=Requirement hops=1 rel=REFINES
+Calculation accuracy rule
+
+[8] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[11] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R70 requires consistent rounding behavior across calculation, storage, and display layers. Tests verify that rounding rules do not diverge between these layers, that user-facing totals match persisted amounts, and that currency presentation does not compromise underlying financial record consistency. Exception handling for pilot-specific currency presentation is included where applicable. Conflicts with simplified partial-unit handling approaches are excluded from default test generation.","Rounding behavior must be consistent across calculation, storage, and display layers || Rounding rule consistency","Pilot-specific currency presentation may require clarification before implementation, but must not compromise consistency between customer-visible totals and underlying financial records",I62 (JIRA-PAY-602 comment): simplified approach for partial-unit handling conflicts with requirement for consistent rounding across all stages,,E1|E2|E3|E4|E5|E6|E7|E8,"R70 targets consistency of rounding rules across calculation, storage, and presentation layers. PRIMARY evidence (E1-E8) establishes that user-facing totals must match persisted amounts, and that currency/display simplifications must not compromise this alignment. E5 (I62 CONFLICTS_WITH) indicates that simplified partial-unit handling approaches conflict with consistency requirements. Multiple gaps (G63, G74, G93c) and related requirements (R63, R80) indicate that specific rounding algorithms, multi-currency rules, and authoritative source-of-truth models remain undefined. CONTEXT evidence (E9-E11) reinforces the broader consistency concern but does not override the primary target-specific statements."" Filtered abstract or low-relevance operative statements: User-facing totals must match persisted billing amounts exactly | Currency conversion and display format must not silently override core pricing logic | Financial outputs must align consistently across all billing contexts (reports, exports, billing records)",1,0,0,0
+f981c493,R70,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R70_7,Pilot-specific currency presentation does not compromise consistency,"Feature: Rounding Rule Consistency
+  Scenario: Pilot currency presentation maintains underlying consistency
+    Given a pilot program with special currency presentation requirements
+    When the currency presentation is applied
+    Then the customer-visible total must still match the persisted financial record
+    And the underlying rounding consistency must not be compromised","Addresses the exception that pilot-specific currency presentation may require clarification, but must not compromise consistency between customer-visible totals and underlying financial records.",E5|E6,"Pilot-specific currency presentation may require clarification before implementation, but must not compromise consistency between customer-visible totals and underlying financial records",G61|G63|G74|G93c|I62|R63|R70|R80,Rounding rule consistency,Rounding rule consistency,"[1] source=R70 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R70 type=Requirement hops=0 rel=TARGET
+Rounding rule consistency
+
+[3] source=R70 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R70 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=CONFLICTS_WITH
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=G61 type=Gap hops=1 rel=AFFECTS
+Monetary rounding inconsistency
+
+[7] source=R63 type=Requirement hops=1 rel=REFINES
+Calculation accuracy rule
+
+[8] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[11] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R70 requires consistent rounding behavior across calculation, storage, and display layers. Tests verify that rounding rules do not diverge between these layers, that user-facing totals match persisted amounts, and that currency presentation does not compromise underlying financial record consistency. Exception handling for pilot-specific currency presentation is included where applicable. Conflicts with simplified partial-unit handling approaches are excluded from default test generation.","Rounding behavior must be consistent across calculation, storage, and display layers || Rounding rule consistency","Pilot-specific currency presentation may require clarification before implementation, but must not compromise consistency between customer-visible totals and underlying financial records",I62 (JIRA-PAY-602 comment): simplified approach for partial-unit handling conflicts with requirement for consistent rounding across all stages,,E1|E2|E3|E4|E5|E6|E7|E8,"R70 targets consistency of rounding rules across calculation, storage, and presentation layers. PRIMARY evidence (E1-E8) establishes that user-facing totals must match persisted amounts, and that currency/display simplifications must not compromise this alignment. E5 (I62 CONFLICTS_WITH) indicates that simplified partial-unit handling approaches conflict with consistency requirements. Multiple gaps (G63, G74, G93c) and related requirements (R63, R80) indicate that specific rounding algorithms, multi-currency rules, and authoritative source-of-truth models remain undefined. CONTEXT evidence (E9-E11) reinforces the broader consistency concern but does not override the primary target-specific statements."" Filtered abstract or low-relevance operative statements: User-facing totals must match persisted billing amounts exactly | Currency conversion and display format must not silently override core pricing logic | Financial outputs must align consistently across all billing contexts (reports, exports, billing records)",1,0,0,0
+f981c493,R70,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R70_8,Rounding consistency prevents financial record misalignment,"Feature: Rounding Rule Consistency
+  Scenario: Consistent rounding prevents discrepancies in financial records
+    Given a series of transactions with amounts requiring rounding
+    When all transactions are calculated, stored, and displayed
+    Then no discrepancies must exist between displayed totals and persisted amounts
+    And financial records must remain aligned across all layers",Validates that consistent rounding rules across all layers prevent financial record misalignment and maintain data integrity.,E1|E7,"Rounding behavior must be consistent across calculation, storage, and display layers",G61|G63|G74|G93c|I62|R63|R70|R80,Rounding rule consistency,Rounding rule consistency,"[1] source=R70 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R70 type=Requirement hops=0 rel=TARGET
+Rounding rule consistency
+
+[3] source=R70 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R70 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=CONFLICTS_WITH
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=G61 type=Gap hops=1 rel=AFFECTS
+Monetary rounding inconsistency
+
+[7] source=R63 type=Requirement hops=1 rel=REFINES
+Calculation accuracy rule
+
+[8] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[11] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R70 requires consistent rounding behavior across calculation, storage, and display layers. Tests verify that rounding rules do not diverge between these layers, that user-facing totals match persisted amounts, and that currency presentation does not compromise underlying financial record consistency. Exception handling for pilot-specific currency presentation is included where applicable. Conflicts with simplified partial-unit handling approaches are excluded from default test generation.","Rounding behavior must be consistent across calculation, storage, and display layers || Rounding rule consistency","Pilot-specific currency presentation may require clarification before implementation, but must not compromise consistency between customer-visible totals and underlying financial records",I62 (JIRA-PAY-602 comment): simplified approach for partial-unit handling conflicts with requirement for consistent rounding across all stages,,E1|E2|E3|E4|E5|E6|E7|E8,"R70 targets consistency of rounding rules across calculation, storage, and presentation layers. PRIMARY evidence (E1-E8) establishes that user-facing totals must match persisted amounts, and that currency/display simplifications must not compromise this alignment. E5 (I62 CONFLICTS_WITH) indicates that simplified partial-unit handling approaches conflict with consistency requirements. Multiple gaps (G63, G74, G93c) and related requirements (R63, R80) indicate that specific rounding algorithms, multi-currency rules, and authoritative source-of-truth models remain undefined. CONTEXT evidence (E9-E11) reinforces the broader consistency concern but does not override the primary target-specific statements."" Filtered abstract or low-relevance operative statements: User-facing totals must match persisted billing amounts exactly | Currency conversion and display format must not silently override core pricing logic | Financial outputs must align consistently across all billing contexts (reports, exports, billing records)",1,0,0,0
+f981c493,R70,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R70_9,Rounding rule consistency in multi-line billing scenarios,"Feature: Rounding Rule Consistency
+  Scenario: Rounding consistency across multiple line items
+    Given a billing record with 5 line items, each requiring rounding
+    When the line items are calculated, stored, and displayed
+    Then each line item must apply the same rounding rule
+    And the sum of rounded line items must match the total stored amount",Ensures that rounding rules are applied consistently to each line item and that the aggregation of rounded values matches the persisted total.,E2|E8,User-facing totals must match persisted billing amounts exactly,G61|G63|G74|G93c|I62|R63|R70|R80,Rounding rule consistency,Rounding rule consistency,"[1] source=R70 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R70 type=Requirement hops=0 rel=TARGET
+Rounding rule consistency
+
+[3] source=R70 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R70 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=CONFLICTS_WITH
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=G61 type=Gap hops=1 rel=AFFECTS
+Monetary rounding inconsistency
+
+[7] source=R63 type=Requirement hops=1 rel=REFINES
+Calculation accuracy rule
+
+[8] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[11] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R70 requires consistent rounding behavior across calculation, storage, and display layers. Tests verify that rounding rules do not diverge between these layers, that user-facing totals match persisted amounts, and that currency presentation does not compromise underlying financial record consistency. Exception handling for pilot-specific currency presentation is included where applicable. Conflicts with simplified partial-unit handling approaches are excluded from default test generation.","Rounding behavior must be consistent across calculation, storage, and display layers || Rounding rule consistency","Pilot-specific currency presentation may require clarification before implementation, but must not compromise consistency between customer-visible totals and underlying financial records",I62 (JIRA-PAY-602 comment): simplified approach for partial-unit handling conflicts with requirement for consistent rounding across all stages,,E1|E2|E3|E4|E5|E6|E7|E8,"R70 targets consistency of rounding rules across calculation, storage, and presentation layers. PRIMARY evidence (E1-E8) establishes that user-facing totals must match persisted amounts, and that currency/display simplifications must not compromise this alignment. E5 (I62 CONFLICTS_WITH) indicates that simplified partial-unit handling approaches conflict with consistency requirements. Multiple gaps (G63, G74, G93c) and related requirements (R63, R80) indicate that specific rounding algorithms, multi-currency rules, and authoritative source-of-truth models remain undefined. CONTEXT evidence (E9-E11) reinforces the broader consistency concern but does not override the primary target-specific statements."" Filtered abstract or low-relevance operative statements: User-facing totals must match persisted billing amounts exactly | Currency conversion and display format must not silently override core pricing logic | Financial outputs must align consistently across all billing contexts (reports, exports, billing records)",1,0,0,0
+f981c493,R70,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R70_10,Rounding consistency excludes simplified partial-unit handling conflicts,"Feature: Rounding Rule Consistency
+  Scenario: Consistent rounding does not use simplified partial-unit handling
+    Given a transaction with a fractional unit amount
+    When the amount is processed
+    Then the rounding must follow the established consistency rules
+    And simplified partial-unit handling approaches must not be applied",Explicitly excludes the conflicting simplified partial-unit handling approach (I62/JIRA-PAY-602) that would compromise consistency requirements. Ensures that rounding consistency is maintained without resorting to simplified approaches.,E5,"Rounding behavior must be consistent across calculation, storage, and display layers",G61|G63|G74|G93c|I62|R63|R70|R80,Rounding rule consistency,Rounding rule consistency,"[1] source=R70 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R70 type=Requirement hops=0 rel=TARGET
+Rounding rule consistency
+
+[3] source=R70 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R70 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=CONFLICTS_WITH
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=G61 type=Gap hops=1 rel=AFFECTS
+Monetary rounding inconsistency
+
+[7] source=R63 type=Requirement hops=1 rel=REFINES
+Calculation accuracy rule
+
+[8] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=G74 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Export/report rounding discrepancy
+
+[11] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R70 requires consistent rounding behavior across calculation, storage, and display layers. Tests verify that rounding rules do not diverge between these layers, that user-facing totals match persisted amounts, and that currency presentation does not compromise underlying financial record consistency. Exception handling for pilot-specific currency presentation is included where applicable. Conflicts with simplified partial-unit handling approaches are excluded from default test generation.","Rounding behavior must be consistent across calculation, storage, and display layers || Rounding rule consistency","Pilot-specific currency presentation may require clarification before implementation, but must not compromise consistency between customer-visible totals and underlying financial records",I62 (JIRA-PAY-602 comment): simplified approach for partial-unit handling conflicts with requirement for consistent rounding across all stages,,E1|E2|E3|E4|E5|E6|E7|E8,"R70 targets consistency of rounding rules across calculation, storage, and presentation layers. PRIMARY evidence (E1-E8) establishes that user-facing totals must match persisted amounts, and that currency/display simplifications must not compromise this alignment. E5 (I62 CONFLICTS_WITH) indicates that simplified partial-unit handling approaches conflict with consistency requirements. Multiple gaps (G63, G74, G93c) and related requirements (R63, R80) indicate that specific rounding algorithms, multi-currency rules, and authoritative source-of-truth models remain undefined. CONTEXT evidence (E9-E11) reinforces the broader consistency concern but does not override the primary target-specific statements."" Filtered abstract or low-relevance operative statements: User-facing totals must match persisted billing amounts exactly | Currency conversion and display format must not silently override core pricing logic | Financial outputs must align consistently across all billing contexts (reports, exports, billing records)",1,0,0,0

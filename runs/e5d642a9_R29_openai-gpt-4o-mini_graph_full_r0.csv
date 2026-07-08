@@ -1,0 +1,2571 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+e5d642a9,R29,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R29_1,Verify equipment returns to rentable state after maintenance window,"Feature: Post-rent maintenance handling
+  Scenario: Equipment returns to rentable state after maintenance window
+    Given the equipment has completed its post-rental maintenance window
+    When the system checks the equipment status
+    Then the equipment should be marked as rentable","To ensure that the system correctly updates the equipment status after the maintenance period, allowing it to be rented out again.",E1|E2,The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed.,3453478160ad1947|A6|D21|D23|G21|G22|G23|G43|G81b|I21|I22|I24|I33|I44|R25|R29,Post-rent maintenance handling,Post-rent maintenance handling,"[1] source=R29 type=Requirement hops=0 rel=TARGET
+Post-rent maintenance handling
+
+[2] source=R29 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[3] source=R29 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=I22 type=Implementation/SrcChunk hops=1 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=PARTIALLY_IMPLEMENTS
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[5] source=G22 type=Gap/SrcChunk hops=1 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=AFFECTS
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[7] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[8] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[9] source=G23 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[10] source=I33 type=Implementation/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[11] source=I44 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[12] source=D23 type=Specification hops=2 rel=PARTIALLY_IMPLEMENTS > CONFLICTS_WITH
+Rent Lifecycle v1.2 (Maintenance)
+
+[13] source=I22 type=Implementation hops=1 rel=PARTIALLY_IMPLEMENTS
+Automated maintenance timer
+
+[14] source=R25 type=Requirement hops=1 rel=REFINES
+End-of-rent lifecycle transition
+
+[15] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[16] source=D21 type=Specification hops=2 rel=REFINES > DEFINED_IN
+Rent Lifecycle v1.0
+
+[17] source=G21 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Missing maintenance matrix specification
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[20] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[21] source=I24 type=Implementation hops=2 rel=REFINES > IMPLEMENTS
+Manual rent completion
+
+[22] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","This document outlines Gherkin tests for the post-rent maintenance handling requirement, ensuring that equipment returns to a rentable state after maintenance windows, with consideration for category-dependent handling durations.","The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed, supporting category-dependent handling durations. || Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity and make the item appear non-rentable during maintenance periods.",,"The current SRS (v1.2) states a dynamic Maintenance Matrix, but there is a conflicting emergency rule for Concrete Mixers requiring a 12-hour maintenance window.",,E1|E2|E3|E4|E10|E11|E12|E13|E14|E15,,0,0,0,0
+e5d642a9,R29,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R29_2,Check non-rentable status during maintenance,"Feature: Post-rent maintenance handling
+  Scenario: Equipment is non-rentable during maintenance
+    Given the equipment is currently undergoing maintenance
+    When a user attempts to rent the equipment
+    Then the system should indicate that the equipment is non-rentable","To verify that the system prevents rental activity during the maintenance period, ensuring compliance with operational requirements.",E3|E4,Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity.,3453478160ad1947|A6|D21|D23|G21|G22|G23|G43|G81b|I21|I22|I24|I33|I44|R25|R29,Post-rent maintenance handling,Post-rent maintenance handling,"[1] source=R29 type=Requirement hops=0 rel=TARGET
+Post-rent maintenance handling
+
+[2] source=R29 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[3] source=R29 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=I22 type=Implementation/SrcChunk hops=1 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=PARTIALLY_IMPLEMENTS
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[5] source=G22 type=Gap/SrcChunk hops=1 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=AFFECTS
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[7] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[8] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[9] source=G23 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[10] source=I33 type=Implementation/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[11] source=I44 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[12] source=D23 type=Specification hops=2 rel=PARTIALLY_IMPLEMENTS > CONFLICTS_WITH
+Rent Lifecycle v1.2 (Maintenance)
+
+[13] source=I22 type=Implementation hops=1 rel=PARTIALLY_IMPLEMENTS
+Automated maintenance timer
+
+[14] source=R25 type=Requirement hops=1 rel=REFINES
+End-of-rent lifecycle transition
+
+[15] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[16] source=D21 type=Specification hops=2 rel=REFINES > DEFINED_IN
+Rent Lifecycle v1.0
+
+[17] source=G21 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Missing maintenance matrix specification
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[20] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[21] source=I24 type=Implementation hops=2 rel=REFINES > IMPLEMENTS
+Manual rent completion
+
+[22] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","This document outlines Gherkin tests for the post-rent maintenance handling requirement, ensuring that equipment returns to a rentable state after maintenance windows, with consideration for category-dependent handling durations.","The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed, supporting category-dependent handling durations. || Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity and make the item appear non-rentable during maintenance periods.",,"The current SRS (v1.2) states a dynamic Maintenance Matrix, but there is a conflicting emergency rule for Concrete Mixers requiring a 12-hour maintenance window.",,E1|E2|E3|E4|E10|E11|E12|E13|E14|E15,,0,0,0,0
+e5d642a9,R29,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R29_3,Validate category-dependent maintenance durations,"Feature: Post-rent maintenance handling
+  Scenario: Equipment maintenance duration varies by category
+    Given the equipment belongs to a specific category with defined maintenance duration
+    When the maintenance window is initiated
+    Then the system should apply the correct maintenance duration for that category","To ensure that the system respects category-specific maintenance durations, which is crucial for operational efficiency.",E5|E6,supporting category-dependent handling durations.,3453478160ad1947|A6|D21|D23|G21|G22|G23|G43|G81b|I21|I22|I24|I33|I44|R25|R29,Post-rent maintenance handling,Post-rent maintenance handling,"[1] source=R29 type=Requirement hops=0 rel=TARGET
+Post-rent maintenance handling
+
+[2] source=R29 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[3] source=R29 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=I22 type=Implementation/SrcChunk hops=1 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=PARTIALLY_IMPLEMENTS
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[5] source=G22 type=Gap/SrcChunk hops=1 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=AFFECTS
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[7] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[8] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[9] source=G23 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[10] source=I33 type=Implementation/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[11] source=I44 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[12] source=D23 type=Specification hops=2 rel=PARTIALLY_IMPLEMENTS > CONFLICTS_WITH
+Rent Lifecycle v1.2 (Maintenance)
+
+[13] source=I22 type=Implementation hops=1 rel=PARTIALLY_IMPLEMENTS
+Automated maintenance timer
+
+[14] source=R25 type=Requirement hops=1 rel=REFINES
+End-of-rent lifecycle transition
+
+[15] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[16] source=D21 type=Specification hops=2 rel=REFINES > DEFINED_IN
+Rent Lifecycle v1.0
+
+[17] source=G21 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Missing maintenance matrix specification
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[20] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[21] source=I24 type=Implementation hops=2 rel=REFINES > IMPLEMENTS
+Manual rent completion
+
+[22] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","This document outlines Gherkin tests for the post-rent maintenance handling requirement, ensuring that equipment returns to a rentable state after maintenance windows, with consideration for category-dependent handling durations.","The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed, supporting category-dependent handling durations. || Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity and make the item appear non-rentable during maintenance periods.",,"The current SRS (v1.2) states a dynamic Maintenance Matrix, but there is a conflicting emergency rule for Concrete Mixers requiring a 12-hour maintenance window.",,E1|E2|E3|E4|E10|E11|E12|E13|E14|E15,,0,0,0,0
+e5d642a9,R29,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R29_4,Ensure maintenance window blocks rental activity,"Feature: Post-rent maintenance handling
+  Scenario: Maintenance window prevents rental activity
+    Given the equipment is in a maintenance window
+    When a rental request is made
+    Then the system should reject the rental request","To confirm that the system effectively blocks rental requests during maintenance, adhering to the defined operational context.",E7|E8,Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity.,3453478160ad1947|A6|D21|D23|G21|G22|G23|G43|G81b|I21|I22|I24|I33|I44|R25|R29,Post-rent maintenance handling,Post-rent maintenance handling,"[1] source=R29 type=Requirement hops=0 rel=TARGET
+Post-rent maintenance handling
+
+[2] source=R29 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[3] source=R29 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=I22 type=Implementation/SrcChunk hops=1 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=PARTIALLY_IMPLEMENTS
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[5] source=G22 type=Gap/SrcChunk hops=1 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=AFFECTS
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[7] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[8] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[9] source=G23 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[10] source=I33 type=Implementation/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[11] source=I44 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[12] source=D23 type=Specification hops=2 rel=PARTIALLY_IMPLEMENTS > CONFLICTS_WITH
+Rent Lifecycle v1.2 (Maintenance)
+
+[13] source=I22 type=Implementation hops=1 rel=PARTIALLY_IMPLEMENTS
+Automated maintenance timer
+
+[14] source=R25 type=Requirement hops=1 rel=REFINES
+End-of-rent lifecycle transition
+
+[15] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[16] source=D21 type=Specification hops=2 rel=REFINES > DEFINED_IN
+Rent Lifecycle v1.0
+
+[17] source=G21 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Missing maintenance matrix specification
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[20] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[21] source=I24 type=Implementation hops=2 rel=REFINES > IMPLEMENTS
+Manual rent completion
+
+[22] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","This document outlines Gherkin tests for the post-rent maintenance handling requirement, ensuring that equipment returns to a rentable state after maintenance windows, with consideration for category-dependent handling durations.","The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed, supporting category-dependent handling durations. || Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity and make the item appear non-rentable during maintenance periods.",,"The current SRS (v1.2) states a dynamic Maintenance Matrix, but there is a conflicting emergency rule for Concrete Mixers requiring a 12-hour maintenance window.",,E1|E2|E3|E4|E10|E11|E12|E13|E14|E15,,0,0,0,0
+e5d642a9,R29,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R29_5,Confirm equipment status updates after maintenance,"Feature: Post-rent maintenance handling
+  Scenario: Equipment status updates post-maintenance
+    Given the equipment has completed maintenance
+    When the system processes the equipment status
+    Then the equipment status should be updated to 'rentable'","To ensure that the system updates the equipment status correctly after maintenance, allowing for accurate rental availability.",E9|E10,The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed.,3453478160ad1947|A6|D21|D23|G21|G22|G23|G43|G81b|I21|I22|I24|I33|I44|R25|R29,Post-rent maintenance handling,Post-rent maintenance handling,"[1] source=R29 type=Requirement hops=0 rel=TARGET
+Post-rent maintenance handling
+
+[2] source=R29 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[3] source=R29 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=I22 type=Implementation/SrcChunk hops=1 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=PARTIALLY_IMPLEMENTS
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[5] source=G22 type=Gap/SrcChunk hops=1 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=AFFECTS
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[7] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[8] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[9] source=G23 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[10] source=I33 type=Implementation/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[11] source=I44 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[12] source=D23 type=Specification hops=2 rel=PARTIALLY_IMPLEMENTS > CONFLICTS_WITH
+Rent Lifecycle v1.2 (Maintenance)
+
+[13] source=I22 type=Implementation hops=1 rel=PARTIALLY_IMPLEMENTS
+Automated maintenance timer
+
+[14] source=R25 type=Requirement hops=1 rel=REFINES
+End-of-rent lifecycle transition
+
+[15] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[16] source=D21 type=Specification hops=2 rel=REFINES > DEFINED_IN
+Rent Lifecycle v1.0
+
+[17] source=G21 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Missing maintenance matrix specification
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[20] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[21] source=I24 type=Implementation hops=2 rel=REFINES > IMPLEMENTS
+Manual rent completion
+
+[22] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","This document outlines Gherkin tests for the post-rent maintenance handling requirement, ensuring that equipment returns to a rentable state after maintenance windows, with consideration for category-dependent handling durations.","The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed, supporting category-dependent handling durations. || Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity and make the item appear non-rentable during maintenance periods.",,"The current SRS (v1.2) states a dynamic Maintenance Matrix, but there is a conflicting emergency rule for Concrete Mixers requiring a 12-hour maintenance window.",,E1|E2|E3|E4|E10|E11|E12|E13|E14|E15,,0,0,0,0
+e5d642a9,R29,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R29_6,Test system response to maintenance window expiration,"Feature: Post-rent maintenance handling
+  Scenario: System response after maintenance window expiration
+    Given the maintenance window for the equipment has expired
+    When the system checks the equipment status
+    Then the equipment should be available for rental",To verify that the system correctly recognizes the end of the maintenance window and updates the equipment status accordingly.,E11|E12,The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed.,3453478160ad1947|A6|D21|D23|G21|G22|G23|G43|G81b|I21|I22|I24|I33|I44|R25|R29,Post-rent maintenance handling,Post-rent maintenance handling,"[1] source=R29 type=Requirement hops=0 rel=TARGET
+Post-rent maintenance handling
+
+[2] source=R29 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[3] source=R29 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=I22 type=Implementation/SrcChunk hops=1 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=PARTIALLY_IMPLEMENTS
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[5] source=G22 type=Gap/SrcChunk hops=1 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=AFFECTS
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[7] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[8] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[9] source=G23 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[10] source=I33 type=Implementation/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[11] source=I44 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[12] source=D23 type=Specification hops=2 rel=PARTIALLY_IMPLEMENTS > CONFLICTS_WITH
+Rent Lifecycle v1.2 (Maintenance)
+
+[13] source=I22 type=Implementation hops=1 rel=PARTIALLY_IMPLEMENTS
+Automated maintenance timer
+
+[14] source=R25 type=Requirement hops=1 rel=REFINES
+End-of-rent lifecycle transition
+
+[15] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[16] source=D21 type=Specification hops=2 rel=REFINES > DEFINED_IN
+Rent Lifecycle v1.0
+
+[17] source=G21 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Missing maintenance matrix specification
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[20] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[21] source=I24 type=Implementation hops=2 rel=REFINES > IMPLEMENTS
+Manual rent completion
+
+[22] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","This document outlines Gherkin tests for the post-rent maintenance handling requirement, ensuring that equipment returns to a rentable state after maintenance windows, with consideration for category-dependent handling durations.","The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed, supporting category-dependent handling durations. || Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity and make the item appear non-rentable during maintenance periods.",,"The current SRS (v1.2) states a dynamic Maintenance Matrix, but there is a conflicting emergency rule for Concrete Mixers requiring a 12-hour maintenance window.",,E1|E2|E3|E4|E10|E11|E12|E13|E14|E15,,0,0,0,0
+e5d642a9,R29,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R29_7,Assess handling of emergency rules for Concrete Mixers,"Feature: Post-rent maintenance handling
+  Scenario: Emergency rule for Concrete Mixers maintenance window
+    Given the equipment is a Concrete Mixer
+    When the maintenance window is initiated
+    Then the system should enforce a 12-hour maintenance window","To ensure that the system adheres to the specific emergency rule for Concrete Mixers, which overrides general handling durations.",E13|E14,"The current SRS (v1.2) states a dynamic Maintenance Matrix, but there is a conflicting emergency rule for Concrete Mixers requiring a 12-hour maintenance window.",3453478160ad1947|A6|D21|D23|G21|G22|G23|G43|G81b|I21|I22|I24|I33|I44|R25|R29,Post-rent maintenance handling,Post-rent maintenance handling,"[1] source=R29 type=Requirement hops=0 rel=TARGET
+Post-rent maintenance handling
+
+[2] source=R29 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[3] source=R29 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=I22 type=Implementation/SrcChunk hops=1 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=PARTIALLY_IMPLEMENTS
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[5] source=G22 type=Gap/SrcChunk hops=1 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=AFFECTS
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[7] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[8] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[9] source=G23 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[10] source=I33 type=Implementation/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[11] source=I44 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[12] source=D23 type=Specification hops=2 rel=PARTIALLY_IMPLEMENTS > CONFLICTS_WITH
+Rent Lifecycle v1.2 (Maintenance)
+
+[13] source=I22 type=Implementation hops=1 rel=PARTIALLY_IMPLEMENTS
+Automated maintenance timer
+
+[14] source=R25 type=Requirement hops=1 rel=REFINES
+End-of-rent lifecycle transition
+
+[15] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[16] source=D21 type=Specification hops=2 rel=REFINES > DEFINED_IN
+Rent Lifecycle v1.0
+
+[17] source=G21 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Missing maintenance matrix specification
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[20] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[21] source=I24 type=Implementation hops=2 rel=REFINES > IMPLEMENTS
+Manual rent completion
+
+[22] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","This document outlines Gherkin tests for the post-rent maintenance handling requirement, ensuring that equipment returns to a rentable state after maintenance windows, with consideration for category-dependent handling durations.","The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed, supporting category-dependent handling durations. || Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity and make the item appear non-rentable during maintenance periods.",,"The current SRS (v1.2) states a dynamic Maintenance Matrix, but there is a conflicting emergency rule for Concrete Mixers requiring a 12-hour maintenance window.",,E1|E2|E3|E4|E10|E11|E12|E13|E14|E15,,0,0,0,0
+e5d642a9,R29,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R29_8,Verify system logs for maintenance activities,"Feature: Post-rent maintenance handling
+  Scenario: System logs maintenance activities correctly
+    Given the equipment is undergoing maintenance
+    When the maintenance activity is logged
+    Then the system should record the maintenance start and end times",To ensure that all maintenance activities are properly logged for auditing and operational tracking purposes.,E15,Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity.,3453478160ad1947|A6|D21|D23|G21|G22|G23|G43|G81b|I21|I22|I24|I33|I44|R25|R29,Post-rent maintenance handling,Post-rent maintenance handling,"[1] source=R29 type=Requirement hops=0 rel=TARGET
+Post-rent maintenance handling
+
+[2] source=R29 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[3] source=R29 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=I22 type=Implementation/SrcChunk hops=1 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=PARTIALLY_IMPLEMENTS
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[5] source=G22 type=Gap/SrcChunk hops=1 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=AFFECTS
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[7] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[8] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[9] source=G23 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[10] source=I33 type=Implementation/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[11] source=I44 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[12] source=D23 type=Specification hops=2 rel=PARTIALLY_IMPLEMENTS > CONFLICTS_WITH
+Rent Lifecycle v1.2 (Maintenance)
+
+[13] source=I22 type=Implementation hops=1 rel=PARTIALLY_IMPLEMENTS
+Automated maintenance timer
+
+[14] source=R25 type=Requirement hops=1 rel=REFINES
+End-of-rent lifecycle transition
+
+[15] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[16] source=D21 type=Specification hops=2 rel=REFINES > DEFINED_IN
+Rent Lifecycle v1.0
+
+[17] source=G21 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Missing maintenance matrix specification
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[20] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[21] source=I24 type=Implementation hops=2 rel=REFINES > IMPLEMENTS
+Manual rent completion
+
+[22] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","This document outlines Gherkin tests for the post-rent maintenance handling requirement, ensuring that equipment returns to a rentable state after maintenance windows, with consideration for category-dependent handling durations.","The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed, supporting category-dependent handling durations. || Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity and make the item appear non-rentable during maintenance periods.",,"The current SRS (v1.2) states a dynamic Maintenance Matrix, but there is a conflicting emergency rule for Concrete Mixers requiring a 12-hour maintenance window.",,E1|E2|E3|E4|E10|E11|E12|E13|E14|E15,,0,0,0,0
+e5d642a9,R29,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R29_9,Check for notifications during maintenance,"Feature: Post-rent maintenance handling
+  Scenario: Notifications sent during maintenance periods
+    Given the equipment is in a maintenance window
+    When the maintenance window is active
+    Then the system should send notifications to relevant users about the non-rentable status","To confirm that users are informed about the equipment's non-rentable status during maintenance, enhancing communication and transparency.",E1|E2,Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity.,3453478160ad1947|A6|D21|D23|G21|G22|G23|G43|G81b|I21|I22|I24|I33|I44|R25|R29,Post-rent maintenance handling,Post-rent maintenance handling,"[1] source=R29 type=Requirement hops=0 rel=TARGET
+Post-rent maintenance handling
+
+[2] source=R29 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[3] source=R29 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=I22 type=Implementation/SrcChunk hops=1 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=PARTIALLY_IMPLEMENTS
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[5] source=G22 type=Gap/SrcChunk hops=1 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=AFFECTS
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[7] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[8] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[9] source=G23 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[10] source=I33 type=Implementation/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[11] source=I44 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[12] source=D23 type=Specification hops=2 rel=PARTIALLY_IMPLEMENTS > CONFLICTS_WITH
+Rent Lifecycle v1.2 (Maintenance)
+
+[13] source=I22 type=Implementation hops=1 rel=PARTIALLY_IMPLEMENTS
+Automated maintenance timer
+
+[14] source=R25 type=Requirement hops=1 rel=REFINES
+End-of-rent lifecycle transition
+
+[15] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[16] source=D21 type=Specification hops=2 rel=REFINES > DEFINED_IN
+Rent Lifecycle v1.0
+
+[17] source=G21 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Missing maintenance matrix specification
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[20] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[21] source=I24 type=Implementation hops=2 rel=REFINES > IMPLEMENTS
+Manual rent completion
+
+[22] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","This document outlines Gherkin tests for the post-rent maintenance handling requirement, ensuring that equipment returns to a rentable state after maintenance windows, with consideration for category-dependent handling durations.","The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed, supporting category-dependent handling durations. || Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity and make the item appear non-rentable during maintenance periods.",,"The current SRS (v1.2) states a dynamic Maintenance Matrix, but there is a conflicting emergency rule for Concrete Mixers requiring a 12-hour maintenance window.",,E1|E2|E3|E4|E10|E11|E12|E13|E14|E15,,0,0,0,0
+e5d642a9,R29,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R29_10,Ensure system handles multiple equipment maintenance,"Feature: Post-rent maintenance handling
+  Scenario: System manages multiple equipment maintenance windows
+    Given multiple pieces of equipment are in maintenance
+    When the system processes their statuses
+    Then each piece of equipment should reflect its individual maintenance status","To verify that the system can handle multiple equipment maintenance windows without errors, ensuring operational efficiency.",E3|E4,The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed.,3453478160ad1947|A6|D21|D23|G21|G22|G23|G43|G81b|I21|I22|I24|I33|I44|R25|R29,Post-rent maintenance handling,Post-rent maintenance handling,"[1] source=R29 type=Requirement hops=0 rel=TARGET
+Post-rent maintenance handling
+
+[2] source=R29 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[3] source=R29 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=I22 type=Implementation/SrcChunk hops=1 chunk=25530b133e40baa1 doc=EMAIL_OPS_MixerSpecialRule.txt rel=PARTIALLY_IMPLEMENTS
+From: ops_lead@toolchain.com
+To: dev_leads@toolchain.com, pm_team@toolchain.com
+Date: 2026-02-20 14:00
+Subject: URGENT: Special Maintenance Rule for Concrete Mixers
+
+Hi Team,
+
+Regardless of what the current SRS (v1.2) says about the dynamic Maintenance Matrix, we have an emergency with Concrete Mixers. 120 minutes is absolutely not enough for proper cleaning/maintenance.
+
+Effective immediately:
+- Concrete Mixers MUST have a 12-hour (720 min) maintenance window.
+- All other machinery can stay at the 2-hour (120 min) rule for now.
+
+Please hardcode this for the Mixer category until the official Matrix is published in the next SRS version.
+
+Best regards,
+Tom (Operations Lead)
+
+[5] source=G22 type=Gap/SrcChunk hops=1 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=AFFECTS
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=I24 type=Implementation/SrcChunk hops=2 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES > IMPLEMENTS
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[7] source=R25 type=Requirement/SrcChunk hops=1 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[8] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[9] source=G23 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[10] source=I33 type=Implementation/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[11] source=I44 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[12] source=D23 type=Specification hops=2 rel=PARTIALLY_IMPLEMENTS > CONFLICTS_WITH
+Rent Lifecycle v1.2 (Maintenance)
+
+[13] source=I22 type=Implementation hops=1 rel=PARTIALLY_IMPLEMENTS
+Automated maintenance timer
+
+[14] source=R25 type=Requirement hops=1 rel=REFINES
+End-of-rent lifecycle transition
+
+[15] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[16] source=D21 type=Specification hops=2 rel=REFINES > DEFINED_IN
+Rent Lifecycle v1.0
+
+[17] source=G21 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Missing maintenance matrix specification
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[20] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[21] source=I24 type=Implementation hops=2 rel=REFINES > IMPLEMENTS
+Manual rent completion
+
+[22] source=I44 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Maintenance period management","This document outlines Gherkin tests for the post-rent maintenance handling requirement, ensuring that equipment returns to a rentable state after maintenance windows, with consideration for category-dependent handling durations.","The system must develop backend logic to return equipment to its normal rentable state after the post-rental handling window has elapsed, supporting category-dependent handling durations. || Post-rent maintenance handling includes implementing maintenance windows for items that block rental activity and make the item appear non-rentable during maintenance periods.",,"The current SRS (v1.2) states a dynamic Maintenance Matrix, but there is a conflicting emergency rule for Concrete Mixers requiring a 12-hour maintenance window.",,E1|E2|E3|E4|E10|E11|E12|E13|E14|E15,,0,0,0,0

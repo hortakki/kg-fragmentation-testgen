@@ -1,0 +1,1907 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+03848a87,R92c,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R92c_1,Delivery fee calculated consistently across all calculation stages,"Feature: Delivery Fee Calculation Consistency
+  Scenario: Delivery fee is calculated identically at each stage
+    Given a delivery order with base distance 10 km and standard rate $2.50 per km
+    When the delivery fee is calculated at order creation
+    And the delivery fee is recalculated at billing stage
+    And the delivery fee is recalculated at reporting stage
+    Then all three calculated amounts must be identical
+    And the amount must be $25.00","Ensures delivery fees are calculated consistently across all stages (order creation, billing, reporting) without variation. Directly addresses the core requirement that delivery fees must be calculated consistently across all calculation stages.",E1|E2|E3,,2eee991de900fd57|A6|A9|D61|G63|G64|G72|G82b|G93c|R92c,Delivery fee billing consistency,Delivery fee billing consistency,"[1] source=R92c type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R92c type=Requirement hops=0 rel=TARGET
+Delivery fee billing consistency
+
+[3] source=R92c type=Requirement/SrcChunk hops=0 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=TARGET
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[4] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[5] source=A9 type=Actor/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[9] source=G82b type=Gap/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[11] source=D61 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Payment & Billing Spec
+
+[12] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[13] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Delivery fee billing consistency (R92c) requires that delivery fees are calculated, stored, and displayed consistently across all stages without discrepancies. The resolved context identifies two critical exceptions: (1) currency presentation and conversion in pilot scenarios must not override core billing logic, and (2) display-friendly simplifications must not create visible mismatches with stored amounts. The primary evidence (E1–E12) reveals gaps in fraction handling, currency presentation, source-of-truth definitions, and audit/reporting inconsistencies. These 10 test cases focus on ensuring delivery fees remain consistent across calculation, storage, billing, and user-facing display, with specific attention to exception scenarios and known conflict areas.",,Currency presentation and conversion in pilot scenarios must not override core delivery fee billing logic || Display-friendly simplifications in presentation layers must not produce visible mismatches with stored billing amounts,"Inconsistent delivery fee figures across reports, exported files, and billing records indicate potential conflicts in current implementation",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"TARGET R92c focuses on delivery fee billing consistency. PRIMARY evidence (12 items) reveals core requirement: delivery fees must be calculated and billed consistently across all stages. Multiple gaps exist around fraction handling, currency presentation, and source-of-truth definitions. E7 and E8 highlight audit and reporting inconsistencies that directly affect delivery fee visibility. E6 indicates potential lifecycle-related fee application gaps. No CONTEXT evidence provided. All 12 PRIMARY items are directly relevant to delivery fee billing consistency. Filtered abstract or low-relevance operative statements: Delivery fees must be calculated and billed consistently across all calculation stages, storage, and user-facing display | Delivery fee amounts must flow into billing in a consistent manner according to configured logistics rules | User-facing delivery fee totals must match persisted billing amounts exactly",0,0,0,0
+03848a87,R92c,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R92c_2,Stored delivery fee amount matches persisted billing record,"Feature: Delivery Fee Storage Consistency
+  Scenario: Persisted delivery fee matches stored billing amount
+    Given a delivery order with calculated fee of $25.00
+    When the delivery fee is persisted to the billing database
+    And the billing record is retrieved
+    Then the stored billing amount must equal $25.00
+    And no rounding or truncation must have occurred",Validates that delivery fees flow into billing consistently according to configured logistics rules. Addresses the requirement that delivery fee amounts must flow into billing in a consistent manner.,E2|E4|E5,,2eee991de900fd57|A6|A9|D61|G63|G64|G72|G82b|G93c|R92c,Delivery fee billing consistency,Delivery fee billing consistency,"[1] source=R92c type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R92c type=Requirement hops=0 rel=TARGET
+Delivery fee billing consistency
+
+[3] source=R92c type=Requirement/SrcChunk hops=0 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=TARGET
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[4] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[5] source=A9 type=Actor/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[9] source=G82b type=Gap/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[11] source=D61 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Payment & Billing Spec
+
+[12] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[13] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Delivery fee billing consistency (R92c) requires that delivery fees are calculated, stored, and displayed consistently across all stages without discrepancies. The resolved context identifies two critical exceptions: (1) currency presentation and conversion in pilot scenarios must not override core billing logic, and (2) display-friendly simplifications must not create visible mismatches with stored amounts. The primary evidence (E1–E12) reveals gaps in fraction handling, currency presentation, source-of-truth definitions, and audit/reporting inconsistencies. These 10 test cases focus on ensuring delivery fees remain consistent across calculation, storage, billing, and user-facing display, with specific attention to exception scenarios and known conflict areas.",,Currency presentation and conversion in pilot scenarios must not override core delivery fee billing logic || Display-friendly simplifications in presentation layers must not produce visible mismatches with stored billing amounts,"Inconsistent delivery fee figures across reports, exported files, and billing records indicate potential conflicts in current implementation",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"TARGET R92c focuses on delivery fee billing consistency. PRIMARY evidence (12 items) reveals core requirement: delivery fees must be calculated and billed consistently across all stages. Multiple gaps exist around fraction handling, currency presentation, and source-of-truth definitions. E7 and E8 highlight audit and reporting inconsistencies that directly affect delivery fee visibility. E6 indicates potential lifecycle-related fee application gaps. No CONTEXT evidence provided. All 12 PRIMARY items are directly relevant to delivery fee billing consistency. Filtered abstract or low-relevance operative statements: Delivery fees must be calculated and billed consistently across all calculation stages, storage, and user-facing display | Delivery fee amounts must flow into billing in a consistent manner according to configured logistics rules | User-facing delivery fee totals must match persisted billing amounts exactly",0,0,0,0
+03848a87,R92c,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R92c_3,User-facing delivery fee display matches persisted billing amount exactly,"Feature: Delivery Fee Display Consistency
+  Scenario: User-facing total matches persisted billing amount
+    Given a delivery order with persisted billing fee of $25.00
+    When the user-facing delivery fee total is displayed
+    Then the displayed amount must be exactly $25.00
+    And no display-friendly simplifications must alter the visible amount
+    And the displayed amount must match the persisted billing record","Ensures user-facing delivery fee totals match persisted billing amounts exactly, preventing visible mismatches. Directly addresses the exception that display-friendly simplifications must not produce visible mismatches with stored billing amounts.",E7|E8|E9,,2eee991de900fd57|A6|A9|D61|G63|G64|G72|G82b|G93c|R92c,Delivery fee billing consistency,Delivery fee billing consistency,"[1] source=R92c type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R92c type=Requirement hops=0 rel=TARGET
+Delivery fee billing consistency
+
+[3] source=R92c type=Requirement/SrcChunk hops=0 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=TARGET
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[4] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[5] source=A9 type=Actor/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[9] source=G82b type=Gap/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[11] source=D61 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Payment & Billing Spec
+
+[12] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[13] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Delivery fee billing consistency (R92c) requires that delivery fees are calculated, stored, and displayed consistently across all stages without discrepancies. The resolved context identifies two critical exceptions: (1) currency presentation and conversion in pilot scenarios must not override core billing logic, and (2) display-friendly simplifications must not create visible mismatches with stored amounts. The primary evidence (E1–E12) reveals gaps in fraction handling, currency presentation, source-of-truth definitions, and audit/reporting inconsistencies. These 10 test cases focus on ensuring delivery fees remain consistent across calculation, storage, billing, and user-facing display, with specific attention to exception scenarios and known conflict areas.",,Currency presentation and conversion in pilot scenarios must not override core delivery fee billing logic || Display-friendly simplifications in presentation layers must not produce visible mismatches with stored billing amounts,"Inconsistent delivery fee figures across reports, exported files, and billing records indicate potential conflicts in current implementation",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"TARGET R92c focuses on delivery fee billing consistency. PRIMARY evidence (12 items) reveals core requirement: delivery fees must be calculated and billed consistently across all stages. Multiple gaps exist around fraction handling, currency presentation, and source-of-truth definitions. E7 and E8 highlight audit and reporting inconsistencies that directly affect delivery fee visibility. E6 indicates potential lifecycle-related fee application gaps. No CONTEXT evidence provided. All 12 PRIMARY items are directly relevant to delivery fee billing consistency. Filtered abstract or low-relevance operative statements: Delivery fees must be calculated and billed consistently across all calculation stages, storage, and user-facing display | Delivery fee amounts must flow into billing in a consistent manner according to configured logistics rules | User-facing delivery fee totals must match persisted billing amounts exactly",0,0,0,0
+03848a87,R92c,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R92c_4,Currency presentation in pilot scenarios does not override core billing logic,"Feature: Currency Presentation in Pilot Scenarios
+  Scenario: Pilot currency conversion does not alter core billing amount
+    Given a delivery order with core billing fee of $25.00 USD
+    And a pilot scenario with currency conversion to EUR
+    When the delivery fee is displayed in the pilot scenario
+    Then the core billing amount must remain $25.00 USD in the billing system
+    And the pilot display may show converted currency
+    But the stored billing record must not be overridden
+    And the original USD amount must be recoverable",Validates the exception that currency presentation and conversion in pilot scenarios must not override core delivery fee billing logic. Ensures pilot currency conversions are display-only and do not affect persisted billing amounts.,E3|E5|E10,,2eee991de900fd57|A6|A9|D61|G63|G64|G72|G82b|G93c|R92c,Delivery fee billing consistency,Delivery fee billing consistency,"[1] source=R92c type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R92c type=Requirement hops=0 rel=TARGET
+Delivery fee billing consistency
+
+[3] source=R92c type=Requirement/SrcChunk hops=0 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=TARGET
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[4] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[5] source=A9 type=Actor/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[9] source=G82b type=Gap/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[11] source=D61 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Payment & Billing Spec
+
+[12] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[13] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Delivery fee billing consistency (R92c) requires that delivery fees are calculated, stored, and displayed consistently across all stages without discrepancies. The resolved context identifies two critical exceptions: (1) currency presentation and conversion in pilot scenarios must not override core billing logic, and (2) display-friendly simplifications must not create visible mismatches with stored amounts. The primary evidence (E1–E12) reveals gaps in fraction handling, currency presentation, source-of-truth definitions, and audit/reporting inconsistencies. These 10 test cases focus on ensuring delivery fees remain consistent across calculation, storage, billing, and user-facing display, with specific attention to exception scenarios and known conflict areas.",,Currency presentation and conversion in pilot scenarios must not override core delivery fee billing logic || Display-friendly simplifications in presentation layers must not produce visible mismatches with stored billing amounts,"Inconsistent delivery fee figures across reports, exported files, and billing records indicate potential conflicts in current implementation",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"TARGET R92c focuses on delivery fee billing consistency. PRIMARY evidence (12 items) reveals core requirement: delivery fees must be calculated and billed consistently across all stages. Multiple gaps exist around fraction handling, currency presentation, and source-of-truth definitions. E7 and E8 highlight audit and reporting inconsistencies that directly affect delivery fee visibility. E6 indicates potential lifecycle-related fee application gaps. No CONTEXT evidence provided. All 12 PRIMARY items are directly relevant to delivery fee billing consistency. Filtered abstract or low-relevance operative statements: Delivery fees must be calculated and billed consistently across all calculation stages, storage, and user-facing display | Delivery fee amounts must flow into billing in a consistent manner according to configured logistics rules | User-facing delivery fee totals must match persisted billing amounts exactly",0,0,0,0
+03848a87,R92c,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R92c_5,Delivery fee consistency across exported files and billing records,"Feature: Delivery Fee Consistency in Exports
+  Scenario: Exported delivery fee matches billing record
+    Given a delivery order with billing fee of $25.00
+    When the delivery fee is exported to a CSV file
+    And the delivery fee is exported to a JSON report
+    And the billing record is retrieved
+    Then all three sources must show $25.00
+    And no discrepancies must exist between exported files and billing records","Addresses the conflict that inconsistent delivery fee figures across reports, exported files, and billing records indicate potential implementation issues. Ensures consistency across all output formats.",E7|E8|E11,,2eee991de900fd57|A6|A9|D61|G63|G64|G72|G82b|G93c|R92c,Delivery fee billing consistency,Delivery fee billing consistency,"[1] source=R92c type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R92c type=Requirement hops=0 rel=TARGET
+Delivery fee billing consistency
+
+[3] source=R92c type=Requirement/SrcChunk hops=0 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=TARGET
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[4] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[5] source=A9 type=Actor/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[9] source=G82b type=Gap/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[11] source=D61 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Payment & Billing Spec
+
+[12] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[13] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Delivery fee billing consistency (R92c) requires that delivery fees are calculated, stored, and displayed consistently across all stages without discrepancies. The resolved context identifies two critical exceptions: (1) currency presentation and conversion in pilot scenarios must not override core billing logic, and (2) display-friendly simplifications must not create visible mismatches with stored amounts. The primary evidence (E1–E12) reveals gaps in fraction handling, currency presentation, source-of-truth definitions, and audit/reporting inconsistencies. These 10 test cases focus on ensuring delivery fees remain consistent across calculation, storage, billing, and user-facing display, with specific attention to exception scenarios and known conflict areas.",,Currency presentation and conversion in pilot scenarios must not override core delivery fee billing logic || Display-friendly simplifications in presentation layers must not produce visible mismatches with stored billing amounts,"Inconsistent delivery fee figures across reports, exported files, and billing records indicate potential conflicts in current implementation",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"TARGET R92c focuses on delivery fee billing consistency. PRIMARY evidence (12 items) reveals core requirement: delivery fees must be calculated and billed consistently across all stages. Multiple gaps exist around fraction handling, currency presentation, and source-of-truth definitions. E7 and E8 highlight audit and reporting inconsistencies that directly affect delivery fee visibility. E6 indicates potential lifecycle-related fee application gaps. No CONTEXT evidence provided. All 12 PRIMARY items are directly relevant to delivery fee billing consistency. Filtered abstract or low-relevance operative statements: Delivery fees must be calculated and billed consistently across all calculation stages, storage, and user-facing display | Delivery fee amounts must flow into billing in a consistent manner according to configured logistics rules | User-facing delivery fee totals must match persisted billing amounts exactly",0,0,0,0
+03848a87,R92c,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R92c_6,Delivery fee fraction handling remains consistent,"Feature: Delivery Fee Fraction Handling
+  Scenario: Fractional delivery fees are handled consistently
+    Given a delivery order with calculated fee of $25.33 (with cents)
+    When the delivery fee is stored in the billing system
+    And the delivery fee is displayed to the user
+    And the delivery fee is exported in reports
+    Then all instances must preserve the $25.33 amount
+    And no rounding to $25.00 or $25.30 must occur
+    And fractional cents must be consistently applied","Addresses the gap around fraction handling in delivery fee calculations. Ensures that fractional amounts (cents) are consistently preserved across storage, display, and export without unintended rounding.",E1|E4|E6,,2eee991de900fd57|A6|A9|D61|G63|G64|G72|G82b|G93c|R92c,Delivery fee billing consistency,Delivery fee billing consistency,"[1] source=R92c type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R92c type=Requirement hops=0 rel=TARGET
+Delivery fee billing consistency
+
+[3] source=R92c type=Requirement/SrcChunk hops=0 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=TARGET
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[4] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[5] source=A9 type=Actor/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[9] source=G82b type=Gap/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[11] source=D61 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Payment & Billing Spec
+
+[12] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[13] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Delivery fee billing consistency (R92c) requires that delivery fees are calculated, stored, and displayed consistently across all stages without discrepancies. The resolved context identifies two critical exceptions: (1) currency presentation and conversion in pilot scenarios must not override core billing logic, and (2) display-friendly simplifications must not create visible mismatches with stored amounts. The primary evidence (E1–E12) reveals gaps in fraction handling, currency presentation, source-of-truth definitions, and audit/reporting inconsistencies. These 10 test cases focus on ensuring delivery fees remain consistent across calculation, storage, billing, and user-facing display, with specific attention to exception scenarios and known conflict areas.",,Currency presentation and conversion in pilot scenarios must not override core delivery fee billing logic || Display-friendly simplifications in presentation layers must not produce visible mismatches with stored billing amounts,"Inconsistent delivery fee figures across reports, exported files, and billing records indicate potential conflicts in current implementation",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"TARGET R92c focuses on delivery fee billing consistency. PRIMARY evidence (12 items) reveals core requirement: delivery fees must be calculated and billed consistently across all stages. Multiple gaps exist around fraction handling, currency presentation, and source-of-truth definitions. E7 and E8 highlight audit and reporting inconsistencies that directly affect delivery fee visibility. E6 indicates potential lifecycle-related fee application gaps. No CONTEXT evidence provided. All 12 PRIMARY items are directly relevant to delivery fee billing consistency. Filtered abstract or low-relevance operative statements: Delivery fees must be calculated and billed consistently across all calculation stages, storage, and user-facing display | Delivery fee amounts must flow into billing in a consistent manner according to configured logistics rules | User-facing delivery fee totals must match persisted billing amounts exactly",0,0,0,0
+03848a87,R92c,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R92c_7,Delivery fee audit trail maintains consistency,"Feature: Delivery Fee Audit Trail
+  Scenario: Audit log reflects consistent delivery fee amounts
+    Given a delivery order with initial fee of $25.00
+    When the delivery fee is calculated and stored
+    And an audit log entry is created
+    And the billing record is updated
+    Then the audit log must record the fee as $25.00
+    And the audit log amount must match the billing record
+    And no discrepancies must exist between audit entries and billing amounts",Addresses the reporting inconsistency highlighted in E7 and E8 that affects delivery fee visibility. Ensures audit logs accurately reflect billing amounts for consistency verification.,E7|E8|E12,,2eee991de900fd57|A6|A9|D61|G63|G64|G72|G82b|G93c|R92c,Delivery fee billing consistency,Delivery fee billing consistency,"[1] source=R92c type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R92c type=Requirement hops=0 rel=TARGET
+Delivery fee billing consistency
+
+[3] source=R92c type=Requirement/SrcChunk hops=0 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=TARGET
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[4] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[5] source=A9 type=Actor/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[9] source=G82b type=Gap/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[11] source=D61 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Payment & Billing Spec
+
+[12] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[13] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Delivery fee billing consistency (R92c) requires that delivery fees are calculated, stored, and displayed consistently across all stages without discrepancies. The resolved context identifies two critical exceptions: (1) currency presentation and conversion in pilot scenarios must not override core billing logic, and (2) display-friendly simplifications must not create visible mismatches with stored amounts. The primary evidence (E1–E12) reveals gaps in fraction handling, currency presentation, source-of-truth definitions, and audit/reporting inconsistencies. These 10 test cases focus on ensuring delivery fees remain consistent across calculation, storage, billing, and user-facing display, with specific attention to exception scenarios and known conflict areas.",,Currency presentation and conversion in pilot scenarios must not override core delivery fee billing logic || Display-friendly simplifications in presentation layers must not produce visible mismatches with stored billing amounts,"Inconsistent delivery fee figures across reports, exported files, and billing records indicate potential conflicts in current implementation",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"TARGET R92c focuses on delivery fee billing consistency. PRIMARY evidence (12 items) reveals core requirement: delivery fees must be calculated and billed consistently across all stages. Multiple gaps exist around fraction handling, currency presentation, and source-of-truth definitions. E7 and E8 highlight audit and reporting inconsistencies that directly affect delivery fee visibility. E6 indicates potential lifecycle-related fee application gaps. No CONTEXT evidence provided. All 12 PRIMARY items are directly relevant to delivery fee billing consistency. Filtered abstract or low-relevance operative statements: Delivery fees must be calculated and billed consistently across all calculation stages, storage, and user-facing display | Delivery fee amounts must flow into billing in a consistent manner according to configured logistics rules | User-facing delivery fee totals must match persisted billing amounts exactly",0,0,0,0
+03848a87,R92c,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R92c_8,Delivery fee consistency across order lifecycle stages,"Feature: Delivery Fee Lifecycle Consistency
+  Scenario: Delivery fee remains consistent through order lifecycle
+    Given a delivery order with fee of $25.00 at creation
+    When the order transitions from pending to confirmed
+    And the order transitions from confirmed to in-transit
+    And the order transitions from in-transit to delivered
+    Then the delivery fee must remain $25.00 at each stage
+    And no lifecycle-related fee modifications must occur
+    And the billing amount must not change",Addresses the gap indicated in E6 around potential lifecycle-related fee application gaps. Ensures delivery fees remain consistent as orders progress through their lifecycle without unintended modifications.,E6|E9|E10,,2eee991de900fd57|A6|A9|D61|G63|G64|G72|G82b|G93c|R92c,Delivery fee billing consistency,Delivery fee billing consistency,"[1] source=R92c type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R92c type=Requirement hops=0 rel=TARGET
+Delivery fee billing consistency
+
+[3] source=R92c type=Requirement/SrcChunk hops=0 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=TARGET
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[4] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[5] source=A9 type=Actor/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[9] source=G82b type=Gap/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[11] source=D61 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Payment & Billing Spec
+
+[12] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[13] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Delivery fee billing consistency (R92c) requires that delivery fees are calculated, stored, and displayed consistently across all stages without discrepancies. The resolved context identifies two critical exceptions: (1) currency presentation and conversion in pilot scenarios must not override core billing logic, and (2) display-friendly simplifications must not create visible mismatches with stored amounts. The primary evidence (E1–E12) reveals gaps in fraction handling, currency presentation, source-of-truth definitions, and audit/reporting inconsistencies. These 10 test cases focus on ensuring delivery fees remain consistent across calculation, storage, billing, and user-facing display, with specific attention to exception scenarios and known conflict areas.",,Currency presentation and conversion in pilot scenarios must not override core delivery fee billing logic || Display-friendly simplifications in presentation layers must not produce visible mismatches with stored billing amounts,"Inconsistent delivery fee figures across reports, exported files, and billing records indicate potential conflicts in current implementation",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"TARGET R92c focuses on delivery fee billing consistency. PRIMARY evidence (12 items) reveals core requirement: delivery fees must be calculated and billed consistently across all stages. Multiple gaps exist around fraction handling, currency presentation, and source-of-truth definitions. E7 and E8 highlight audit and reporting inconsistencies that directly affect delivery fee visibility. E6 indicates potential lifecycle-related fee application gaps. No CONTEXT evidence provided. All 12 PRIMARY items are directly relevant to delivery fee billing consistency. Filtered abstract or low-relevance operative statements: Delivery fees must be calculated and billed consistently across all calculation stages, storage, and user-facing display | Delivery fee amounts must flow into billing in a consistent manner according to configured logistics rules | User-facing delivery fee totals must match persisted billing amounts exactly",0,0,0,0
+03848a87,R92c,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R92c_9,Delivery fee source-of-truth definition and consistency,"Feature: Delivery Fee Source of Truth
+  Scenario: Single source of truth for delivery fee is maintained
+    Given a delivery order with fee calculated from logistics rules
+    When the fee is stored in the billing database
+    And the fee is queried from the billing system
+    And the fee is displayed in user interface
+    And the fee is exported in reports
+    Then the billing database must be the authoritative source
+    And all other sources must derive from the billing database
+    And no independent calculations must override the stored amount",Addresses the gap around source-of-truth definitions for delivery fees. Establishes the billing database as the authoritative source and ensures all displays and exports derive from it consistently.,E2|E5|E11,,2eee991de900fd57|A6|A9|D61|G63|G64|G72|G82b|G93c|R92c,Delivery fee billing consistency,Delivery fee billing consistency,"[1] source=R92c type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R92c type=Requirement hops=0 rel=TARGET
+Delivery fee billing consistency
+
+[3] source=R92c type=Requirement/SrcChunk hops=0 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=TARGET
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[4] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[5] source=A9 type=Actor/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[9] source=G82b type=Gap/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[11] source=D61 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Payment & Billing Spec
+
+[12] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[13] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Delivery fee billing consistency (R92c) requires that delivery fees are calculated, stored, and displayed consistently across all stages without discrepancies. The resolved context identifies two critical exceptions: (1) currency presentation and conversion in pilot scenarios must not override core billing logic, and (2) display-friendly simplifications must not create visible mismatches with stored amounts. The primary evidence (E1–E12) reveals gaps in fraction handling, currency presentation, source-of-truth definitions, and audit/reporting inconsistencies. These 10 test cases focus on ensuring delivery fees remain consistent across calculation, storage, billing, and user-facing display, with specific attention to exception scenarios and known conflict areas.",,Currency presentation and conversion in pilot scenarios must not override core delivery fee billing logic || Display-friendly simplifications in presentation layers must not produce visible mismatches with stored billing amounts,"Inconsistent delivery fee figures across reports, exported files, and billing records indicate potential conflicts in current implementation",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"TARGET R92c focuses on delivery fee billing consistency. PRIMARY evidence (12 items) reveals core requirement: delivery fees must be calculated and billed consistently across all stages. Multiple gaps exist around fraction handling, currency presentation, and source-of-truth definitions. E7 and E8 highlight audit and reporting inconsistencies that directly affect delivery fee visibility. E6 indicates potential lifecycle-related fee application gaps. No CONTEXT evidence provided. All 12 PRIMARY items are directly relevant to delivery fee billing consistency. Filtered abstract or low-relevance operative statements: Delivery fees must be calculated and billed consistently across all calculation stages, storage, and user-facing display | Delivery fee amounts must flow into billing in a consistent manner according to configured logistics rules | User-facing delivery fee totals must match persisted billing amounts exactly",0,0,0,0
+03848a87,R92c,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R92c_10,Display-friendly simplifications do not create visible mismatches,"Feature: Display Simplification Consistency
+    Scenario: Display formatting does not create visible mismatches
+    Given a delivery fee of $25.00 stored in billing
+    When the fee is displayed with currency formatting
+    And the fee is displayed with locale-specific formatting
+    And the fee is displayed in reports
+    Then the visible amount must always be $25.00
+    And no display-friendly rounding must alter the visible value
+    And the displayed amount must match the stored billing amount exactly
+    And formatting must be presentation-only without affecting stored data",Directly validates the exception that display-friendly simplifications in presentation layers must not produce visible mismatches with stored billing amounts. Ensures formatting is purely presentational.,E3|E8|E9,,2eee991de900fd57|A6|A9|D61|G63|G64|G72|G82b|G93c|R92c,Delivery fee billing consistency,Delivery fee billing consistency,"[1] source=R92c type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R92c type=Requirement hops=0 rel=TARGET
+Delivery fee billing consistency
+
+[3] source=R92c type=Requirement/SrcChunk hops=0 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=TARGET
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[4] source=A6 type=Actor/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[5] source=A9 type=Actor/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=G64 type=Gap/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[8] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[9] source=G82b type=Gap/SrcChunk hops=2 chunk=bdc40e2851e22a6d doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-DEL-801"",
+    ""summary"": ""Delivery Option Selection"",
+    ""description"": ""Implement the choice between pickup and delivery, including the collection of delivery-related address data and the validation needed before a delivery-based rental can proceed."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-10T09:00:00Z"",
+        ""text"": ""The address verification integration is in place. We should still confirm whether the current validation result is only a delivery-readiness check or also intended to serve as a customer-facing address quality decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-802"",
+    ""summary"": ""Delivery Scheduling and Timing"",
+    ""description"": ""Implement delivery-slot selection and time-window validation so users can request supported delivery periods without creating scheduling conflicts."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structural
+
+[10] source=2eee991de900fd57 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-DELIVERY-01.md
+
+[11] source=D61 type=Specification hops=2 rel=AFFECTS > DEFINED_IN
+Payment & Billing Spec
+
+[12] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[13] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Delivery fee billing consistency (R92c) requires that delivery fees are calculated, stored, and displayed consistently across all stages without discrepancies. The resolved context identifies two critical exceptions: (1) currency presentation and conversion in pilot scenarios must not override core billing logic, and (2) display-friendly simplifications must not create visible mismatches with stored amounts. The primary evidence (E1–E12) reveals gaps in fraction handling, currency presentation, source-of-truth definitions, and audit/reporting inconsistencies. These 10 test cases focus on ensuring delivery fees remain consistent across calculation, storage, billing, and user-facing display, with specific attention to exception scenarios and known conflict areas.",,Currency presentation and conversion in pilot scenarios must not override core delivery fee billing logic || Display-friendly simplifications in presentation layers must not produce visible mismatches with stored billing amounts,"Inconsistent delivery fee figures across reports, exported files, and billing records indicate potential conflicts in current implementation",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"TARGET R92c focuses on delivery fee billing consistency. PRIMARY evidence (12 items) reveals core requirement: delivery fees must be calculated and billed consistently across all stages. Multiple gaps exist around fraction handling, currency presentation, and source-of-truth definitions. E7 and E8 highlight audit and reporting inconsistencies that directly affect delivery fee visibility. E6 indicates potential lifecycle-related fee application gaps. No CONTEXT evidence provided. All 12 PRIMARY items are directly relevant to delivery fee billing consistency. Filtered abstract or low-relevance operative statements: Delivery fees must be calculated and billed consistently across all calculation stages, storage, and user-facing display | Delivery fee amounts must flow into billing in a consistent manner according to configured logistics rules | User-facing delivery fee totals must match persisted billing amounts exactly",0,0,0,0

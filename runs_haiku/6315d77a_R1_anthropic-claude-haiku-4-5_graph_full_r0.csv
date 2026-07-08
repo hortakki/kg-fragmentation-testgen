@@ -1,0 +1,2750 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+6315d77a,R1,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R1_1,Submit button disabled when mandatory fields are empty,"Feature: Registration Form Submit Button Behavior
+  Scenario: Submit button remains disabled when all mandatory fields are empty
+    Given the registration form is displayed
+    When no fields are filled
+    Then the Submit button should be disabled",Validates core requirement that submit button remains disabled until all mandatory fields are filled. This is the foundational behavior for mandatory field enforcement.,E1|E11,Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked,A1|C71|I1a|I2|I3|I6|I9|R1|R3,Registration mandatory fields,Registration mandatory fields,"[1] source=R1 type=Requirement/SrcChunk hops=0 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[2] source=R1 type=Requirement hops=0 rel=TARGET
+Registration mandatory fields
+
+[3] source=R1 type=Requirement/SrcChunk hops=0 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=TARGET
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[4] source=R1 type=Requirement/SrcChunk hops=0 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=TARGET
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[5] source=I1a type=Implementation/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=REFINES
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[6] source=A1 type=Actor/SrcChunk hops=2 chunk=af22485c3c34f13c doc=EMAIL_LEGAL_GDPR_Compliance.txt rel=IN_DOC > IN_DOC
+From: it_lead@toolchain.com
+To: pm_team@toolchain.com, dev_leads@toolchain.com
+Date: 2026-02-18 14:45
+Subject: Registration consent flow must be revised before launch
+
+Hi All,
+
+During the latest compliance review, Legal raised a blocking concern regarding how consent is collected in the registration journey.
+
+At the moment, the current approach appears to bundle multiple legal acknowledgements too closely. For launch readiness, users need to express consent to the contractual terms and the personal-data-related notice in a clearly distinguishable way. A single combined acknowledgement is not sufficient for this purpose.
+
+Please adjust the registration flow so that these approvals are captured independently and can be demonstrated separately if needed during audit.
+
+This is a release-blocking compliance item.
+
+Best regards,
+
+Dr. Arpad Jog
+General Counsel
+
+[7] source=I9 type=Implementation/SrcChunk hops=1 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=REFINES
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[8] source=I6 type=Implementation/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=CONFLICTS_WITH
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=R3 type=Requirement/SrcChunk hops=2 chunk=856fef14e989c23c doc=CONF-AUTH-01.md rel=DEFINED_IN > DEFINED_IN
+ed, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated session until the user logs out or the session expires.
+## 1.2.9. The system shall allow the user to log out, which shall terminate the authenticated session.
+## 1.2.10. After logout, the system shall require the user to authenticate again in order to access the platform.
+
+## 1.3. Password Management
+## 1.3.1. The system shall require the user to create a password during registration.
+## 1.3.2. The system shall enforce password policy requirements, including minimum length and complexity rules.
+## 1.3.3. The system shall store passwords in a securely hashed format and shall not store passwords in plain text.
+## 1.3.4. The system shall allow authenticated users to change their password.
+## 1.3.5. The system shall require the user to provide their current password when changing their password.
+## 1.3.6. The system shall allow users to initiate a password reset process if they forget their password.
+## 1.3.7. The system shall require the user to provide their registered email address to initi
+
+[11] source=I1a type=Implementation hops=1 rel=REFINES
+Mandatory fields + disabled submit
+
+[12] source=C71 type=Communication/SrcChunk hops=2 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[13] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,","Generated 10 executable Gherkin tests for R1 (Registration mandatory fields). Tests cover mandatory field validation, submit button behavior, Terms and Conditions consent requirements, email uniqueness (case-insensitive), and OWASP compliance for email enumeration prevention. All tests are grounded in the operative context and supporting evidence, excluding conflicting proposals from JIRA-Auth-114 and JIRA-Auth-111.",Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked || Registration form must include a Terms and Conditions checkbox representing acceptance of both Terms of Service and Privacy Policy || All fields are mandatory and must be validated before submission.,"Email uniqueness validation must be case-insensitive (e.g., Test@t.com equals test@t.com) || 'If this email is valid, a message has been sent to it' (prevents email enumeration per OWASP compliance)","JIRA-Auth-114 proposes making phone number optional, contradicting the primary requirement that phone number is mandatory || JIRA-Auth-111 proposes allowing multiple users to share the same email address if phone number is unique, contradicting the email uniqueness requirement",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,">E1 provides the core specification with mandatory fields and form behavior. E4 clarifies field structure (separate first/last name, optional middle name). E3 and E7 provide validation details for phone and email. E6 introduces a critical compliance conflict regarding consent capture methodology. E8 and E9 present conflicting proposals about phone number and email uniqueness that contradict the primary requirement. E10 provides supporting context from the configuration specification. E11 reinforces the disabled-submit behavior. E12 documents the email uniqueness contradiction explicitly. Filtered abstract or low-relevance operative statements: first name, last name, phone number, email address, and password | First name and last name are separate fields, each limited to 50 characters | Leading and trailing spaces in name fields are trimmed; hyphens and accents are allowed",1,0,0,0
+6315d77a,R1,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R1_2,Submit button disabled when first name is missing,"Feature: Registration Form Mandatory Field Validation
+  Scenario: Submit button remains disabled when first name is empty
+    Given the registration form is displayed
+    And the last name field is filled with ""Smith""
+    And the email field is filled with ""user@example.com""
+    And the phone field is filled with ""1234567890""
+    And the password field is filled with ""SecurePass123""
+    And the Terms and Conditions checkbox is checked
+    When the first name field is empty
+    Then the Submit button should be disabled","Confirms that first name is a mandatory field and its absence prevents form submission, enforcing the requirement that all fields are mandatory.",E1|E4,All fields are mandatory and must be validated before submission,A1|C71|I1a|I2|I3|I6|I9|R1|R3,Registration mandatory fields,Registration mandatory fields,"[1] source=R1 type=Requirement/SrcChunk hops=0 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[2] source=R1 type=Requirement hops=0 rel=TARGET
+Registration mandatory fields
+
+[3] source=R1 type=Requirement/SrcChunk hops=0 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=TARGET
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[4] source=R1 type=Requirement/SrcChunk hops=0 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=TARGET
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[5] source=I1a type=Implementation/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=REFINES
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[6] source=A1 type=Actor/SrcChunk hops=2 chunk=af22485c3c34f13c doc=EMAIL_LEGAL_GDPR_Compliance.txt rel=IN_DOC > IN_DOC
+From: it_lead@toolchain.com
+To: pm_team@toolchain.com, dev_leads@toolchain.com
+Date: 2026-02-18 14:45
+Subject: Registration consent flow must be revised before launch
+
+Hi All,
+
+During the latest compliance review, Legal raised a blocking concern regarding how consent is collected in the registration journey.
+
+At the moment, the current approach appears to bundle multiple legal acknowledgements too closely. For launch readiness, users need to express consent to the contractual terms and the personal-data-related notice in a clearly distinguishable way. A single combined acknowledgement is not sufficient for this purpose.
+
+Please adjust the registration flow so that these approvals are captured independently and can be demonstrated separately if needed during audit.
+
+This is a release-blocking compliance item.
+
+Best regards,
+
+Dr. Arpad Jog
+General Counsel
+
+[7] source=I9 type=Implementation/SrcChunk hops=1 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=REFINES
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[8] source=I6 type=Implementation/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=CONFLICTS_WITH
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=R3 type=Requirement/SrcChunk hops=2 chunk=856fef14e989c23c doc=CONF-AUTH-01.md rel=DEFINED_IN > DEFINED_IN
+ed, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated session until the user logs out or the session expires.
+## 1.2.9. The system shall allow the user to log out, which shall terminate the authenticated session.
+## 1.2.10. After logout, the system shall require the user to authenticate again in order to access the platform.
+
+## 1.3. Password Management
+## 1.3.1. The system shall require the user to create a password during registration.
+## 1.3.2. The system shall enforce password policy requirements, including minimum length and complexity rules.
+## 1.3.3. The system shall store passwords in a securely hashed format and shall not store passwords in plain text.
+## 1.3.4. The system shall allow authenticated users to change their password.
+## 1.3.5. The system shall require the user to provide their current password when changing their password.
+## 1.3.6. The system shall allow users to initiate a password reset process if they forget their password.
+## 1.3.7. The system shall require the user to provide their registered email address to initi
+
+[11] source=I1a type=Implementation hops=1 rel=REFINES
+Mandatory fields + disabled submit
+
+[12] source=C71 type=Communication/SrcChunk hops=2 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[13] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,","Generated 10 executable Gherkin tests for R1 (Registration mandatory fields). Tests cover mandatory field validation, submit button behavior, Terms and Conditions consent requirements, email uniqueness (case-insensitive), and OWASP compliance for email enumeration prevention. All tests are grounded in the operative context and supporting evidence, excluding conflicting proposals from JIRA-Auth-114 and JIRA-Auth-111.",Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked || Registration form must include a Terms and Conditions checkbox representing acceptance of both Terms of Service and Privacy Policy || All fields are mandatory and must be validated before submission.,"Email uniqueness validation must be case-insensitive (e.g., Test@t.com equals test@t.com) || 'If this email is valid, a message has been sent to it' (prevents email enumeration per OWASP compliance)","JIRA-Auth-114 proposes making phone number optional, contradicting the primary requirement that phone number is mandatory || JIRA-Auth-111 proposes allowing multiple users to share the same email address if phone number is unique, contradicting the email uniqueness requirement",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,">E1 provides the core specification with mandatory fields and form behavior. E4 clarifies field structure (separate first/last name, optional middle name). E3 and E7 provide validation details for phone and email. E6 introduces a critical compliance conflict regarding consent capture methodology. E8 and E9 present conflicting proposals about phone number and email uniqueness that contradict the primary requirement. E10 provides supporting context from the configuration specification. E11 reinforces the disabled-submit behavior. E12 documents the email uniqueness contradiction explicitly. Filtered abstract or low-relevance operative statements: first name, last name, phone number, email address, and password | First name and last name are separate fields, each limited to 50 characters | Leading and trailing spaces in name fields are trimmed; hyphens and accents are allowed",1,0,0,0
+6315d77a,R1,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R1_3,Submit button disabled when last name is missing,"Feature: Registration Form Mandatory Field Validation
+  Scenario: Submit button remains disabled when last name is empty
+    Given the registration form is displayed
+    And the first name field is filled with ""John""
+    And the email field is filled with ""user@example.com""
+    And the phone field is filled with ""1234567890""
+    And the password field is filled with ""SecurePass123""
+    And the Terms and Conditions checkbox is checked
+    When the last name field is empty
+    Then the Submit button should be disabled","Confirms that last name is a mandatory field and its absence prevents form submission, enforcing the requirement that all fields are mandatory.",E1|E4,All fields are mandatory and must be validated before submission,A1|C71|I1a|I2|I3|I6|I9|R1|R3,Registration mandatory fields,Registration mandatory fields,"[1] source=R1 type=Requirement/SrcChunk hops=0 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[2] source=R1 type=Requirement hops=0 rel=TARGET
+Registration mandatory fields
+
+[3] source=R1 type=Requirement/SrcChunk hops=0 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=TARGET
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[4] source=R1 type=Requirement/SrcChunk hops=0 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=TARGET
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[5] source=I1a type=Implementation/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=REFINES
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[6] source=A1 type=Actor/SrcChunk hops=2 chunk=af22485c3c34f13c doc=EMAIL_LEGAL_GDPR_Compliance.txt rel=IN_DOC > IN_DOC
+From: it_lead@toolchain.com
+To: pm_team@toolchain.com, dev_leads@toolchain.com
+Date: 2026-02-18 14:45
+Subject: Registration consent flow must be revised before launch
+
+Hi All,
+
+During the latest compliance review, Legal raised a blocking concern regarding how consent is collected in the registration journey.
+
+At the moment, the current approach appears to bundle multiple legal acknowledgements too closely. For launch readiness, users need to express consent to the contractual terms and the personal-data-related notice in a clearly distinguishable way. A single combined acknowledgement is not sufficient for this purpose.
+
+Please adjust the registration flow so that these approvals are captured independently and can be demonstrated separately if needed during audit.
+
+This is a release-blocking compliance item.
+
+Best regards,
+
+Dr. Arpad Jog
+General Counsel
+
+[7] source=I9 type=Implementation/SrcChunk hops=1 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=REFINES
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[8] source=I6 type=Implementation/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=CONFLICTS_WITH
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=R3 type=Requirement/SrcChunk hops=2 chunk=856fef14e989c23c doc=CONF-AUTH-01.md rel=DEFINED_IN > DEFINED_IN
+ed, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated session until the user logs out or the session expires.
+## 1.2.9. The system shall allow the user to log out, which shall terminate the authenticated session.
+## 1.2.10. After logout, the system shall require the user to authenticate again in order to access the platform.
+
+## 1.3. Password Management
+## 1.3.1. The system shall require the user to create a password during registration.
+## 1.3.2. The system shall enforce password policy requirements, including minimum length and complexity rules.
+## 1.3.3. The system shall store passwords in a securely hashed format and shall not store passwords in plain text.
+## 1.3.4. The system shall allow authenticated users to change their password.
+## 1.3.5. The system shall require the user to provide their current password when changing their password.
+## 1.3.6. The system shall allow users to initiate a password reset process if they forget their password.
+## 1.3.7. The system shall require the user to provide their registered email address to initi
+
+[11] source=I1a type=Implementation hops=1 rel=REFINES
+Mandatory fields + disabled submit
+
+[12] source=C71 type=Communication/SrcChunk hops=2 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[13] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,","Generated 10 executable Gherkin tests for R1 (Registration mandatory fields). Tests cover mandatory field validation, submit button behavior, Terms and Conditions consent requirements, email uniqueness (case-insensitive), and OWASP compliance for email enumeration prevention. All tests are grounded in the operative context and supporting evidence, excluding conflicting proposals from JIRA-Auth-114 and JIRA-Auth-111.",Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked || Registration form must include a Terms and Conditions checkbox representing acceptance of both Terms of Service and Privacy Policy || All fields are mandatory and must be validated before submission.,"Email uniqueness validation must be case-insensitive (e.g., Test@t.com equals test@t.com) || 'If this email is valid, a message has been sent to it' (prevents email enumeration per OWASP compliance)","JIRA-Auth-114 proposes making phone number optional, contradicting the primary requirement that phone number is mandatory || JIRA-Auth-111 proposes allowing multiple users to share the same email address if phone number is unique, contradicting the email uniqueness requirement",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,">E1 provides the core specification with mandatory fields and form behavior. E4 clarifies field structure (separate first/last name, optional middle name). E3 and E7 provide validation details for phone and email. E6 introduces a critical compliance conflict regarding consent capture methodology. E8 and E9 present conflicting proposals about phone number and email uniqueness that contradict the primary requirement. E10 provides supporting context from the configuration specification. E11 reinforces the disabled-submit behavior. E12 documents the email uniqueness contradiction explicitly. Filtered abstract or low-relevance operative statements: first name, last name, phone number, email address, and password | First name and last name are separate fields, each limited to 50 characters | Leading and trailing spaces in name fields are trimmed; hyphens and accents are allowed",1,0,0,0
+6315d77a,R1,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R1_4,Submit button disabled when email is missing,"Feature: Registration Form Mandatory Field Validation
+  Scenario: Submit button remains disabled when email is empty
+    Given the registration form is displayed
+    And the first name field is filled with ""John""
+    And the last name field is filled with ""Smith""
+    And the phone field is filled with ""1234567890""
+    And the password field is filled with ""SecurePass123""
+    And the Terms and Conditions checkbox is checked
+    When the email field is empty
+    Then the Submit button should be disabled","Confirms that email is a mandatory field and its absence prevents form submission, enforcing the requirement that all fields are mandatory.",E1|E3,All fields are mandatory and must be validated before submission,A1|C71|I1a|I2|I3|I6|I9|R1|R3,Registration mandatory fields,Registration mandatory fields,"[1] source=R1 type=Requirement/SrcChunk hops=0 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[2] source=R1 type=Requirement hops=0 rel=TARGET
+Registration mandatory fields
+
+[3] source=R1 type=Requirement/SrcChunk hops=0 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=TARGET
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[4] source=R1 type=Requirement/SrcChunk hops=0 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=TARGET
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[5] source=I1a type=Implementation/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=REFINES
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[6] source=A1 type=Actor/SrcChunk hops=2 chunk=af22485c3c34f13c doc=EMAIL_LEGAL_GDPR_Compliance.txt rel=IN_DOC > IN_DOC
+From: it_lead@toolchain.com
+To: pm_team@toolchain.com, dev_leads@toolchain.com
+Date: 2026-02-18 14:45
+Subject: Registration consent flow must be revised before launch
+
+Hi All,
+
+During the latest compliance review, Legal raised a blocking concern regarding how consent is collected in the registration journey.
+
+At the moment, the current approach appears to bundle multiple legal acknowledgements too closely. For launch readiness, users need to express consent to the contractual terms and the personal-data-related notice in a clearly distinguishable way. A single combined acknowledgement is not sufficient for this purpose.
+
+Please adjust the registration flow so that these approvals are captured independently and can be demonstrated separately if needed during audit.
+
+This is a release-blocking compliance item.
+
+Best regards,
+
+Dr. Arpad Jog
+General Counsel
+
+[7] source=I9 type=Implementation/SrcChunk hops=1 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=REFINES
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[8] source=I6 type=Implementation/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=CONFLICTS_WITH
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=R3 type=Requirement/SrcChunk hops=2 chunk=856fef14e989c23c doc=CONF-AUTH-01.md rel=DEFINED_IN > DEFINED_IN
+ed, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated session until the user logs out or the session expires.
+## 1.2.9. The system shall allow the user to log out, which shall terminate the authenticated session.
+## 1.2.10. After logout, the system shall require the user to authenticate again in order to access the platform.
+
+## 1.3. Password Management
+## 1.3.1. The system shall require the user to create a password during registration.
+## 1.3.2. The system shall enforce password policy requirements, including minimum length and complexity rules.
+## 1.3.3. The system shall store passwords in a securely hashed format and shall not store passwords in plain text.
+## 1.3.4. The system shall allow authenticated users to change their password.
+## 1.3.5. The system shall require the user to provide their current password when changing their password.
+## 1.3.6. The system shall allow users to initiate a password reset process if they forget their password.
+## 1.3.7. The system shall require the user to provide their registered email address to initi
+
+[11] source=I1a type=Implementation hops=1 rel=REFINES
+Mandatory fields + disabled submit
+
+[12] source=C71 type=Communication/SrcChunk hops=2 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[13] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,","Generated 10 executable Gherkin tests for R1 (Registration mandatory fields). Tests cover mandatory field validation, submit button behavior, Terms and Conditions consent requirements, email uniqueness (case-insensitive), and OWASP compliance for email enumeration prevention. All tests are grounded in the operative context and supporting evidence, excluding conflicting proposals from JIRA-Auth-114 and JIRA-Auth-111.",Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked || Registration form must include a Terms and Conditions checkbox representing acceptance of both Terms of Service and Privacy Policy || All fields are mandatory and must be validated before submission.,"Email uniqueness validation must be case-insensitive (e.g., Test@t.com equals test@t.com) || 'If this email is valid, a message has been sent to it' (prevents email enumeration per OWASP compliance)","JIRA-Auth-114 proposes making phone number optional, contradicting the primary requirement that phone number is mandatory || JIRA-Auth-111 proposes allowing multiple users to share the same email address if phone number is unique, contradicting the email uniqueness requirement",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,">E1 provides the core specification with mandatory fields and form behavior. E4 clarifies field structure (separate first/last name, optional middle name). E3 and E7 provide validation details for phone and email. E6 introduces a critical compliance conflict regarding consent capture methodology. E8 and E9 present conflicting proposals about phone number and email uniqueness that contradict the primary requirement. E10 provides supporting context from the configuration specification. E11 reinforces the disabled-submit behavior. E12 documents the email uniqueness contradiction explicitly. Filtered abstract or low-relevance operative statements: first name, last name, phone number, email address, and password | First name and last name are separate fields, each limited to 50 characters | Leading and trailing spaces in name fields are trimmed; hyphens and accents are allowed",1,0,0,0
+6315d77a,R1,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R1_5,Submit button disabled when phone number is missing,"Feature: Registration Form Mandatory Field Validation
+  Scenario: Submit button remains disabled when phone number is empty
+    Given the registration form is displayed
+    And the first name field is filled with ""John""
+    And the last name field is filled with ""Smith""
+    And the email field is filled with ""user@example.com""
+    And the password field is filled with ""SecurePass123""
+    And the Terms and Conditions checkbox is checked
+    When the phone field is empty
+    Then the Submit button should be disabled",Confirms that phone number is a mandatory field and its absence prevents form submission. This test explicitly validates the primary requirement against the conflicting proposal in JIRA-Auth-114.,E1|E7,All fields are mandatory and must be validated before submission,A1|C71|I1a|I2|I3|I6|I9|R1|R3,Registration mandatory fields,Registration mandatory fields,"[1] source=R1 type=Requirement/SrcChunk hops=0 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[2] source=R1 type=Requirement hops=0 rel=TARGET
+Registration mandatory fields
+
+[3] source=R1 type=Requirement/SrcChunk hops=0 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=TARGET
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[4] source=R1 type=Requirement/SrcChunk hops=0 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=TARGET
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[5] source=I1a type=Implementation/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=REFINES
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[6] source=A1 type=Actor/SrcChunk hops=2 chunk=af22485c3c34f13c doc=EMAIL_LEGAL_GDPR_Compliance.txt rel=IN_DOC > IN_DOC
+From: it_lead@toolchain.com
+To: pm_team@toolchain.com, dev_leads@toolchain.com
+Date: 2026-02-18 14:45
+Subject: Registration consent flow must be revised before launch
+
+Hi All,
+
+During the latest compliance review, Legal raised a blocking concern regarding how consent is collected in the registration journey.
+
+At the moment, the current approach appears to bundle multiple legal acknowledgements too closely. For launch readiness, users need to express consent to the contractual terms and the personal-data-related notice in a clearly distinguishable way. A single combined acknowledgement is not sufficient for this purpose.
+
+Please adjust the registration flow so that these approvals are captured independently and can be demonstrated separately if needed during audit.
+
+This is a release-blocking compliance item.
+
+Best regards,
+
+Dr. Arpad Jog
+General Counsel
+
+[7] source=I9 type=Implementation/SrcChunk hops=1 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=REFINES
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[8] source=I6 type=Implementation/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=CONFLICTS_WITH
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=R3 type=Requirement/SrcChunk hops=2 chunk=856fef14e989c23c doc=CONF-AUTH-01.md rel=DEFINED_IN > DEFINED_IN
+ed, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated session until the user logs out or the session expires.
+## 1.2.9. The system shall allow the user to log out, which shall terminate the authenticated session.
+## 1.2.10. After logout, the system shall require the user to authenticate again in order to access the platform.
+
+## 1.3. Password Management
+## 1.3.1. The system shall require the user to create a password during registration.
+## 1.3.2. The system shall enforce password policy requirements, including minimum length and complexity rules.
+## 1.3.3. The system shall store passwords in a securely hashed format and shall not store passwords in plain text.
+## 1.3.4. The system shall allow authenticated users to change their password.
+## 1.3.5. The system shall require the user to provide their current password when changing their password.
+## 1.3.6. The system shall allow users to initiate a password reset process if they forget their password.
+## 1.3.7. The system shall require the user to provide their registered email address to initi
+
+[11] source=I1a type=Implementation hops=1 rel=REFINES
+Mandatory fields + disabled submit
+
+[12] source=C71 type=Communication/SrcChunk hops=2 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[13] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,","Generated 10 executable Gherkin tests for R1 (Registration mandatory fields). Tests cover mandatory field validation, submit button behavior, Terms and Conditions consent requirements, email uniqueness (case-insensitive), and OWASP compliance for email enumeration prevention. All tests are grounded in the operative context and supporting evidence, excluding conflicting proposals from JIRA-Auth-114 and JIRA-Auth-111.",Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked || Registration form must include a Terms and Conditions checkbox representing acceptance of both Terms of Service and Privacy Policy || All fields are mandatory and must be validated before submission.,"Email uniqueness validation must be case-insensitive (e.g., Test@t.com equals test@t.com) || 'If this email is valid, a message has been sent to it' (prevents email enumeration per OWASP compliance)","JIRA-Auth-114 proposes making phone number optional, contradicting the primary requirement that phone number is mandatory || JIRA-Auth-111 proposes allowing multiple users to share the same email address if phone number is unique, contradicting the email uniqueness requirement",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,">E1 provides the core specification with mandatory fields and form behavior. E4 clarifies field structure (separate first/last name, optional middle name). E3 and E7 provide validation details for phone and email. E6 introduces a critical compliance conflict regarding consent capture methodology. E8 and E9 present conflicting proposals about phone number and email uniqueness that contradict the primary requirement. E10 provides supporting context from the configuration specification. E11 reinforces the disabled-submit behavior. E12 documents the email uniqueness contradiction explicitly. Filtered abstract or low-relevance operative statements: first name, last name, phone number, email address, and password | First name and last name are separate fields, each limited to 50 characters | Leading and trailing spaces in name fields are trimmed; hyphens and accents are allowed",1,0,0,0
+6315d77a,R1,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R1_6,Submit button disabled when password is missing,"Feature: Registration Form Mandatory Field Validation
+  Scenario: Submit button remains disabled when password is empty
+    Given the registration form is displayed
+    And the first name field is filled with ""John""
+    And the last name field is filled with ""Smith""
+    And the email field is filled with ""user@example.com""
+    And the phone field is filled with ""1234567890""
+    And the Terms and Conditions checkbox is checked
+    When the password field is empty
+    Then the Submit button should be disabled","Confirms that password is a mandatory field and its absence prevents form submission, enforcing the requirement that all fields are mandatory.",E1,All fields are mandatory and must be validated before submission,A1|C71|I1a|I2|I3|I6|I9|R1|R3,Registration mandatory fields,Registration mandatory fields,"[1] source=R1 type=Requirement/SrcChunk hops=0 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[2] source=R1 type=Requirement hops=0 rel=TARGET
+Registration mandatory fields
+
+[3] source=R1 type=Requirement/SrcChunk hops=0 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=TARGET
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[4] source=R1 type=Requirement/SrcChunk hops=0 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=TARGET
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[5] source=I1a type=Implementation/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=REFINES
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[6] source=A1 type=Actor/SrcChunk hops=2 chunk=af22485c3c34f13c doc=EMAIL_LEGAL_GDPR_Compliance.txt rel=IN_DOC > IN_DOC
+From: it_lead@toolchain.com
+To: pm_team@toolchain.com, dev_leads@toolchain.com
+Date: 2026-02-18 14:45
+Subject: Registration consent flow must be revised before launch
+
+Hi All,
+
+During the latest compliance review, Legal raised a blocking concern regarding how consent is collected in the registration journey.
+
+At the moment, the current approach appears to bundle multiple legal acknowledgements too closely. For launch readiness, users need to express consent to the contractual terms and the personal-data-related notice in a clearly distinguishable way. A single combined acknowledgement is not sufficient for this purpose.
+
+Please adjust the registration flow so that these approvals are captured independently and can be demonstrated separately if needed during audit.
+
+This is a release-blocking compliance item.
+
+Best regards,
+
+Dr. Arpad Jog
+General Counsel
+
+[7] source=I9 type=Implementation/SrcChunk hops=1 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=REFINES
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[8] source=I6 type=Implementation/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=CONFLICTS_WITH
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=R3 type=Requirement/SrcChunk hops=2 chunk=856fef14e989c23c doc=CONF-AUTH-01.md rel=DEFINED_IN > DEFINED_IN
+ed, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated session until the user logs out or the session expires.
+## 1.2.9. The system shall allow the user to log out, which shall terminate the authenticated session.
+## 1.2.10. After logout, the system shall require the user to authenticate again in order to access the platform.
+
+## 1.3. Password Management
+## 1.3.1. The system shall require the user to create a password during registration.
+## 1.3.2. The system shall enforce password policy requirements, including minimum length and complexity rules.
+## 1.3.3. The system shall store passwords in a securely hashed format and shall not store passwords in plain text.
+## 1.3.4. The system shall allow authenticated users to change their password.
+## 1.3.5. The system shall require the user to provide their current password when changing their password.
+## 1.3.6. The system shall allow users to initiate a password reset process if they forget their password.
+## 1.3.7. The system shall require the user to provide their registered email address to initi
+
+[11] source=I1a type=Implementation hops=1 rel=REFINES
+Mandatory fields + disabled submit
+
+[12] source=C71 type=Communication/SrcChunk hops=2 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[13] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,","Generated 10 executable Gherkin tests for R1 (Registration mandatory fields). Tests cover mandatory field validation, submit button behavior, Terms and Conditions consent requirements, email uniqueness (case-insensitive), and OWASP compliance for email enumeration prevention. All tests are grounded in the operative context and supporting evidence, excluding conflicting proposals from JIRA-Auth-114 and JIRA-Auth-111.",Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked || Registration form must include a Terms and Conditions checkbox representing acceptance of both Terms of Service and Privacy Policy || All fields are mandatory and must be validated before submission.,"Email uniqueness validation must be case-insensitive (e.g., Test@t.com equals test@t.com) || 'If this email is valid, a message has been sent to it' (prevents email enumeration per OWASP compliance)","JIRA-Auth-114 proposes making phone number optional, contradicting the primary requirement that phone number is mandatory || JIRA-Auth-111 proposes allowing multiple users to share the same email address if phone number is unique, contradicting the email uniqueness requirement",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,">E1 provides the core specification with mandatory fields and form behavior. E4 clarifies field structure (separate first/last name, optional middle name). E3 and E7 provide validation details for phone and email. E6 introduces a critical compliance conflict regarding consent capture methodology. E8 and E9 present conflicting proposals about phone number and email uniqueness that contradict the primary requirement. E10 provides supporting context from the configuration specification. E11 reinforces the disabled-submit behavior. E12 documents the email uniqueness contradiction explicitly. Filtered abstract or low-relevance operative statements: first name, last name, phone number, email address, and password | First name and last name are separate fields, each limited to 50 characters | Leading and trailing spaces in name fields are trimmed; hyphens and accents are allowed",1,0,0,0
+6315d77a,R1,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R1_7,Submit button disabled when Terms and Conditions checkbox is unchecked,"Feature: Registration Form Legal Consent Validation
+  Scenario: Submit button remains disabled when Terms and Conditions checkbox is unchecked
+    Given the registration form is displayed
+    And the first name field is filled with ""John""
+    And the last name field is filled with ""Smith""
+    And the email field is filled with ""user@example.com""
+    And the phone field is filled with ""1234567890""
+    And the password field is filled with ""SecurePass123""
+    When the Terms and Conditions checkbox is unchecked
+    Then the Submit button should be disabled",Validates that the legal consent checkbox (Terms and Conditions) is mandatory and must be checked before submission. This enforces the requirement that submit button remains disabled until the legal consent checkbox is checked.,E1|E6|E11,Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked|Registration form must include a Terms and Conditions checkbox representing acceptance of both Terms of Service and Privacy Policy,A1|C71|I1a|I2|I3|I6|I9|R1|R3,Registration mandatory fields,Registration mandatory fields,"[1] source=R1 type=Requirement/SrcChunk hops=0 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[2] source=R1 type=Requirement hops=0 rel=TARGET
+Registration mandatory fields
+
+[3] source=R1 type=Requirement/SrcChunk hops=0 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=TARGET
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[4] source=R1 type=Requirement/SrcChunk hops=0 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=TARGET
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[5] source=I1a type=Implementation/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=REFINES
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[6] source=A1 type=Actor/SrcChunk hops=2 chunk=af22485c3c34f13c doc=EMAIL_LEGAL_GDPR_Compliance.txt rel=IN_DOC > IN_DOC
+From: it_lead@toolchain.com
+To: pm_team@toolchain.com, dev_leads@toolchain.com
+Date: 2026-02-18 14:45
+Subject: Registration consent flow must be revised before launch
+
+Hi All,
+
+During the latest compliance review, Legal raised a blocking concern regarding how consent is collected in the registration journey.
+
+At the moment, the current approach appears to bundle multiple legal acknowledgements too closely. For launch readiness, users need to express consent to the contractual terms and the personal-data-related notice in a clearly distinguishable way. A single combined acknowledgement is not sufficient for this purpose.
+
+Please adjust the registration flow so that these approvals are captured independently and can be demonstrated separately if needed during audit.
+
+This is a release-blocking compliance item.
+
+Best regards,
+
+Dr. Arpad Jog
+General Counsel
+
+[7] source=I9 type=Implementation/SrcChunk hops=1 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=REFINES
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[8] source=I6 type=Implementation/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=CONFLICTS_WITH
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=R3 type=Requirement/SrcChunk hops=2 chunk=856fef14e989c23c doc=CONF-AUTH-01.md rel=DEFINED_IN > DEFINED_IN
+ed, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated session until the user logs out or the session expires.
+## 1.2.9. The system shall allow the user to log out, which shall terminate the authenticated session.
+## 1.2.10. After logout, the system shall require the user to authenticate again in order to access the platform.
+
+## 1.3. Password Management
+## 1.3.1. The system shall require the user to create a password during registration.
+## 1.3.2. The system shall enforce password policy requirements, including minimum length and complexity rules.
+## 1.3.3. The system shall store passwords in a securely hashed format and shall not store passwords in plain text.
+## 1.3.4. The system shall allow authenticated users to change their password.
+## 1.3.5. The system shall require the user to provide their current password when changing their password.
+## 1.3.6. The system shall allow users to initiate a password reset process if they forget their password.
+## 1.3.7. The system shall require the user to provide their registered email address to initi
+
+[11] source=I1a type=Implementation hops=1 rel=REFINES
+Mandatory fields + disabled submit
+
+[12] source=C71 type=Communication/SrcChunk hops=2 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[13] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,","Generated 10 executable Gherkin tests for R1 (Registration mandatory fields). Tests cover mandatory field validation, submit button behavior, Terms and Conditions consent requirements, email uniqueness (case-insensitive), and OWASP compliance for email enumeration prevention. All tests are grounded in the operative context and supporting evidence, excluding conflicting proposals from JIRA-Auth-114 and JIRA-Auth-111.",Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked || Registration form must include a Terms and Conditions checkbox representing acceptance of both Terms of Service and Privacy Policy || All fields are mandatory and must be validated before submission.,"Email uniqueness validation must be case-insensitive (e.g., Test@t.com equals test@t.com) || 'If this email is valid, a message has been sent to it' (prevents email enumeration per OWASP compliance)","JIRA-Auth-114 proposes making phone number optional, contradicting the primary requirement that phone number is mandatory || JIRA-Auth-111 proposes allowing multiple users to share the same email address if phone number is unique, contradicting the email uniqueness requirement",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,">E1 provides the core specification with mandatory fields and form behavior. E4 clarifies field structure (separate first/last name, optional middle name). E3 and E7 provide validation details for phone and email. E6 introduces a critical compliance conflict regarding consent capture methodology. E8 and E9 present conflicting proposals about phone number and email uniqueness that contradict the primary requirement. E10 provides supporting context from the configuration specification. E11 reinforces the disabled-submit behavior. E12 documents the email uniqueness contradiction explicitly. Filtered abstract or low-relevance operative statements: first name, last name, phone number, email address, and password | First name and last name are separate fields, each limited to 50 characters | Leading and trailing spaces in name fields are trimmed; hyphens and accents are allowed",1,0,0,0
+6315d77a,R1,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R1_8,Email uniqueness validation is case-insensitive,"Feature: Email Uniqueness Validation
+  Scenario: Email addresses with different cases are treated as duplicates
+    Given a user has registered with email ""Test@example.com""
+    When a new user attempts to register with email ""test@example.com""
+    Then the registration should fail with a duplicate email error",Validates the exception requirement that email uniqueness validation must be case-insensitive. This prevents duplicate registrations using different case variations of the same email address.,E3|E12,"Email uniqueness validation must be case-insensitive (e.g., Test@t.com equals test@t.com)",A1|C71|I1a|I2|I3|I6|I9|R1|R3,Registration mandatory fields,Registration mandatory fields,"[1] source=R1 type=Requirement/SrcChunk hops=0 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[2] source=R1 type=Requirement hops=0 rel=TARGET
+Registration mandatory fields
+
+[3] source=R1 type=Requirement/SrcChunk hops=0 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=TARGET
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[4] source=R1 type=Requirement/SrcChunk hops=0 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=TARGET
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[5] source=I1a type=Implementation/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=REFINES
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[6] source=A1 type=Actor/SrcChunk hops=2 chunk=af22485c3c34f13c doc=EMAIL_LEGAL_GDPR_Compliance.txt rel=IN_DOC > IN_DOC
+From: it_lead@toolchain.com
+To: pm_team@toolchain.com, dev_leads@toolchain.com
+Date: 2026-02-18 14:45
+Subject: Registration consent flow must be revised before launch
+
+Hi All,
+
+During the latest compliance review, Legal raised a blocking concern regarding how consent is collected in the registration journey.
+
+At the moment, the current approach appears to bundle multiple legal acknowledgements too closely. For launch readiness, users need to express consent to the contractual terms and the personal-data-related notice in a clearly distinguishable way. A single combined acknowledgement is not sufficient for this purpose.
+
+Please adjust the registration flow so that these approvals are captured independently and can be demonstrated separately if needed during audit.
+
+This is a release-blocking compliance item.
+
+Best regards,
+
+Dr. Arpad Jog
+General Counsel
+
+[7] source=I9 type=Implementation/SrcChunk hops=1 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=REFINES
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[8] source=I6 type=Implementation/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=CONFLICTS_WITH
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=R3 type=Requirement/SrcChunk hops=2 chunk=856fef14e989c23c doc=CONF-AUTH-01.md rel=DEFINED_IN > DEFINED_IN
+ed, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated session until the user logs out or the session expires.
+## 1.2.9. The system shall allow the user to log out, which shall terminate the authenticated session.
+## 1.2.10. After logout, the system shall require the user to authenticate again in order to access the platform.
+
+## 1.3. Password Management
+## 1.3.1. The system shall require the user to create a password during registration.
+## 1.3.2. The system shall enforce password policy requirements, including minimum length and complexity rules.
+## 1.3.3. The system shall store passwords in a securely hashed format and shall not store passwords in plain text.
+## 1.3.4. The system shall allow authenticated users to change their password.
+## 1.3.5. The system shall require the user to provide their current password when changing their password.
+## 1.3.6. The system shall allow users to initiate a password reset process if they forget their password.
+## 1.3.7. The system shall require the user to provide their registered email address to initi
+
+[11] source=I1a type=Implementation hops=1 rel=REFINES
+Mandatory fields + disabled submit
+
+[12] source=C71 type=Communication/SrcChunk hops=2 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[13] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,","Generated 10 executable Gherkin tests for R1 (Registration mandatory fields). Tests cover mandatory field validation, submit button behavior, Terms and Conditions consent requirements, email uniqueness (case-insensitive), and OWASP compliance for email enumeration prevention. All tests are grounded in the operative context and supporting evidence, excluding conflicting proposals from JIRA-Auth-114 and JIRA-Auth-111.",Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked || Registration form must include a Terms and Conditions checkbox representing acceptance of both Terms of Service and Privacy Policy || All fields are mandatory and must be validated before submission.,"Email uniqueness validation must be case-insensitive (e.g., Test@t.com equals test@t.com) || 'If this email is valid, a message has been sent to it' (prevents email enumeration per OWASP compliance)","JIRA-Auth-114 proposes making phone number optional, contradicting the primary requirement that phone number is mandatory || JIRA-Auth-111 proposes allowing multiple users to share the same email address if phone number is unique, contradicting the email uniqueness requirement",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,">E1 provides the core specification with mandatory fields and form behavior. E4 clarifies field structure (separate first/last name, optional middle name). E3 and E7 provide validation details for phone and email. E6 introduces a critical compliance conflict regarding consent capture methodology. E8 and E9 present conflicting proposals about phone number and email uniqueness that contradict the primary requirement. E10 provides supporting context from the configuration specification. E11 reinforces the disabled-submit behavior. E12 documents the email uniqueness contradiction explicitly. Filtered abstract or low-relevance operative statements: first name, last name, phone number, email address, and password | First name and last name are separate fields, each limited to 50 characters | Leading and trailing spaces in name fields are trimmed; hyphens and accents are allowed",1,0,0,0
+6315d77a,R1,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R1_9,OWASP compliance: Email enumeration prevention message,"Feature: OWASP Email Enumeration Prevention
+  Scenario: Generic message displayed regardless of email existence
+    Given the registration form is displayed
+    When a user submits the form with email ""existing@example.com""
+    And the email already exists in the system
+    Then the message ""If this email is valid, a message has been sent to it"" should be displayed
+    When a user submits the form with email ""nonexistent@example.com""
+    And the email does not exist in the system
+    Then the same message ""If this email is valid, a message has been sent to it"" should be displayed",Validates OWASP compliance exception that prevents email enumeration attacks by displaying an identical message regardless of whether the email exists in the system.,E1,"'If this email is valid, a message has been sent to it' (prevents email enumeration per OWASP compliance)",A1|C71|I1a|I2|I3|I6|I9|R1|R3,Registration mandatory fields,Registration mandatory fields,"[1] source=R1 type=Requirement/SrcChunk hops=0 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[2] source=R1 type=Requirement hops=0 rel=TARGET
+Registration mandatory fields
+
+[3] source=R1 type=Requirement/SrcChunk hops=0 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=TARGET
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[4] source=R1 type=Requirement/SrcChunk hops=0 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=TARGET
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[5] source=I1a type=Implementation/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=REFINES
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[6] source=A1 type=Actor/SrcChunk hops=2 chunk=af22485c3c34f13c doc=EMAIL_LEGAL_GDPR_Compliance.txt rel=IN_DOC > IN_DOC
+From: it_lead@toolchain.com
+To: pm_team@toolchain.com, dev_leads@toolchain.com
+Date: 2026-02-18 14:45
+Subject: Registration consent flow must be revised before launch
+
+Hi All,
+
+During the latest compliance review, Legal raised a blocking concern regarding how consent is collected in the registration journey.
+
+At the moment, the current approach appears to bundle multiple legal acknowledgements too closely. For launch readiness, users need to express consent to the contractual terms and the personal-data-related notice in a clearly distinguishable way. A single combined acknowledgement is not sufficient for this purpose.
+
+Please adjust the registration flow so that these approvals are captured independently and can be demonstrated separately if needed during audit.
+
+This is a release-blocking compliance item.
+
+Best regards,
+
+Dr. Arpad Jog
+General Counsel
+
+[7] source=I9 type=Implementation/SrcChunk hops=1 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=REFINES
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[8] source=I6 type=Implementation/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=CONFLICTS_WITH
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=R3 type=Requirement/SrcChunk hops=2 chunk=856fef14e989c23c doc=CONF-AUTH-01.md rel=DEFINED_IN > DEFINED_IN
+ed, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated session until the user logs out or the session expires.
+## 1.2.9. The system shall allow the user to log out, which shall terminate the authenticated session.
+## 1.2.10. After logout, the system shall require the user to authenticate again in order to access the platform.
+
+## 1.3. Password Management
+## 1.3.1. The system shall require the user to create a password during registration.
+## 1.3.2. The system shall enforce password policy requirements, including minimum length and complexity rules.
+## 1.3.3. The system shall store passwords in a securely hashed format and shall not store passwords in plain text.
+## 1.3.4. The system shall allow authenticated users to change their password.
+## 1.3.5. The system shall require the user to provide their current password when changing their password.
+## 1.3.6. The system shall allow users to initiate a password reset process if they forget their password.
+## 1.3.7. The system shall require the user to provide their registered email address to initi
+
+[11] source=I1a type=Implementation hops=1 rel=REFINES
+Mandatory fields + disabled submit
+
+[12] source=C71 type=Communication/SrcChunk hops=2 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[13] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,","Generated 10 executable Gherkin tests for R1 (Registration mandatory fields). Tests cover mandatory field validation, submit button behavior, Terms and Conditions consent requirements, email uniqueness (case-insensitive), and OWASP compliance for email enumeration prevention. All tests are grounded in the operative context and supporting evidence, excluding conflicting proposals from JIRA-Auth-114 and JIRA-Auth-111.",Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked || Registration form must include a Terms and Conditions checkbox representing acceptance of both Terms of Service and Privacy Policy || All fields are mandatory and must be validated before submission.,"Email uniqueness validation must be case-insensitive (e.g., Test@t.com equals test@t.com) || 'If this email is valid, a message has been sent to it' (prevents email enumeration per OWASP compliance)","JIRA-Auth-114 proposes making phone number optional, contradicting the primary requirement that phone number is mandatory || JIRA-Auth-111 proposes allowing multiple users to share the same email address if phone number is unique, contradicting the email uniqueness requirement",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,">E1 provides the core specification with mandatory fields and form behavior. E4 clarifies field structure (separate first/last name, optional middle name). E3 and E7 provide validation details for phone and email. E6 introduces a critical compliance conflict regarding consent capture methodology. E8 and E9 present conflicting proposals about phone number and email uniqueness that contradict the primary requirement. E10 provides supporting context from the configuration specification. E11 reinforces the disabled-submit behavior. E12 documents the email uniqueness contradiction explicitly. Filtered abstract or low-relevance operative statements: first name, last name, phone number, email address, and password | First name and last name are separate fields, each limited to 50 characters | Leading and trailing spaces in name fields are trimmed; hyphens and accents are allowed",1,0,0,0
+6315d77a,R1,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R1_10,Submit button enabled when all mandatory fields and consent are complete,"Feature: Registration Form Submit Button Enablement
+  Scenario: Submit button becomes enabled when all mandatory fields are filled and consent is given
+    Given the registration form is displayed
+    When the first name field is filled with ""John""
+    And the last name field is filled with ""Smith""
+    And the email field is filled with ""user@example.com""
+    And the phone field is filled with ""1234567890""
+    And the password field is filled with ""SecurePass123""
+    And the Terms and Conditions checkbox is checked
+    Then the Submit button should be enabled","Validates the positive case that the submit button becomes enabled only when all mandatory fields are filled and the legal consent checkbox is checked, confirming the complete mandatory field validation workflow.",E1|E11,Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked|All fields are mandatory and must be validated before submission,A1|C71|I1a|I2|I3|I6|I9|R1|R3,Registration mandatory fields,Registration mandatory fields,"[1] source=R1 type=Requirement/SrcChunk hops=0 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[2] source=R1 type=Requirement hops=0 rel=TARGET
+Registration mandatory fields
+
+[3] source=R1 type=Requirement/SrcChunk hops=0 chunk=dbdfe9579474ba43 doc=JIRA-Auth.md rel=TARGET
+be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone numbers to E.164 format.""
+    },
+    {
+      ""author"": ""Backend Engineer Tomas"",
+      ""timestamp"": ""2026-02-15T11:42:00Z"",
+      ""text"": ""Yes, email format must be validated. The email must follow standard format: local-part@domain. The local part may contain letters, numbers, dots, hyphens, and underscores. The domain must contain at least one dot and valid domain name characters. Example of valid format: user.name@example.com""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-104"",
+    ""summary"": ""Registration - Create Pending account after successful submission"",
+    ""description"": ""Upon successful submission of the registration form, the system shall create a new user account with status set to Pending."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-105"",
+    ""summary"": ""Activation - Send confirmation email with activation link"",
+    ""description"": ""After successful registration, the system shall send an account activation email to the provided email address. The email shall c
+
+[4] source=R1 type=Requirement/SrcChunk hops=0 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=TARGET
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[5] source=I1a type=Implementation/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=REFINES
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[6] source=A1 type=Actor/SrcChunk hops=2 chunk=af22485c3c34f13c doc=EMAIL_LEGAL_GDPR_Compliance.txt rel=IN_DOC > IN_DOC
+From: it_lead@toolchain.com
+To: pm_team@toolchain.com, dev_leads@toolchain.com
+Date: 2026-02-18 14:45
+Subject: Registration consent flow must be revised before launch
+
+Hi All,
+
+During the latest compliance review, Legal raised a blocking concern regarding how consent is collected in the registration journey.
+
+At the moment, the current approach appears to bundle multiple legal acknowledgements too closely. For launch readiness, users need to express consent to the contractual terms and the personal-data-related notice in a clearly distinguishable way. A single combined acknowledgement is not sufficient for this purpose.
+
+Please adjust the registration flow so that these approvals are captured independently and can be demonstrated separately if needed during audit.
+
+This is a release-blocking compliance item.
+
+Best regards,
+
+Dr. Arpad Jog
+General Counsel
+
+[7] source=I9 type=Implementation/SrcChunk hops=1 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=REFINES
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[8] source=I6 type=Implementation/SrcChunk hops=1 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=CONFLICTS_WITH
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=R3 type=Requirement/SrcChunk hops=2 chunk=856fef14e989c23c doc=CONF-AUTH-01.md rel=DEFINED_IN > DEFINED_IN
+ed, or Deleted statuses.
+## 1.2.7. Upon successful authentication, the system shall create an authenticated session associated with the user.
+## 1.2.8. The system shall maintain the authenticated session until the user logs out or the session expires.
+## 1.2.9. The system shall allow the user to log out, which shall terminate the authenticated session.
+## 1.2.10. After logout, the system shall require the user to authenticate again in order to access the platform.
+
+## 1.3. Password Management
+## 1.3.1. The system shall require the user to create a password during registration.
+## 1.3.2. The system shall enforce password policy requirements, including minimum length and complexity rules.
+## 1.3.3. The system shall store passwords in a securely hashed format and shall not store passwords in plain text.
+## 1.3.4. The system shall allow authenticated users to change their password.
+## 1.3.5. The system shall require the user to provide their current password when changing their password.
+## 1.3.6. The system shall allow users to initiate a password reset process if they forget their password.
+## 1.3.7. The system shall require the user to provide their registered email address to initi
+
+[11] source=I1a type=Implementation hops=1 rel=REFINES
+Mandatory fields + disabled submit
+
+[12] source=C71 type=Communication/SrcChunk hops=2 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[13] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,","Generated 10 executable Gherkin tests for R1 (Registration mandatory fields). Tests cover mandatory field validation, submit button behavior, Terms and Conditions consent requirements, email uniqueness (case-insensitive), and OWASP compliance for email enumeration prevention. All tests are grounded in the operative context and supporting evidence, excluding conflicting proposals from JIRA-Auth-114 and JIRA-Auth-111.",Submit button remains disabled until all mandatory fields are filled and the legal consent checkbox is checked || Registration form must include a Terms and Conditions checkbox representing acceptance of both Terms of Service and Privacy Policy || All fields are mandatory and must be validated before submission.,"Email uniqueness validation must be case-insensitive (e.g., Test@t.com equals test@t.com) || 'If this email is valid, a message has been sent to it' (prevents email enumeration per OWASP compliance)","JIRA-Auth-114 proposes making phone number optional, contradicting the primary requirement that phone number is mandatory || JIRA-Auth-111 proposes allowing multiple users to share the same email address if phone number is unique, contradicting the email uniqueness requirement",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,">E1 provides the core specification with mandatory fields and form behavior. E4 clarifies field structure (separate first/last name, optional middle name). E3 and E7 provide validation details for phone and email. E6 introduces a critical compliance conflict regarding consent capture methodology. E8 and E9 present conflicting proposals about phone number and email uniqueness that contradict the primary requirement. E10 provides supporting context from the configuration specification. E11 reinforces the disabled-submit behavior. E12 documents the email uniqueness contradiction explicitly. Filtered abstract or low-relevance operative statements: first name, last name, phone number, email address, and password | First name and last name are separate fields, each limited to 50 characters | Leading and trailing spaces in name fields are trimmed; hyphens and accents are allowed",1,0,0,0

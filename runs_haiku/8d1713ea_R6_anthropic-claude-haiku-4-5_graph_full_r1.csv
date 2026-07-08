@@ -1,0 +1,2779 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+8d1713ea,R6,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R6_1,Automatic deletion of Pending account after 30 days,"Feature: Pending Account Cleanup
+  Scenario: System automatically deletes Pending account after 30 days
+    Given a user account is in 'Pending' status
+    And the account was created 30 days ago
+    When the cleanup job runs
+    Then the account should be deleted from the system
+    And the account should no longer be retrievable",Core requirement: System shall automatically delete any user account that remains in 'Pending' status for more than 30 days. This test validates the primary cleanup behavior mandated by JIRA-Auth-112 for GDPR data minimization compliance.,E1,System shall automatically delete any user account that remains in 'Pending' status for more than 30 days,A44|A5|A8|C1|G1|G63|G93c|I3|I4|R6,Pending-account cleanup,Pending-account cleanup,"[1] source=R6 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[2] source=R6 type=Requirement/SrcChunk hops=0 chunk=2b468c2425caf512 doc=CONF-AUTH-01.md rel=TARGET
+ystem shall set the account status to Pending upon successful registration and before email verification.
+## 1.4.4 The system shall set the account status to Active after successful email verification.
+## 1.4.5 The system shall allow the system administrator to change the account status to Suspended.
+## 1.4.6 The system shall prevent Suspended accounts from authenticating and accessing the platform.
+## 1.4.7 The system shall allow the system administrator to reactivate Suspended accounts by setting the status to Active.
+## 1.4.8 The system shall allow the system administrator to set the account status to Deleted.
+## 1.4.9 The system shall prevent Deleted accounts from authenticating and accessing the platform.
+## 1.4.10 The system shall retain account data for Deleted accounts according to the data retention policy.
+## 1.4.11 The system shall ensure that account status changes take effect immediately.
+
+## 1.5. Session Management
+## 1.5.1 The system shall create an authenticated session upon successful user authentication.
+## 1.5.2 The system shall associate each session with a specific user account.
+## 1.5.3 The system shall allow authenticated users to access protected resources o
+
+[3] source=R6 type=Requirement hops=0 rel=TARGET
+Pending-account cleanup
+
+[4] source=R6 type=Requirement/SrcChunk hops=0 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=TARGET
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[5] source=I4 type=Implementation/SrcChunk hops=1 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=AFFECTS
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[8] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=C1 type=Communication/SrcChunk hops=2 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[12] source=A5 type=Actor/SrcChunk hops=2 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[13] source=A8 type=Actor/SrcChunk hops=2 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[14] source=A44 type=Actor/SrcChunk hops=2 chunk=c48c34de8cf76bce doc=EMAIL_SUPPORT_Emergency_Override.txt rel=IN_DOC > IN_DOC
+From: support_lead@toolchain.com
+Date: 2026-02-24 15:30
+Subject: Escalation: exception handling for priority customers
+
+Hi Dev Team,
+
+Support keeps running into cases where a high-priority customer wants to secure an item even though the system currently treats the time window as blocked because of another pending request.
+
+Operationally, the team is asking whether specially authorized staff should be able to intervene in those cases and resolve the conflict manually, rather than forcing the customer to wait for the ordinary availability flow to clear on its own. In practice this would mean allowing a priority booking path to take precedence over weaker, not-yet-confirmed demand.
+
+Please do not treat this as confirmed product policy yet. We need guidance on whether this should remain a support-side exception process, or whether the booking logic itself is expected to support it.
+
+Regards,
+Sarah (Support Lead)","Test suite for R6 Pending-account cleanup requirement. Validates automatic deletion of accounts in Pending status after 30 days, immediate status effect, prevention of Pending account authentication, and exception handling for manual deletion grace periods and activation link errors. Tests cover core cleanup behavior, status lifecycle, access prevention, and edge cases.",System shall automatically delete any user account that remains in 'Pending' status for more than 30 days || ystem shall set the account status to Pending upon successful registration and before email verification. || System shall prevent Pending accounts from authenticating and accessing the platform || Account status changes take effect immediately,Manual account deletion may require a 14-day grace period for recovery before permanent wipe (clarification needed) || Activation link behavior on non-existent accounts must not trigger 500 error,JIRA-Auth-111 proposes allowing multiple accounts with same email (contradicts CONF-AUTH-01 1.1.3 email uniqueness requirement),,E1|E2|E4|E5|E7|E13|E14,"R6 'Pending-account cleanup' is primarily defined by JIRA-Auth-112 (E1), which mandates automatic deletion of Pending accounts after 30 days for GDPR data minimization compliance. Core operative rules are derived from E1 and cross-referenced against CONF-AUTH-01 account status lifecycle (E2, E5). E13 and E14 identify related gaps around activation expiry and pending cleanup interaction. E4 captures unresolved clarifications on manual deletion grace periods and activation-link error handling. E12 is unrelated (booking/priority customer override) and excluded. E6, E8, E9, E10, E11 are payment or registration field details not directly relevant to pending-account cleanup behavior. Filtered abstract or low-relevance operative statements: All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy",1,0,0,0
+8d1713ea,R6,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R6_2,Account status set to Pending upon successful registration,"Feature: Pending Account Lifecycle
+  Scenario: Account status is set to Pending after successful registration
+    Given a user completes the registration form with valid data
+    When the registration is submitted successfully
+    Then the account status should be set to 'Pending'
+    And the account should await email verification","Validates the initial status assignment in the account lifecycle. System shall set the account status to Pending upon successful registration and before email verification, establishing the starting point for the 30-day cleanup timer.",E2|E5,System shall set the account status to Pending upon successful registration and before email verification,A44|A5|A8|C1|G1|G63|G93c|I3|I4|R6,Pending-account cleanup,Pending-account cleanup,"[1] source=R6 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[2] source=R6 type=Requirement/SrcChunk hops=0 chunk=2b468c2425caf512 doc=CONF-AUTH-01.md rel=TARGET
+ystem shall set the account status to Pending upon successful registration and before email verification.
+## 1.4.4 The system shall set the account status to Active after successful email verification.
+## 1.4.5 The system shall allow the system administrator to change the account status to Suspended.
+## 1.4.6 The system shall prevent Suspended accounts from authenticating and accessing the platform.
+## 1.4.7 The system shall allow the system administrator to reactivate Suspended accounts by setting the status to Active.
+## 1.4.8 The system shall allow the system administrator to set the account status to Deleted.
+## 1.4.9 The system shall prevent Deleted accounts from authenticating and accessing the platform.
+## 1.4.10 The system shall retain account data for Deleted accounts according to the data retention policy.
+## 1.4.11 The system shall ensure that account status changes take effect immediately.
+
+## 1.5. Session Management
+## 1.5.1 The system shall create an authenticated session upon successful user authentication.
+## 1.5.2 The system shall associate each session with a specific user account.
+## 1.5.3 The system shall allow authenticated users to access protected resources o
+
+[3] source=R6 type=Requirement hops=0 rel=TARGET
+Pending-account cleanup
+
+[4] source=R6 type=Requirement/SrcChunk hops=0 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=TARGET
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[5] source=I4 type=Implementation/SrcChunk hops=1 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=AFFECTS
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[8] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=C1 type=Communication/SrcChunk hops=2 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[12] source=A5 type=Actor/SrcChunk hops=2 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[13] source=A8 type=Actor/SrcChunk hops=2 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[14] source=A44 type=Actor/SrcChunk hops=2 chunk=c48c34de8cf76bce doc=EMAIL_SUPPORT_Emergency_Override.txt rel=IN_DOC > IN_DOC
+From: support_lead@toolchain.com
+Date: 2026-02-24 15:30
+Subject: Escalation: exception handling for priority customers
+
+Hi Dev Team,
+
+Support keeps running into cases where a high-priority customer wants to secure an item even though the system currently treats the time window as blocked because of another pending request.
+
+Operationally, the team is asking whether specially authorized staff should be able to intervene in those cases and resolve the conflict manually, rather than forcing the customer to wait for the ordinary availability flow to clear on its own. In practice this would mean allowing a priority booking path to take precedence over weaker, not-yet-confirmed demand.
+
+Please do not treat this as confirmed product policy yet. We need guidance on whether this should remain a support-side exception process, or whether the booking logic itself is expected to support it.
+
+Regards,
+Sarah (Support Lead)","Test suite for R6 Pending-account cleanup requirement. Validates automatic deletion of accounts in Pending status after 30 days, immediate status effect, prevention of Pending account authentication, and exception handling for manual deletion grace periods and activation link errors. Tests cover core cleanup behavior, status lifecycle, access prevention, and edge cases.",System shall automatically delete any user account that remains in 'Pending' status for more than 30 days || ystem shall set the account status to Pending upon successful registration and before email verification. || System shall prevent Pending accounts from authenticating and accessing the platform || Account status changes take effect immediately,Manual account deletion may require a 14-day grace period for recovery before permanent wipe (clarification needed) || Activation link behavior on non-existent accounts must not trigger 500 error,JIRA-Auth-111 proposes allowing multiple accounts with same email (contradicts CONF-AUTH-01 1.1.3 email uniqueness requirement),,E1|E2|E4|E5|E7|E13|E14,"R6 'Pending-account cleanup' is primarily defined by JIRA-Auth-112 (E1), which mandates automatic deletion of Pending accounts after 30 days for GDPR data minimization compliance. Core operative rules are derived from E1 and cross-referenced against CONF-AUTH-01 account status lifecycle (E2, E5). E13 and E14 identify related gaps around activation expiry and pending cleanup interaction. E4 captures unresolved clarifications on manual deletion grace periods and activation-link error handling. E12 is unrelated (booking/priority customer override) and excluded. E6, E8, E9, E10, E11 are payment or registration field details not directly relevant to pending-account cleanup behavior. Filtered abstract or low-relevance operative statements: All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy",1,0,0,0
+8d1713ea,R6,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R6_3,Pending accounts cannot authenticate,"Feature: Pending Account Access Control
+  Scenario: Pending account authentication is prevented
+    Given a user account is in 'Pending' status
+    When the user attempts to authenticate with valid credentials
+    Then authentication should fail
+    And the user should not be granted access to the platform",Ensures security and compliance: System shall prevent Pending accounts from authenticating and accessing the platform. This prevents unverified accounts from accessing platform resources.,E2|E5,System shall prevent Pending accounts from authenticating and accessing the platform,A44|A5|A8|C1|G1|G63|G93c|I3|I4|R6,Pending-account cleanup,Pending-account cleanup,"[1] source=R6 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[2] source=R6 type=Requirement/SrcChunk hops=0 chunk=2b468c2425caf512 doc=CONF-AUTH-01.md rel=TARGET
+ystem shall set the account status to Pending upon successful registration and before email verification.
+## 1.4.4 The system shall set the account status to Active after successful email verification.
+## 1.4.5 The system shall allow the system administrator to change the account status to Suspended.
+## 1.4.6 The system shall prevent Suspended accounts from authenticating and accessing the platform.
+## 1.4.7 The system shall allow the system administrator to reactivate Suspended accounts by setting the status to Active.
+## 1.4.8 The system shall allow the system administrator to set the account status to Deleted.
+## 1.4.9 The system shall prevent Deleted accounts from authenticating and accessing the platform.
+## 1.4.10 The system shall retain account data for Deleted accounts according to the data retention policy.
+## 1.4.11 The system shall ensure that account status changes take effect immediately.
+
+## 1.5. Session Management
+## 1.5.1 The system shall create an authenticated session upon successful user authentication.
+## 1.5.2 The system shall associate each session with a specific user account.
+## 1.5.3 The system shall allow authenticated users to access protected resources o
+
+[3] source=R6 type=Requirement hops=0 rel=TARGET
+Pending-account cleanup
+
+[4] source=R6 type=Requirement/SrcChunk hops=0 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=TARGET
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[5] source=I4 type=Implementation/SrcChunk hops=1 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=AFFECTS
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[8] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=C1 type=Communication/SrcChunk hops=2 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[12] source=A5 type=Actor/SrcChunk hops=2 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[13] source=A8 type=Actor/SrcChunk hops=2 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[14] source=A44 type=Actor/SrcChunk hops=2 chunk=c48c34de8cf76bce doc=EMAIL_SUPPORT_Emergency_Override.txt rel=IN_DOC > IN_DOC
+From: support_lead@toolchain.com
+Date: 2026-02-24 15:30
+Subject: Escalation: exception handling for priority customers
+
+Hi Dev Team,
+
+Support keeps running into cases where a high-priority customer wants to secure an item even though the system currently treats the time window as blocked because of another pending request.
+
+Operationally, the team is asking whether specially authorized staff should be able to intervene in those cases and resolve the conflict manually, rather than forcing the customer to wait for the ordinary availability flow to clear on its own. In practice this would mean allowing a priority booking path to take precedence over weaker, not-yet-confirmed demand.
+
+Please do not treat this as confirmed product policy yet. We need guidance on whether this should remain a support-side exception process, or whether the booking logic itself is expected to support it.
+
+Regards,
+Sarah (Support Lead)","Test suite for R6 Pending-account cleanup requirement. Validates automatic deletion of accounts in Pending status after 30 days, immediate status effect, prevention of Pending account authentication, and exception handling for manual deletion grace periods and activation link errors. Tests cover core cleanup behavior, status lifecycle, access prevention, and edge cases.",System shall automatically delete any user account that remains in 'Pending' status for more than 30 days || ystem shall set the account status to Pending upon successful registration and before email verification. || System shall prevent Pending accounts from authenticating and accessing the platform || Account status changes take effect immediately,Manual account deletion may require a 14-day grace period for recovery before permanent wipe (clarification needed) || Activation link behavior on non-existent accounts must not trigger 500 error,JIRA-Auth-111 proposes allowing multiple accounts with same email (contradicts CONF-AUTH-01 1.1.3 email uniqueness requirement),,E1|E2|E4|E5|E7|E13|E14,"R6 'Pending-account cleanup' is primarily defined by JIRA-Auth-112 (E1), which mandates automatic deletion of Pending accounts after 30 days for GDPR data minimization compliance. Core operative rules are derived from E1 and cross-referenced against CONF-AUTH-01 account status lifecycle (E2, E5). E13 and E14 identify related gaps around activation expiry and pending cleanup interaction. E4 captures unresolved clarifications on manual deletion grace periods and activation-link error handling. E12 is unrelated (booking/priority customer override) and excluded. E6, E8, E9, E10, E11 are payment or registration field details not directly relevant to pending-account cleanup behavior. Filtered abstract or low-relevance operative statements: All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy",1,0,0,0
+8d1713ea,R6,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R6_4,Account status changes take effect immediately,"Feature: Account Status Propagation
+  Scenario: Status change to Pending takes effect immediately
+    Given a user account transitions to 'Pending' status
+    When the status change is committed
+    Then the new status should be immediately reflected in the system
+    And authentication checks should immediately enforce the new status",Validates immediate status propagation: Account status changes take effect immediately. This ensures that access control and cleanup logic operate on current state without delay.,E5,Account status changes take effect immediately,A44|A5|A8|C1|G1|G63|G93c|I3|I4|R6,Pending-account cleanup,Pending-account cleanup,"[1] source=R6 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[2] source=R6 type=Requirement/SrcChunk hops=0 chunk=2b468c2425caf512 doc=CONF-AUTH-01.md rel=TARGET
+ystem shall set the account status to Pending upon successful registration and before email verification.
+## 1.4.4 The system shall set the account status to Active after successful email verification.
+## 1.4.5 The system shall allow the system administrator to change the account status to Suspended.
+## 1.4.6 The system shall prevent Suspended accounts from authenticating and accessing the platform.
+## 1.4.7 The system shall allow the system administrator to reactivate Suspended accounts by setting the status to Active.
+## 1.4.8 The system shall allow the system administrator to set the account status to Deleted.
+## 1.4.9 The system shall prevent Deleted accounts from authenticating and accessing the platform.
+## 1.4.10 The system shall retain account data for Deleted accounts according to the data retention policy.
+## 1.4.11 The system shall ensure that account status changes take effect immediately.
+
+## 1.5. Session Management
+## 1.5.1 The system shall create an authenticated session upon successful user authentication.
+## 1.5.2 The system shall associate each session with a specific user account.
+## 1.5.3 The system shall allow authenticated users to access protected resources o
+
+[3] source=R6 type=Requirement hops=0 rel=TARGET
+Pending-account cleanup
+
+[4] source=R6 type=Requirement/SrcChunk hops=0 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=TARGET
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[5] source=I4 type=Implementation/SrcChunk hops=1 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=AFFECTS
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[8] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=C1 type=Communication/SrcChunk hops=2 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[12] source=A5 type=Actor/SrcChunk hops=2 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[13] source=A8 type=Actor/SrcChunk hops=2 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[14] source=A44 type=Actor/SrcChunk hops=2 chunk=c48c34de8cf76bce doc=EMAIL_SUPPORT_Emergency_Override.txt rel=IN_DOC > IN_DOC
+From: support_lead@toolchain.com
+Date: 2026-02-24 15:30
+Subject: Escalation: exception handling for priority customers
+
+Hi Dev Team,
+
+Support keeps running into cases where a high-priority customer wants to secure an item even though the system currently treats the time window as blocked because of another pending request.
+
+Operationally, the team is asking whether specially authorized staff should be able to intervene in those cases and resolve the conflict manually, rather than forcing the customer to wait for the ordinary availability flow to clear on its own. In practice this would mean allowing a priority booking path to take precedence over weaker, not-yet-confirmed demand.
+
+Please do not treat this as confirmed product policy yet. We need guidance on whether this should remain a support-side exception process, or whether the booking logic itself is expected to support it.
+
+Regards,
+Sarah (Support Lead)","Test suite for R6 Pending-account cleanup requirement. Validates automatic deletion of accounts in Pending status after 30 days, immediate status effect, prevention of Pending account authentication, and exception handling for manual deletion grace periods and activation link errors. Tests cover core cleanup behavior, status lifecycle, access prevention, and edge cases.",System shall automatically delete any user account that remains in 'Pending' status for more than 30 days || ystem shall set the account status to Pending upon successful registration and before email verification. || System shall prevent Pending accounts from authenticating and accessing the platform || Account status changes take effect immediately,Manual account deletion may require a 14-day grace period for recovery before permanent wipe (clarification needed) || Activation link behavior on non-existent accounts must not trigger 500 error,JIRA-Auth-111 proposes allowing multiple accounts with same email (contradicts CONF-AUTH-01 1.1.3 email uniqueness requirement),,E1|E2|E4|E5|E7|E13|E14,"R6 'Pending-account cleanup' is primarily defined by JIRA-Auth-112 (E1), which mandates automatic deletion of Pending accounts after 30 days for GDPR data minimization compliance. Core operative rules are derived from E1 and cross-referenced against CONF-AUTH-01 account status lifecycle (E2, E5). E13 and E14 identify related gaps around activation expiry and pending cleanup interaction. E4 captures unresolved clarifications on manual deletion grace periods and activation-link error handling. E12 is unrelated (booking/priority customer override) and excluded. E6, E8, E9, E10, E11 are payment or registration field details not directly relevant to pending-account cleanup behavior. Filtered abstract or low-relevance operative statements: All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy",1,0,0,0
+8d1713ea,R6,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R6_5,Pending account not deleted before 30 days,"Feature: Pending Account Cleanup Timing
+  Scenario: Pending account is not deleted before 30-day threshold
+    Given a user account is in 'Pending' status
+    And the account was created 29 days ago
+    When the cleanup job runs
+    Then the account should not be deleted
+    And the account should remain in 'Pending' status","Validates the 30-day threshold boundary. Accounts should only be deleted after more than 30 days, not before. This ensures users have adequate time to verify their email.",E1,System shall automatically delete any user account that remains in 'Pending' status for more than 30 days,A44|A5|A8|C1|G1|G63|G93c|I3|I4|R6,Pending-account cleanup,Pending-account cleanup,"[1] source=R6 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[2] source=R6 type=Requirement/SrcChunk hops=0 chunk=2b468c2425caf512 doc=CONF-AUTH-01.md rel=TARGET
+ystem shall set the account status to Pending upon successful registration and before email verification.
+## 1.4.4 The system shall set the account status to Active after successful email verification.
+## 1.4.5 The system shall allow the system administrator to change the account status to Suspended.
+## 1.4.6 The system shall prevent Suspended accounts from authenticating and accessing the platform.
+## 1.4.7 The system shall allow the system administrator to reactivate Suspended accounts by setting the status to Active.
+## 1.4.8 The system shall allow the system administrator to set the account status to Deleted.
+## 1.4.9 The system shall prevent Deleted accounts from authenticating and accessing the platform.
+## 1.4.10 The system shall retain account data for Deleted accounts according to the data retention policy.
+## 1.4.11 The system shall ensure that account status changes take effect immediately.
+
+## 1.5. Session Management
+## 1.5.1 The system shall create an authenticated session upon successful user authentication.
+## 1.5.2 The system shall associate each session with a specific user account.
+## 1.5.3 The system shall allow authenticated users to access protected resources o
+
+[3] source=R6 type=Requirement hops=0 rel=TARGET
+Pending-account cleanup
+
+[4] source=R6 type=Requirement/SrcChunk hops=0 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=TARGET
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[5] source=I4 type=Implementation/SrcChunk hops=1 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=AFFECTS
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[8] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=C1 type=Communication/SrcChunk hops=2 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[12] source=A5 type=Actor/SrcChunk hops=2 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[13] source=A8 type=Actor/SrcChunk hops=2 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[14] source=A44 type=Actor/SrcChunk hops=2 chunk=c48c34de8cf76bce doc=EMAIL_SUPPORT_Emergency_Override.txt rel=IN_DOC > IN_DOC
+From: support_lead@toolchain.com
+Date: 2026-02-24 15:30
+Subject: Escalation: exception handling for priority customers
+
+Hi Dev Team,
+
+Support keeps running into cases where a high-priority customer wants to secure an item even though the system currently treats the time window as blocked because of another pending request.
+
+Operationally, the team is asking whether specially authorized staff should be able to intervene in those cases and resolve the conflict manually, rather than forcing the customer to wait for the ordinary availability flow to clear on its own. In practice this would mean allowing a priority booking path to take precedence over weaker, not-yet-confirmed demand.
+
+Please do not treat this as confirmed product policy yet. We need guidance on whether this should remain a support-side exception process, or whether the booking logic itself is expected to support it.
+
+Regards,
+Sarah (Support Lead)","Test suite for R6 Pending-account cleanup requirement. Validates automatic deletion of accounts in Pending status after 30 days, immediate status effect, prevention of Pending account authentication, and exception handling for manual deletion grace periods and activation link errors. Tests cover core cleanup behavior, status lifecycle, access prevention, and edge cases.",System shall automatically delete any user account that remains in 'Pending' status for more than 30 days || ystem shall set the account status to Pending upon successful registration and before email verification. || System shall prevent Pending accounts from authenticating and accessing the platform || Account status changes take effect immediately,Manual account deletion may require a 14-day grace period for recovery before permanent wipe (clarification needed) || Activation link behavior on non-existent accounts must not trigger 500 error,JIRA-Auth-111 proposes allowing multiple accounts with same email (contradicts CONF-AUTH-01 1.1.3 email uniqueness requirement),,E1|E2|E4|E5|E7|E13|E14,"R6 'Pending-account cleanup' is primarily defined by JIRA-Auth-112 (E1), which mandates automatic deletion of Pending accounts after 30 days for GDPR data minimization compliance. Core operative rules are derived from E1 and cross-referenced against CONF-AUTH-01 account status lifecycle (E2, E5). E13 and E14 identify related gaps around activation expiry and pending cleanup interaction. E4 captures unresolved clarifications on manual deletion grace periods and activation-link error handling. E12 is unrelated (booking/priority customer override) and excluded. E6, E8, E9, E10, E11 are payment or registration field details not directly relevant to pending-account cleanup behavior. Filtered abstract or low-relevance operative statements: All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy",1,0,0,0
+8d1713ea,R6,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R6_6,Manual account deletion requires 14-day grace period for recovery,"Feature: Manual Account Deletion Grace Period
+  Scenario: Manual deletion initiates 14-day recovery grace period
+    Given an administrator manually deletes a user account
+    When the deletion is initiated
+    Then the account should enter a 14-day grace period
+    And the account data should be recoverable during the grace period
+    And after 14 days, the account should be permanently wiped","Exception handling: Manual account deletion may require a 14-day grace period for recovery before permanent wipe. This test validates the exception case where manual deletion differs from automatic cleanup, providing data recovery protection.",E4,Manual account deletion may require a 14-day grace period for recovery before permanent wipe (clarification needed),A44|A5|A8|C1|G1|G63|G93c|I3|I4|R6,Pending-account cleanup,Pending-account cleanup,"[1] source=R6 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[2] source=R6 type=Requirement/SrcChunk hops=0 chunk=2b468c2425caf512 doc=CONF-AUTH-01.md rel=TARGET
+ystem shall set the account status to Pending upon successful registration and before email verification.
+## 1.4.4 The system shall set the account status to Active after successful email verification.
+## 1.4.5 The system shall allow the system administrator to change the account status to Suspended.
+## 1.4.6 The system shall prevent Suspended accounts from authenticating and accessing the platform.
+## 1.4.7 The system shall allow the system administrator to reactivate Suspended accounts by setting the status to Active.
+## 1.4.8 The system shall allow the system administrator to set the account status to Deleted.
+## 1.4.9 The system shall prevent Deleted accounts from authenticating and accessing the platform.
+## 1.4.10 The system shall retain account data for Deleted accounts according to the data retention policy.
+## 1.4.11 The system shall ensure that account status changes take effect immediately.
+
+## 1.5. Session Management
+## 1.5.1 The system shall create an authenticated session upon successful user authentication.
+## 1.5.2 The system shall associate each session with a specific user account.
+## 1.5.3 The system shall allow authenticated users to access protected resources o
+
+[3] source=R6 type=Requirement hops=0 rel=TARGET
+Pending-account cleanup
+
+[4] source=R6 type=Requirement/SrcChunk hops=0 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=TARGET
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[5] source=I4 type=Implementation/SrcChunk hops=1 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=AFFECTS
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[8] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=C1 type=Communication/SrcChunk hops=2 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[12] source=A5 type=Actor/SrcChunk hops=2 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[13] source=A8 type=Actor/SrcChunk hops=2 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[14] source=A44 type=Actor/SrcChunk hops=2 chunk=c48c34de8cf76bce doc=EMAIL_SUPPORT_Emergency_Override.txt rel=IN_DOC > IN_DOC
+From: support_lead@toolchain.com
+Date: 2026-02-24 15:30
+Subject: Escalation: exception handling for priority customers
+
+Hi Dev Team,
+
+Support keeps running into cases where a high-priority customer wants to secure an item even though the system currently treats the time window as blocked because of another pending request.
+
+Operationally, the team is asking whether specially authorized staff should be able to intervene in those cases and resolve the conflict manually, rather than forcing the customer to wait for the ordinary availability flow to clear on its own. In practice this would mean allowing a priority booking path to take precedence over weaker, not-yet-confirmed demand.
+
+Please do not treat this as confirmed product policy yet. We need guidance on whether this should remain a support-side exception process, or whether the booking logic itself is expected to support it.
+
+Regards,
+Sarah (Support Lead)","Test suite for R6 Pending-account cleanup requirement. Validates automatic deletion of accounts in Pending status after 30 days, immediate status effect, prevention of Pending account authentication, and exception handling for manual deletion grace periods and activation link errors. Tests cover core cleanup behavior, status lifecycle, access prevention, and edge cases.",System shall automatically delete any user account that remains in 'Pending' status for more than 30 days || ystem shall set the account status to Pending upon successful registration and before email verification. || System shall prevent Pending accounts from authenticating and accessing the platform || Account status changes take effect immediately,Manual account deletion may require a 14-day grace period for recovery before permanent wipe (clarification needed) || Activation link behavior on non-existent accounts must not trigger 500 error,JIRA-Auth-111 proposes allowing multiple accounts with same email (contradicts CONF-AUTH-01 1.1.3 email uniqueness requirement),,E1|E2|E4|E5|E7|E13|E14,"R6 'Pending-account cleanup' is primarily defined by JIRA-Auth-112 (E1), which mandates automatic deletion of Pending accounts after 30 days for GDPR data minimization compliance. Core operative rules are derived from E1 and cross-referenced against CONF-AUTH-01 account status lifecycle (E2, E5). E13 and E14 identify related gaps around activation expiry and pending cleanup interaction. E4 captures unresolved clarifications on manual deletion grace periods and activation-link error handling. E12 is unrelated (booking/priority customer override) and excluded. E6, E8, E9, E10, E11 are payment or registration field details not directly relevant to pending-account cleanup behavior. Filtered abstract or low-relevance operative statements: All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy",1,0,0,0
+8d1713ea,R6,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R6_7,Activation link on non-existent account does not trigger 500 error,"Feature: Activation Link Error Handling
+  Scenario: Activation link for non-existent account returns graceful error
+    Given an activation link is provided for a non-existent account
+    When the activation link is clicked
+    Then the system should not return a 500 Internal Server Error
+    And the user should receive a user-friendly error message
+    And the system should remain stable",Exception handling: Activation link behavior on non-existent accounts must not trigger 500 error. This prevents information disclosure and ensures graceful degradation when accounts have been deleted or never existed.,E4,Activation link behavior on non-existent accounts must not trigger 500 error,A44|A5|A8|C1|G1|G63|G93c|I3|I4|R6,Pending-account cleanup,Pending-account cleanup,"[1] source=R6 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[2] source=R6 type=Requirement/SrcChunk hops=0 chunk=2b468c2425caf512 doc=CONF-AUTH-01.md rel=TARGET
+ystem shall set the account status to Pending upon successful registration and before email verification.
+## 1.4.4 The system shall set the account status to Active after successful email verification.
+## 1.4.5 The system shall allow the system administrator to change the account status to Suspended.
+## 1.4.6 The system shall prevent Suspended accounts from authenticating and accessing the platform.
+## 1.4.7 The system shall allow the system administrator to reactivate Suspended accounts by setting the status to Active.
+## 1.4.8 The system shall allow the system administrator to set the account status to Deleted.
+## 1.4.9 The system shall prevent Deleted accounts from authenticating and accessing the platform.
+## 1.4.10 The system shall retain account data for Deleted accounts according to the data retention policy.
+## 1.4.11 The system shall ensure that account status changes take effect immediately.
+
+## 1.5. Session Management
+## 1.5.1 The system shall create an authenticated session upon successful user authentication.
+## 1.5.2 The system shall associate each session with a specific user account.
+## 1.5.3 The system shall allow authenticated users to access protected resources o
+
+[3] source=R6 type=Requirement hops=0 rel=TARGET
+Pending-account cleanup
+
+[4] source=R6 type=Requirement/SrcChunk hops=0 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=TARGET
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[5] source=I4 type=Implementation/SrcChunk hops=1 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=AFFECTS
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[8] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=C1 type=Communication/SrcChunk hops=2 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[12] source=A5 type=Actor/SrcChunk hops=2 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[13] source=A8 type=Actor/SrcChunk hops=2 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[14] source=A44 type=Actor/SrcChunk hops=2 chunk=c48c34de8cf76bce doc=EMAIL_SUPPORT_Emergency_Override.txt rel=IN_DOC > IN_DOC
+From: support_lead@toolchain.com
+Date: 2026-02-24 15:30
+Subject: Escalation: exception handling for priority customers
+
+Hi Dev Team,
+
+Support keeps running into cases where a high-priority customer wants to secure an item even though the system currently treats the time window as blocked because of another pending request.
+
+Operationally, the team is asking whether specially authorized staff should be able to intervene in those cases and resolve the conflict manually, rather than forcing the customer to wait for the ordinary availability flow to clear on its own. In practice this would mean allowing a priority booking path to take precedence over weaker, not-yet-confirmed demand.
+
+Please do not treat this as confirmed product policy yet. We need guidance on whether this should remain a support-side exception process, or whether the booking logic itself is expected to support it.
+
+Regards,
+Sarah (Support Lead)","Test suite for R6 Pending-account cleanup requirement. Validates automatic deletion of accounts in Pending status after 30 days, immediate status effect, prevention of Pending account authentication, and exception handling for manual deletion grace periods and activation link errors. Tests cover core cleanup behavior, status lifecycle, access prevention, and edge cases.",System shall automatically delete any user account that remains in 'Pending' status for more than 30 days || ystem shall set the account status to Pending upon successful registration and before email verification. || System shall prevent Pending accounts from authenticating and accessing the platform || Account status changes take effect immediately,Manual account deletion may require a 14-day grace period for recovery before permanent wipe (clarification needed) || Activation link behavior on non-existent accounts must not trigger 500 error,JIRA-Auth-111 proposes allowing multiple accounts with same email (contradicts CONF-AUTH-01 1.1.3 email uniqueness requirement),,E1|E2|E4|E5|E7|E13|E14,"R6 'Pending-account cleanup' is primarily defined by JIRA-Auth-112 (E1), which mandates automatic deletion of Pending accounts after 30 days for GDPR data minimization compliance. Core operative rules are derived from E1 and cross-referenced against CONF-AUTH-01 account status lifecycle (E2, E5). E13 and E14 identify related gaps around activation expiry and pending cleanup interaction. E4 captures unresolved clarifications on manual deletion grace periods and activation-link error handling. E12 is unrelated (booking/priority customer override) and excluded. E6, E8, E9, E10, E11 are payment or registration field details not directly relevant to pending-account cleanup behavior. Filtered abstract or low-relevance operative statements: All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy",1,0,0,0
+8d1713ea,R6,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R6_8,Personal data removed upon Pending account cleanup,"Feature: Data Minimization on Cleanup
+  Scenario: Personal data is removed when Pending account is deleted
+    Given a Pending account is scheduled for deletion after 30 days
+    When the cleanup job executes the deletion
+    Then all associated personal data should be removed
+    And minimal audit logs required by retention policy should be preserved
+    And the account should no longer be identifiable by personal information","GDPR data minimization compliance: All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy. This ensures compliance with data protection regulations.",E1,"System shall automatically delete any user account that remains in 'Pending' status for more than 30 days|All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy",A44|A5|A8|C1|G1|G63|G93c|I3|I4|R6,Pending-account cleanup,Pending-account cleanup,"[1] source=R6 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[2] source=R6 type=Requirement/SrcChunk hops=0 chunk=2b468c2425caf512 doc=CONF-AUTH-01.md rel=TARGET
+ystem shall set the account status to Pending upon successful registration and before email verification.
+## 1.4.4 The system shall set the account status to Active after successful email verification.
+## 1.4.5 The system shall allow the system administrator to change the account status to Suspended.
+## 1.4.6 The system shall prevent Suspended accounts from authenticating and accessing the platform.
+## 1.4.7 The system shall allow the system administrator to reactivate Suspended accounts by setting the status to Active.
+## 1.4.8 The system shall allow the system administrator to set the account status to Deleted.
+## 1.4.9 The system shall prevent Deleted accounts from authenticating and accessing the platform.
+## 1.4.10 The system shall retain account data for Deleted accounts according to the data retention policy.
+## 1.4.11 The system shall ensure that account status changes take effect immediately.
+
+## 1.5. Session Management
+## 1.5.1 The system shall create an authenticated session upon successful user authentication.
+## 1.5.2 The system shall associate each session with a specific user account.
+## 1.5.3 The system shall allow authenticated users to access protected resources o
+
+[3] source=R6 type=Requirement hops=0 rel=TARGET
+Pending-account cleanup
+
+[4] source=R6 type=Requirement/SrcChunk hops=0 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=TARGET
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[5] source=I4 type=Implementation/SrcChunk hops=1 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=AFFECTS
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[8] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=C1 type=Communication/SrcChunk hops=2 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[12] source=A5 type=Actor/SrcChunk hops=2 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[13] source=A8 type=Actor/SrcChunk hops=2 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[14] source=A44 type=Actor/SrcChunk hops=2 chunk=c48c34de8cf76bce doc=EMAIL_SUPPORT_Emergency_Override.txt rel=IN_DOC > IN_DOC
+From: support_lead@toolchain.com
+Date: 2026-02-24 15:30
+Subject: Escalation: exception handling for priority customers
+
+Hi Dev Team,
+
+Support keeps running into cases where a high-priority customer wants to secure an item even though the system currently treats the time window as blocked because of another pending request.
+
+Operationally, the team is asking whether specially authorized staff should be able to intervene in those cases and resolve the conflict manually, rather than forcing the customer to wait for the ordinary availability flow to clear on its own. In practice this would mean allowing a priority booking path to take precedence over weaker, not-yet-confirmed demand.
+
+Please do not treat this as confirmed product policy yet. We need guidance on whether this should remain a support-side exception process, or whether the booking logic itself is expected to support it.
+
+Regards,
+Sarah (Support Lead)","Test suite for R6 Pending-account cleanup requirement. Validates automatic deletion of accounts in Pending status after 30 days, immediate status effect, prevention of Pending account authentication, and exception handling for manual deletion grace periods and activation link errors. Tests cover core cleanup behavior, status lifecycle, access prevention, and edge cases.",System shall automatically delete any user account that remains in 'Pending' status for more than 30 days || ystem shall set the account status to Pending upon successful registration and before email verification. || System shall prevent Pending accounts from authenticating and accessing the platform || Account status changes take effect immediately,Manual account deletion may require a 14-day grace period for recovery before permanent wipe (clarification needed) || Activation link behavior on non-existent accounts must not trigger 500 error,JIRA-Auth-111 proposes allowing multiple accounts with same email (contradicts CONF-AUTH-01 1.1.3 email uniqueness requirement),,E1|E2|E4|E5|E7|E13|E14,"R6 'Pending-account cleanup' is primarily defined by JIRA-Auth-112 (E1), which mandates automatic deletion of Pending accounts after 30 days for GDPR data minimization compliance. Core operative rules are derived from E1 and cross-referenced against CONF-AUTH-01 account status lifecycle (E2, E5). E13 and E14 identify related gaps around activation expiry and pending cleanup interaction. E4 captures unresolved clarifications on manual deletion grace periods and activation-link error handling. E12 is unrelated (booking/priority customer override) and excluded. E6, E8, E9, E10, E11 are payment or registration field details not directly relevant to pending-account cleanup behavior. Filtered abstract or low-relevance operative statements: All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy",1,0,0,0
+8d1713ea,R6,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R6_9,Pending account cleanup interaction with activation expiry,"Feature: Pending Account Cleanup and Activation Expiry
+  Scenario: Cleanup respects activation link expiry during pending period
+    Given a Pending account with an expired activation link
+    And the account is within the 30-day cleanup window
+    When the cleanup job runs
+    Then the account should be deleted after 30 days
+    And the expired activation link should not prevent cleanup",Gap clarification: E13 and E14 identify related gaps around activation expiry and pending cleanup interaction. This test ensures cleanup logic is independent of activation link state and executes as scheduled.,E13|E14,System shall automatically delete any user account that remains in 'Pending' status for more than 30 days,A44|A5|A8|C1|G1|G63|G93c|I3|I4|R6,Pending-account cleanup,Pending-account cleanup,"[1] source=R6 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[2] source=R6 type=Requirement/SrcChunk hops=0 chunk=2b468c2425caf512 doc=CONF-AUTH-01.md rel=TARGET
+ystem shall set the account status to Pending upon successful registration and before email verification.
+## 1.4.4 The system shall set the account status to Active after successful email verification.
+## 1.4.5 The system shall allow the system administrator to change the account status to Suspended.
+## 1.4.6 The system shall prevent Suspended accounts from authenticating and accessing the platform.
+## 1.4.7 The system shall allow the system administrator to reactivate Suspended accounts by setting the status to Active.
+## 1.4.8 The system shall allow the system administrator to set the account status to Deleted.
+## 1.4.9 The system shall prevent Deleted accounts from authenticating and accessing the platform.
+## 1.4.10 The system shall retain account data for Deleted accounts according to the data retention policy.
+## 1.4.11 The system shall ensure that account status changes take effect immediately.
+
+## 1.5. Session Management
+## 1.5.1 The system shall create an authenticated session upon successful user authentication.
+## 1.5.2 The system shall associate each session with a specific user account.
+## 1.5.3 The system shall allow authenticated users to access protected resources o
+
+[3] source=R6 type=Requirement hops=0 rel=TARGET
+Pending-account cleanup
+
+[4] source=R6 type=Requirement/SrcChunk hops=0 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=TARGET
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[5] source=I4 type=Implementation/SrcChunk hops=1 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=AFFECTS
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[8] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=C1 type=Communication/SrcChunk hops=2 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[12] source=A5 type=Actor/SrcChunk hops=2 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[13] source=A8 type=Actor/SrcChunk hops=2 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[14] source=A44 type=Actor/SrcChunk hops=2 chunk=c48c34de8cf76bce doc=EMAIL_SUPPORT_Emergency_Override.txt rel=IN_DOC > IN_DOC
+From: support_lead@toolchain.com
+Date: 2026-02-24 15:30
+Subject: Escalation: exception handling for priority customers
+
+Hi Dev Team,
+
+Support keeps running into cases where a high-priority customer wants to secure an item even though the system currently treats the time window as blocked because of another pending request.
+
+Operationally, the team is asking whether specially authorized staff should be able to intervene in those cases and resolve the conflict manually, rather than forcing the customer to wait for the ordinary availability flow to clear on its own. In practice this would mean allowing a priority booking path to take precedence over weaker, not-yet-confirmed demand.
+
+Please do not treat this as confirmed product policy yet. We need guidance on whether this should remain a support-side exception process, or whether the booking logic itself is expected to support it.
+
+Regards,
+Sarah (Support Lead)","Test suite for R6 Pending-account cleanup requirement. Validates automatic deletion of accounts in Pending status after 30 days, immediate status effect, prevention of Pending account authentication, and exception handling for manual deletion grace periods and activation link errors. Tests cover core cleanup behavior, status lifecycle, access prevention, and edge cases.",System shall automatically delete any user account that remains in 'Pending' status for more than 30 days || ystem shall set the account status to Pending upon successful registration and before email verification. || System shall prevent Pending accounts from authenticating and accessing the platform || Account status changes take effect immediately,Manual account deletion may require a 14-day grace period for recovery before permanent wipe (clarification needed) || Activation link behavior on non-existent accounts must not trigger 500 error,JIRA-Auth-111 proposes allowing multiple accounts with same email (contradicts CONF-AUTH-01 1.1.3 email uniqueness requirement),,E1|E2|E4|E5|E7|E13|E14,"R6 'Pending-account cleanup' is primarily defined by JIRA-Auth-112 (E1), which mandates automatic deletion of Pending accounts after 30 days for GDPR data minimization compliance. Core operative rules are derived from E1 and cross-referenced against CONF-AUTH-01 account status lifecycle (E2, E5). E13 and E14 identify related gaps around activation expiry and pending cleanup interaction. E4 captures unresolved clarifications on manual deletion grace periods and activation-link error handling. E12 is unrelated (booking/priority customer override) and excluded. E6, E8, E9, E10, E11 are payment or registration field details not directly relevant to pending-account cleanup behavior. Filtered abstract or low-relevance operative statements: All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy",1,0,0,0
+8d1713ea,R6,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R6_10,Multiple Pending accounts cleaned up in batch operation,"Feature: Batch Pending Account Cleanup
+  Scenario: System cleans up multiple Pending accounts in single operation
+    Given multiple user accounts are in 'Pending' status
+    And each account has been pending for more than 30 days
+    When the cleanup job runs
+    Then all eligible Pending accounts should be deleted
+    And the cleanup should complete without errors
+    And audit logs should record all deletions",Operational efficiency: Validates that the cleanup mechanism scales to handle multiple accounts efficiently. Ensures the system can perform batch deletions while maintaining data integrity and audit compliance.,E1,System shall automatically delete any user account that remains in 'Pending' status for more than 30 days,A44|A5|A8|C1|G1|G63|G93c|I3|I4|R6,Pending-account cleanup,Pending-account cleanup,"[1] source=R6 type=Requirement/SrcChunk hops=0 chunk=66d61fc1f995d676 doc=JIRA-Auth.md rel=TARGET
+ {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-112"",
+  ""summary"": ""Registration - Auto-cleanup for unactivated accounts and Data Retention"",
+  ""description"": ""To comply with data minimization principles, the system shall automatically delete any user account that remains in 'Pending' status for more than 30 days. All associated personal data must be removed, except for minimal audit logs required by the retention policy."",
+  ""comments"": [
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-16T12:05:00Z"",
+      ""text"": ""This is an enhancement beyond the initial SRS but aligns with GDPR data minimization.""
+    },
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-16T13:45:00Z"",
+      ""text"": ""Logic Gap: If we delete the account after 30 days, what happens to the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Sec
+
+[2] source=R6 type=Requirement/SrcChunk hops=0 chunk=2b468c2425caf512 doc=CONF-AUTH-01.md rel=TARGET
+ystem shall set the account status to Pending upon successful registration and before email verification.
+## 1.4.4 The system shall set the account status to Active after successful email verification.
+## 1.4.5 The system shall allow the system administrator to change the account status to Suspended.
+## 1.4.6 The system shall prevent Suspended accounts from authenticating and accessing the platform.
+## 1.4.7 The system shall allow the system administrator to reactivate Suspended accounts by setting the status to Active.
+## 1.4.8 The system shall allow the system administrator to set the account status to Deleted.
+## 1.4.9 The system shall prevent Deleted accounts from authenticating and accessing the platform.
+## 1.4.10 The system shall retain account data for Deleted accounts according to the data retention policy.
+## 1.4.11 The system shall ensure that account status changes take effect immediately.
+
+## 1.5. Session Management
+## 1.5.1 The system shall create an authenticated session upon successful user authentication.
+## 1.5.2 The system shall associate each session with a specific user account.
+## 1.5.3 The system shall allow authenticated users to access protected resources o
+
+[3] source=R6 type=Requirement hops=0 rel=TARGET
+Pending-account cleanup
+
+[4] source=R6 type=Requirement/SrcChunk hops=0 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=TARGET
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[5] source=I4 type=Implementation/SrcChunk hops=1 chunk=8f9c14a11698d93e doc=CONF-AUTH-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AUTH-01
+# Description: User account registration and lifecycle management
+# Status: Effective (v1.0)
+
+## 1 User account registration and lifecycle management
+
+## 1.1 User registration and account activation
+## 1.1.1 The user must register in order to access the platform.
+## 1.1.2. During registration, the system shall require the user to provide the following mandatory information: first name, last name, phone number, email address
+## 1.1.3. The system shall validate that the provided email address is unique and not already associated with an existing account.
+## 1.1.4. Upon successful submission of the registration form, the system shall create a new user account with a status of Pending.
+## 1.1.5. The system shall send an account activation email to the provided email address containing a unique activation link.
+## 1.1.6. The user must activate their account by accessing the activation link.
+## 1.1.7. The system shall verify the validity of the activation link.
+## 1.1.8. Upon successful activation, the system shall update the account status to Active.
+## 1.1.9. The system shall not allow authentication or platform access for accounts that are not i
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[7] source=G1 type=Gap/SrcChunk hops=1 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=AFFECTS
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[8] source=G1 type=Gap hops=1 rel=AFFECTS
+Activation expiry / pending cleanup gap
+
+[9] source=I3 type=Implementation/SrcChunk hops=2 chunk=56489466fbfffbaa doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-110"",
+    ""summary"": ""Activation token - Enforce single-use"",
+    ""description"": ""Activation tokens shall be single-use. After a successful activation, the system shall invalidate the activation token immediately to prevent reuse."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-111"",
+    ""summary"": ""Support registration for multiple users sharing the same email address"",
+    ""description"": ""In some use cases (e.g. family accounts or shared organizational email addresses), multiple users may attempt to register using the same email address. Instead of enforcing strict email uniqueness, we may allow multiple accountsto share the same email if another identifier (such as phone number) is unique. This would require adjusting the registration validation logic."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T10:41:00Z"",
+        ""text"": ""This contradicts the SRS requirement that email must be unique. Please confirm expected behavior
+
+[10] source=G93c type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=C1 type=Communication/SrcChunk hops=2 chunk=6bb3b84e337f31dc doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+nd whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be trimmed. Hyphens and accents are allowed.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T07:16:00Z"",
+        ""text"": ""Will first and last names be entered in separate fields? Will we support a middle name?""
+      },
+      {
+        ""author"": ""PM Peter"",
+        ""timestamp"": ""2026-02-16T12:58:00Z"",
+        ""text"": ""First and last name are separate fields. Middle name is optional.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-16T16:43:00Z"",
+        ""text"": ""Do we support double surnames or special characters (e.g. apostrophe in O'Connor)?""
+      }
+    ],
+	""attachments"": [""EMAIL_LEGAL_GDPR_Compliance.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-102"",
+    ""summary"": ""Registration - Email uniqueness validation"",
+    ""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comm
+
+[12] source=A5 type=Actor/SrcChunk hops=2 chunk=b046296a3e9c6aab doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+""description"": ""Validate that the email address provided during registration is unique and not already associated with an existing account. Uniqueness validation shall be case-insensitive."",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T08:22:00Z"",
+        ""text"": ""Should email addresses be case-sensitive when checking for uniqueness? (e.g. Test@t.com = test@t.com?)""
+      }
+    ]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-103"",
+  ""summary"": ""Registration - Phone number validation and normalization"",
+  ""description"": ""Validate phone number format during registration and store it in normalized E.164 format. Reject invalid formats and normalize acceptable inputs."",
+  ""comments"": [
+    {
+      ""author"": ""QA Engineer Marta"",
+      ""timestamp"": ""2026-02-15T10:22:00Z"",
+      ""text"": ""Please confirm whether we accept spaces, parentheses, and dashes in phone number input (e.g., +36 (30) 123-4567) and normalize it. Also, should the email address format be validated during registration?""
+    },
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-15T11:05:00Z"",
+      ""text"": ""Yes, we will accept common separators and normalize phone nu
+
+[13] source=A8 type=Actor/SrcChunk hops=2 chunk=ce4209d8f88ab7e7 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-Auth-101"",
+    ""summary"": ""Registration - Create account with mandatory fields"",
+    ""description"": ""Implement user registration functionality. The system shall require first name, last name, phone number, email address, and password. All fields are mandatory and must be validated before submission. \n\nAdditionally, the form must include:\n1. A single 'Terms and Conditions' checkbox that represents acceptance of both the Terms of Service and Privacy Policy.\n2. A 'Submit' button that remains disabled until all mandatory fields are filled and the legal consent checkbox is checked."",
+    ""comments"": [
+      {
+        ""author"": ""Tool Master Lesly"",
+        ""timestamp"": ""2026-02-15T09:00:00Z"",
+        ""text"": ""Name fields must be limited to 50 characters due to database constraints.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-15T09:09:00Z"",
+        ""text"": ""Please clarify if leading/trailing spaces should be trimmed and whether hyphens/accents are allowed in names.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-15T14:38:00Z"",
+        ""text"": ""Leading/trailing spaces will be tri
+
+[14] source=A44 type=Actor/SrcChunk hops=2 chunk=c48c34de8cf76bce doc=EMAIL_SUPPORT_Emergency_Override.txt rel=IN_DOC > IN_DOC
+From: support_lead@toolchain.com
+Date: 2026-02-24 15:30
+Subject: Escalation: exception handling for priority customers
+
+Hi Dev Team,
+
+Support keeps running into cases where a high-priority customer wants to secure an item even though the system currently treats the time window as blocked because of another pending request.
+
+Operationally, the team is asking whether specially authorized staff should be able to intervene in those cases and resolve the conflict manually, rather than forcing the customer to wait for the ordinary availability flow to clear on its own. In practice this would mean allowing a priority booking path to take precedence over weaker, not-yet-confirmed demand.
+
+Please do not treat this as confirmed product policy yet. We need guidance on whether this should remain a support-side exception process, or whether the booking logic itself is expected to support it.
+
+Regards,
+Sarah (Support Lead)","Test suite for R6 Pending-account cleanup requirement. Validates automatic deletion of accounts in Pending status after 30 days, immediate status effect, prevention of Pending account authentication, and exception handling for manual deletion grace periods and activation link errors. Tests cover core cleanup behavior, status lifecycle, access prevention, and edge cases.",System shall automatically delete any user account that remains in 'Pending' status for more than 30 days || ystem shall set the account status to Pending upon successful registration and before email verification. || System shall prevent Pending accounts from authenticating and accessing the platform || Account status changes take effect immediately,Manual account deletion may require a 14-day grace period for recovery before permanent wipe (clarification needed) || Activation link behavior on non-existent accounts must not trigger 500 error,JIRA-Auth-111 proposes allowing multiple accounts with same email (contradicts CONF-AUTH-01 1.1.3 email uniqueness requirement),,E1|E2|E4|E5|E7|E13|E14,"R6 'Pending-account cleanup' is primarily defined by JIRA-Auth-112 (E1), which mandates automatic deletion of Pending accounts after 30 days for GDPR data minimization compliance. Core operative rules are derived from E1 and cross-referenced against CONF-AUTH-01 account status lifecycle (E2, E5). E13 and E14 identify related gaps around activation expiry and pending cleanup interaction. E4 captures unresolved clarifications on manual deletion grace periods and activation-link error handling. E12 is unrelated (booking/priority customer override) and excluded. E6, E8, E9, E10, E11 are payment or registration field details not directly relevant to pending-account cleanup behavior. Filtered abstract or low-relevance operative statements: All associated personal data must be removed upon pending-account cleanup, except for minimal audit logs required by retention policy",1,0,0,0

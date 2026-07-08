@@ -1,0 +1,815 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+bf6d4ad6,R43,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R43_1,Prevent overlap when new rental period intersects existing rental,"Feature: Overlap Prevention Rule
+  Scenario: Prevent overlap when new rental period intersects existing rental
+    Given a rental property with an existing rental from 2024-01-10 to 2024-01-20
+    When a new rental request is submitted for 2024-01-15 to 2024-01-25
+    Then the system should reject the new rental request
+    And the availability calculation should flag an overlap conflict",Core overlap prevention behavior: the system must detect and prevent rental periods that intersect with existing rentals. This validates the primary function of the overlap prevention rule.,E5,Availability calculation derives rentable periods from existing rental activity|Overlap checks are performed as part of availability calculation logic,G23|I41|R43,Overlap prevention rule,Overlap prevention rule,"[1] source=R43 type=Requirement hops=0 rel=TARGET
+Overlap prevention rule
+
+[2] source=R43 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R43 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R43 type=Requirement/SrcChunk hops=0 chunk=5ce07c8c33fed1ee doc=JIRA-Rewards.md rel=TARGET
+r authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[5] source=I41 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[6] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity","R43 Overlap Prevention Rule - 10 test cases covering overlap detection in rental availability calculations, boundary conditions, and lifecycle-triggered refresh scenarios. Tests validate that the system prevents invalid overlaps in rental periods through availability calculation logic, with attention to grace-period and cancellation edge cases noted in supporting evidence.","\nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'""",,Earlier uniform timing assumptions should not be relied upon for overlap prevention,,E1|E2|E5|E6|E3,R43 targets overlap prevention in rental availability. Primary evidence E5 (Implementation I41) confirms overlap checks are implemented as part of availability calculation and refresh on lifecycle changes. E2 and E6 reference grace-period and cancellation ambiguities that may affect overlap boundary conditions. E3 and E4 are authentication and rewards-related and do not directly support overlap prevention rules. The operative context focuses on the confirmed overlap prevention behavior; gaps capture missing specifics about detection logic and boundary conditions. Filtered abstract or low-relevance operative statements: System must prevent invalid overlaps in rental periods | Availability calculation derives rentable periods from existing rental activity | Overlap checks are performed as part of availability calculation logic,1,0,0,0
+bf6d4ad6,R43,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R43_2,Allow non-overlapping consecutive rental periods,"Feature: Overlap Prevention Rule
+  Scenario: Allow non-overlapping consecutive rental periods
+    Given a rental property with an existing rental from 2024-01-10 to 2024-01-20
+    When a new rental request is submitted for 2024-01-20 to 2024-01-30
+    Then the system should accept the new rental request
+    And the availability calculation should confirm no overlap",Validates that the overlap prevention rule correctly distinguishes between overlapping and consecutive (back-to-back) rental periods. Consecutive rentals should be allowed when they do not actually overlap.,E5,Overlap checks are performed as part of availability calculation logic,G23|I41|R43,Overlap prevention rule,Overlap prevention rule,"[1] source=R43 type=Requirement hops=0 rel=TARGET
+Overlap prevention rule
+
+[2] source=R43 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R43 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R43 type=Requirement/SrcChunk hops=0 chunk=5ce07c8c33fed1ee doc=JIRA-Rewards.md rel=TARGET
+r authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[5] source=I41 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[6] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity","R43 Overlap Prevention Rule - 10 test cases covering overlap detection in rental availability calculations, boundary conditions, and lifecycle-triggered refresh scenarios. Tests validate that the system prevents invalid overlaps in rental periods through availability calculation logic, with attention to grace-period and cancellation edge cases noted in supporting evidence.","\nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'""",,Earlier uniform timing assumptions should not be relied upon for overlap prevention,,E1|E2|E5|E6|E3,R43 targets overlap prevention in rental availability. Primary evidence E5 (Implementation I41) confirms overlap checks are implemented as part of availability calculation and refresh on lifecycle changes. E2 and E6 reference grace-period and cancellation ambiguities that may affect overlap boundary conditions. E3 and E4 are authentication and rewards-related and do not directly support overlap prevention rules. The operative context focuses on the confirmed overlap prevention behavior; gaps capture missing specifics about detection logic and boundary conditions. Filtered abstract or low-relevance operative statements: System must prevent invalid overlaps in rental periods | Availability calculation derives rentable periods from existing rental activity | Overlap checks are performed as part of availability calculation logic,1,0,0,0
+bf6d4ad6,R43,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R43_3,Detect overlap when new rental starts before existing rental ends,"Feature: Overlap Prevention Rule
+  Scenario: Detect overlap when new rental starts before existing rental ends
+    Given a rental property with an existing rental from 2024-01-15 to 2024-01-25
+    When a new rental request is submitted for 2024-01-10 to 2024-01-20
+    Then the system should reject the new rental request
+    And the overlap should be detected during availability calculation",Tests the overlap detection logic when a new rental period partially precedes an existing rental. This ensures the system catches overlaps regardless of temporal direction.,E5,Overlap checks are performed as part of availability calculation logic,G23|I41|R43,Overlap prevention rule,Overlap prevention rule,"[1] source=R43 type=Requirement hops=0 rel=TARGET
+Overlap prevention rule
+
+[2] source=R43 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R43 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R43 type=Requirement/SrcChunk hops=0 chunk=5ce07c8c33fed1ee doc=JIRA-Rewards.md rel=TARGET
+r authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[5] source=I41 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[6] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity","R43 Overlap Prevention Rule - 10 test cases covering overlap detection in rental availability calculations, boundary conditions, and lifecycle-triggered refresh scenarios. Tests validate that the system prevents invalid overlaps in rental periods through availability calculation logic, with attention to grace-period and cancellation edge cases noted in supporting evidence.","\nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'""",,Earlier uniform timing assumptions should not be relied upon for overlap prevention,,E1|E2|E5|E6|E3,R43 targets overlap prevention in rental availability. Primary evidence E5 (Implementation I41) confirms overlap checks are implemented as part of availability calculation and refresh on lifecycle changes. E2 and E6 reference grace-period and cancellation ambiguities that may affect overlap boundary conditions. E3 and E4 are authentication and rewards-related and do not directly support overlap prevention rules. The operative context focuses on the confirmed overlap prevention behavior; gaps capture missing specifics about detection logic and boundary conditions. Filtered abstract or low-relevance operative statements: System must prevent invalid overlaps in rental periods | Availability calculation derives rentable periods from existing rental activity | Overlap checks are performed as part of availability calculation logic,1,0,0,0
+bf6d4ad6,R43,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R43_4,Refresh availability and recheck overlaps on rental lifecycle change,"Feature: Overlap Prevention Rule
+  Scenario: Refresh availability and recheck overlaps on rental lifecycle change
+    Given a rental property with a confirmed rental from 2024-01-10 to 2024-01-20
+    And a pending rental request for 2024-01-15 to 2024-01-25 that was previously rejected
+    When the confirmed rental is cancelled
+    Then the system should refresh availability calculation
+    And the pending rental request should be re-evaluated for overlap","Validates that overlap checks are re-executed when rental lifecycle events occur (e.g., cancellation). This ensures the overlap prevention rule remains current as rental states change.",E5,Overlap checks are performed as part of availability calculation logic|Availability calculation derives rentable periods from existing rental activity,G23|I41|R43,Overlap prevention rule,Overlap prevention rule,"[1] source=R43 type=Requirement hops=0 rel=TARGET
+Overlap prevention rule
+
+[2] source=R43 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R43 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R43 type=Requirement/SrcChunk hops=0 chunk=5ce07c8c33fed1ee doc=JIRA-Rewards.md rel=TARGET
+r authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[5] source=I41 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[6] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity","R43 Overlap Prevention Rule - 10 test cases covering overlap detection in rental availability calculations, boundary conditions, and lifecycle-triggered refresh scenarios. Tests validate that the system prevents invalid overlaps in rental periods through availability calculation logic, with attention to grace-period and cancellation edge cases noted in supporting evidence.","\nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'""",,Earlier uniform timing assumptions should not be relied upon for overlap prevention,,E1|E2|E5|E6|E3,R43 targets overlap prevention in rental availability. Primary evidence E5 (Implementation I41) confirms overlap checks are implemented as part of availability calculation and refresh on lifecycle changes. E2 and E6 reference grace-period and cancellation ambiguities that may affect overlap boundary conditions. E3 and E4 are authentication and rewards-related and do not directly support overlap prevention rules. The operative context focuses on the confirmed overlap prevention behavior; gaps capture missing specifics about detection logic and boundary conditions. Filtered abstract or low-relevance operative statements: System must prevent invalid overlaps in rental periods | Availability calculation derives rentable periods from existing rental activity | Overlap checks are performed as part of availability calculation logic,1,0,0,0
+bf6d4ad6,R43,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R43_5,Handle grace-period boundary in overlap detection,"Feature: Overlap Prevention Rule
+  Scenario: Handle grace-period boundary in overlap detection
+    Given a rental property with an existing rental from 2024-01-10 to 2024-01-20
+    And a grace period of 1 day is defined for rental transitions
+    When a new rental request is submitted for 2024-01-21 to 2024-01-30
+    Then the system should evaluate the overlap considering the grace-period boundary
+    And the decision should be consistent with grace-period rules","Tests overlap detection at grace-period boundaries. Supporting evidence E2 references grace-period ambiguities that may affect overlap boundary conditions, making this edge case critical.",E2|E5,Overlap checks are performed as part of availability calculation logic,G23|I41|R43,Overlap prevention rule,Overlap prevention rule,"[1] source=R43 type=Requirement hops=0 rel=TARGET
+Overlap prevention rule
+
+[2] source=R43 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R43 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R43 type=Requirement/SrcChunk hops=0 chunk=5ce07c8c33fed1ee doc=JIRA-Rewards.md rel=TARGET
+r authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[5] source=I41 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[6] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity","R43 Overlap Prevention Rule - 10 test cases covering overlap detection in rental availability calculations, boundary conditions, and lifecycle-triggered refresh scenarios. Tests validate that the system prevents invalid overlaps in rental periods through availability calculation logic, with attention to grace-period and cancellation edge cases noted in supporting evidence.","\nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'""",,Earlier uniform timing assumptions should not be relied upon for overlap prevention,,E1|E2|E5|E6|E3,R43 targets overlap prevention in rental availability. Primary evidence E5 (Implementation I41) confirms overlap checks are implemented as part of availability calculation and refresh on lifecycle changes. E2 and E6 reference grace-period and cancellation ambiguities that may affect overlap boundary conditions. E3 and E4 are authentication and rewards-related and do not directly support overlap prevention rules. The operative context focuses on the confirmed overlap prevention behavior; gaps capture missing specifics about detection logic and boundary conditions. Filtered abstract or low-relevance operative statements: System must prevent invalid overlaps in rental periods | Availability calculation derives rentable periods from existing rental activity | Overlap checks are performed as part of availability calculation logic,1,0,0,0
+bf6d4ad6,R43,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R43_6,Prevent overlap with cancelled rental in grace period,"Feature: Overlap Prevention Rule
+  Scenario: Prevent overlap with cancelled rental in grace period
+    Given a rental property with a cancelled rental from 2024-01-10 to 2024-01-20
+    And the cancellation occurred within a grace period
+    When a new rental request is submitted for 2024-01-18 to 2024-01-25
+    Then the system should determine overlap status based on cancellation and grace-period rules
+    And the result should be consistent with overlap prevention policy",Tests overlap prevention when a rental has been cancelled but may still be within a grace period. Supporting evidence E6 references cancellation ambiguities that affect overlap boundary conditions.,E6|E5,Overlap checks are performed as part of availability calculation logic,G23|I41|R43,Overlap prevention rule,Overlap prevention rule,"[1] source=R43 type=Requirement hops=0 rel=TARGET
+Overlap prevention rule
+
+[2] source=R43 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R43 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R43 type=Requirement/SrcChunk hops=0 chunk=5ce07c8c33fed1ee doc=JIRA-Rewards.md rel=TARGET
+r authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[5] source=I41 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[6] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity","R43 Overlap Prevention Rule - 10 test cases covering overlap detection in rental availability calculations, boundary conditions, and lifecycle-triggered refresh scenarios. Tests validate that the system prevents invalid overlaps in rental periods through availability calculation logic, with attention to grace-period and cancellation edge cases noted in supporting evidence.","\nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'""",,Earlier uniform timing assumptions should not be relied upon for overlap prevention,,E1|E2|E5|E6|E3,R43 targets overlap prevention in rental availability. Primary evidence E5 (Implementation I41) confirms overlap checks are implemented as part of availability calculation and refresh on lifecycle changes. E2 and E6 reference grace-period and cancellation ambiguities that may affect overlap boundary conditions. E3 and E4 are authentication and rewards-related and do not directly support overlap prevention rules. The operative context focuses on the confirmed overlap prevention behavior; gaps capture missing specifics about detection logic and boundary conditions. Filtered abstract or low-relevance operative statements: System must prevent invalid overlaps in rental periods | Availability calculation derives rentable periods from existing rental activity | Overlap checks are performed as part of availability calculation logic,1,0,0,0
+bf6d4ad6,R43,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R43_7,Detect complete overlap when new rental fully contains existing rental,"Feature: Overlap Prevention Rule
+  Scenario: Detect complete overlap when new rental fully contains existing rental
+    Given a rental property with an existing rental from 2024-01-15 to 2024-01-20
+    When a new rental request is submitted for 2024-01-10 to 2024-01-25
+    Then the system should reject the new rental request
+    And the overlap should be detected as a complete containment overlap",Validates that the overlap prevention rule detects complete overlaps where a new rental period fully encompasses an existing rental. This is a critical overlap scenario.,E5,Overlap checks are performed as part of availability calculation logic,G23|I41|R43,Overlap prevention rule,Overlap prevention rule,"[1] source=R43 type=Requirement hops=0 rel=TARGET
+Overlap prevention rule
+
+[2] source=R43 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R43 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R43 type=Requirement/SrcChunk hops=0 chunk=5ce07c8c33fed1ee doc=JIRA-Rewards.md rel=TARGET
+r authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[5] source=I41 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[6] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity","R43 Overlap Prevention Rule - 10 test cases covering overlap detection in rental availability calculations, boundary conditions, and lifecycle-triggered refresh scenarios. Tests validate that the system prevents invalid overlaps in rental periods through availability calculation logic, with attention to grace-period and cancellation edge cases noted in supporting evidence.","\nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'""",,Earlier uniform timing assumptions should not be relied upon for overlap prevention,,E1|E2|E5|E6|E3,R43 targets overlap prevention in rental availability. Primary evidence E5 (Implementation I41) confirms overlap checks are implemented as part of availability calculation and refresh on lifecycle changes. E2 and E6 reference grace-period and cancellation ambiguities that may affect overlap boundary conditions. E3 and E4 are authentication and rewards-related and do not directly support overlap prevention rules. The operative context focuses on the confirmed overlap prevention behavior; gaps capture missing specifics about detection logic and boundary conditions. Filtered abstract or low-relevance operative statements: System must prevent invalid overlaps in rental periods | Availability calculation derives rentable periods from existing rental activity | Overlap checks are performed as part of availability calculation logic,1,0,0,0
+bf6d4ad6,R43,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R43_8,Detect partial overlap at rental period start,"Feature: Overlap Prevention Rule
+  Scenario: Detect partial overlap at rental period start
+    Given a rental property with an existing rental from 2024-01-15 to 2024-01-25
+    When a new rental request is submitted for 2024-01-10 to 2024-01-17
+    Then the system should reject the new rental request
+    And the overlap should be detected at the rental period start boundary",Tests overlap detection when a new rental period overlaps only the start of an existing rental. This validates boundary condition handling in overlap detection logic.,E5,Overlap checks are performed as part of availability calculation logic,G23|I41|R43,Overlap prevention rule,Overlap prevention rule,"[1] source=R43 type=Requirement hops=0 rel=TARGET
+Overlap prevention rule
+
+[2] source=R43 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R43 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R43 type=Requirement/SrcChunk hops=0 chunk=5ce07c8c33fed1ee doc=JIRA-Rewards.md rel=TARGET
+r authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[5] source=I41 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[6] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity","R43 Overlap Prevention Rule - 10 test cases covering overlap detection in rental availability calculations, boundary conditions, and lifecycle-triggered refresh scenarios. Tests validate that the system prevents invalid overlaps in rental periods through availability calculation logic, with attention to grace-period and cancellation edge cases noted in supporting evidence.","\nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'""",,Earlier uniform timing assumptions should not be relied upon for overlap prevention,,E1|E2|E5|E6|E3,R43 targets overlap prevention in rental availability. Primary evidence E5 (Implementation I41) confirms overlap checks are implemented as part of availability calculation and refresh on lifecycle changes. E2 and E6 reference grace-period and cancellation ambiguities that may affect overlap boundary conditions. E3 and E4 are authentication and rewards-related and do not directly support overlap prevention rules. The operative context focuses on the confirmed overlap prevention behavior; gaps capture missing specifics about detection logic and boundary conditions. Filtered abstract or low-relevance operative statements: System must prevent invalid overlaps in rental periods | Availability calculation derives rentable periods from existing rental activity | Overlap checks are performed as part of availability calculation logic,1,0,0,0
+bf6d4ad6,R43,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R43_9,Detect partial overlap at rental period end,"Feature: Overlap Prevention Rule
+  Scenario: Detect partial overlap at rental period end
+    Given a rental property with an existing rental from 2024-01-10 to 2024-01-20
+    When a new rental request is submitted for 2024-01-18 to 2024-01-30
+    Then the system should reject the new rental request
+    And the overlap should be detected at the rental period end boundary",Tests overlap detection when a new rental period overlaps only the end of an existing rental. This validates boundary condition handling in overlap detection logic.,E5,Overlap checks are performed as part of availability calculation logic,G23|I41|R43,Overlap prevention rule,Overlap prevention rule,"[1] source=R43 type=Requirement hops=0 rel=TARGET
+Overlap prevention rule
+
+[2] source=R43 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R43 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R43 type=Requirement/SrcChunk hops=0 chunk=5ce07c8c33fed1ee doc=JIRA-Rewards.md rel=TARGET
+r authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[5] source=I41 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[6] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity","R43 Overlap Prevention Rule - 10 test cases covering overlap detection in rental availability calculations, boundary conditions, and lifecycle-triggered refresh scenarios. Tests validate that the system prevents invalid overlaps in rental periods through availability calculation logic, with attention to grace-period and cancellation edge cases noted in supporting evidence.","\nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'""",,Earlier uniform timing assumptions should not be relied upon for overlap prevention,,E1|E2|E5|E6|E3,R43 targets overlap prevention in rental availability. Primary evidence E5 (Implementation I41) confirms overlap checks are implemented as part of availability calculation and refresh on lifecycle changes. E2 and E6 reference grace-period and cancellation ambiguities that may affect overlap boundary conditions. E3 and E4 are authentication and rewards-related and do not directly support overlap prevention rules. The operative context focuses on the confirmed overlap prevention behavior; gaps capture missing specifics about detection logic and boundary conditions. Filtered abstract or low-relevance operative statements: System must prevent invalid overlaps in rental periods | Availability calculation derives rentable periods from existing rental activity | Overlap checks are performed as part of availability calculation logic,1,0,0,0
+bf6d4ad6,R43,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R43_10,Recalculate availability after multiple lifecycle changes,"Feature: Overlap Prevention Rule
+  Scenario: Recalculate availability after multiple lifecycle changes
+    Given a rental property with rentals on 2024-01-10 to 2024-01-20 and 2024-01-25 to 2024-01-30
+    When the first rental is cancelled
+    And a new rental request is submitted for 2024-01-12 to 2024-01-28
+    Then the system should refresh availability calculation after the cancellation
+    And the overlap check should only flag conflict with the second rental period",Validates that the overlap prevention rule correctly recalculates availability and re-checks overlaps after multiple lifecycle changes. This ensures the rule remains accurate as rental states evolve.,E5,Overlap checks are performed as part of availability calculation logic|Availability calculation derives rentable periods from existing rental activity,G23|I41|R43,Overlap prevention rule,Overlap prevention rule,"[1] source=R43 type=Requirement hops=0 rel=TARGET
+Overlap prevention rule
+
+[2] source=R43 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[3] source=R43 type=Requirement/SrcChunk hops=0 chunk=1d3d27d1a24b72f0 doc=JIRA-Auth.md rel=TARGET
+that use invalid or expired activation tokens and show an appropriate error state."",
+    ""comments"": []
+  },
+  {
+  ""ticket_id"": ""JIRA-Auth-108"",
+  ""summary"": ""Registration - Security hardening: Prevent email enumeration"",
+  ""description"": ""To prevent attackers from discovering registered users, the registration flow must use generic responses. \n\nRequirement:\nIf a user tries to register with an email address that is already in use, the system MUST NOT display an error message stating 'Email already exists'. \nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'"",
+  ""comments"": [
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-16T10:00:00Z"",
+      ""text"": ""This is critical for OWA (OWASP) compliance. We cannot leak user existence through the registration form.""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-109"",
+    ""summary"": ""Authentication gate - Block login for non-Active accounts"",
+    ""description"": ""The system shall not allow authentication or platform access for accounts that are not in Active status (e.g., Pending, Suspended, Deleted)."",
+    ""comments"": []
+  },
+  {
+    ""ticket_id"": ""JIRA-Auth-1
+
+[4] source=R43 type=Requirement/SrcChunk hops=0 chunk=5ce07c8c33fed1ee doc=JIRA-Rewards.md rel=TARGET
+r authorized reviewers should resolve identities through a controlled lookup path.""
+      }
+    ]
+  }
+]
+
+[5] source=I41 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[6] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity","R43 Overlap Prevention Rule - 10 test cases covering overlap detection in rental availability calculations, boundary conditions, and lifecycle-triggered refresh scenarios. Tests validate that the system prevents invalid overlaps in rental periods through availability calculation logic, with attention to grace-period and cancellation edge cases noted in supporting evidence.","\nInstead, it should display a generic message: 'If this email is valid, a message has been sent to it.'""",,Earlier uniform timing assumptions should not be relied upon for overlap prevention,,E1|E2|E5|E6|E3,R43 targets overlap prevention in rental availability. Primary evidence E5 (Implementation I41) confirms overlap checks are implemented as part of availability calculation and refresh on lifecycle changes. E2 and E6 reference grace-period and cancellation ambiguities that may affect overlap boundary conditions. E3 and E4 are authentication and rewards-related and do not directly support overlap prevention rules. The operative context focuses on the confirmed overlap prevention behavior; gaps capture missing specifics about detection logic and boundary conditions. Filtered abstract or low-relevance operative statements: System must prevent invalid overlaps in rental periods | Availability calculation derives rentable periods from existing rental activity | Overlap checks are performed as part of availability calculation logic,1,0,0,0

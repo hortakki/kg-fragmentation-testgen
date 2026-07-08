@@ -1,0 +1,2081 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+2e8af6f8,R48,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R48_1,Availability updates immediately when rent is created,"Feature: Immediate Availability Synchronization
+  Scenario: Item becomes unavailable immediately upon rent creation
+    Given an item with id ""ITEM-001"" is available for the date range ""2024-01-15"" to ""2024-01-20""
+    When a rent record is created for item ""ITEM-001"" covering ""2024-01-15"" to ""2024-01-18""
+    Then the item availability query for ""2024-01-15"" to ""2024-01-18"" shall return unavailable status immediately
+    And the item availability query for ""2024-01-19"" to ""2024-01-20"" shall return available status","Validates that availability changes are applied immediately when a rent record is created, ensuring real-time synchronization without delay. This is a core requirement from the operative context.",E1|E2|E3,"The system shall update availability in real time when rent records are created, modified, cancelled, or completed.|The system shall return availability status indicating whether the item is available or unavailable for the requested period.|The system shall automatically update availability status when rent lifecycle events occur.",G41|G42|G82b|I34|I41|I42|I43|R29|R41|R48,Immediate availability synchronization,Immediate availability synchronization,"[1] source=R48 type=Requirement/SrcChunk hops=0 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[2] source=R48 type=Requirement hops=0 rel=TARGET
+Immediate availability synchronization
+
+[3] source=R48 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=R48 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[5] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[6] source=G42 type=Gap/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[7] source=I34 type=Implementation/SrcChunk hops=2 chunk=91e709a501470e81 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[8] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[9] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[10] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[11] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle
+
+[12] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[13] source=I42 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability query API
+
+[14] source=I43 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual availability restrictions
+
+[15] source=R41 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Availability calculation rule
+
+[16] source=R29 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R48 'Immediate availability synchronization' requires the system to update item availability in real time when rental lifecycle events occur, apply availability changes immediately, and ensure availability queries reflect the latest rent and item status. The operative context establishes that availability must be synchronized immediately upon rent creation, modification, cancellation, or completion, and that availability restrictions and maintenance periods take precedence. Ten test cases cover core synchronization scenarios, exception handling, and edge cases to validate that availability changes propagate immediately without delay.","The system shall ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || ## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow users to query item availability for a specified date range. || The system shall automatically update availability status when rent lifecycle events occur. || The system shall allow authorized users to define availability restrictions for items. || The system shall allow authorized users to define maintenance periods for items. || The system shall calculate item availability based on existing rent records. || Availability status reflects the current lifecycle state of rent records. || The system shall mark items as unavailable during maintenance periods. || The system shall prevent rent creation during maintenance periods.",Availability restrictions take precedence over normal availability. || Maintenance periods block rental activity and make items appear non-rentable.,"Earlier discussion suggested using a single fallback delay after certain rental events, but this does not align with the current requirement for immediate availability synchronization.",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"R48 'Immediate availability synchronization' is the target requirement. PRIMARY evidence (12 items) establishes that the system must update availability in real time and apply changes immediately when rental lifecycle events occur. E1 and E5 provide the core specification from TOOLCHAIN-CONF-AVAILABILITY-01.md. E3 and E4 provide JIRA ticket context confirming real-time sync requirements. E6, E7, E8 identify implementation challenges and ambiguities around item status changes and query result clarity. E9 and E10 flag synchronization and scheduling gaps. E11 and E12 reference related implementation items. No CONTEXT evidence was provided. The operative context consolidates all real-time and immediate-update requirements from the specification. Exceptions capture the behavioral overrides (unavailable items cannot be rented, restrictions take precedence, maintenance blocks rentals). Conflicts note the earlier fallback-delay approach that contradicts immediate synchronization. Gaps capture unresolved questions about lifecycle mapping, delivery scheduling interaction, query result clarity, UI distinction for maintenance, and admin override scenarios. Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.",1,0,0,0
+2e8af6f8,R48,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R48_2,Availability updates immediately when rent is modified,"Feature: Immediate Availability Synchronization
+  Scenario: Item availability updates immediately when rent period is extended
+    Given a rent record exists for item ""ITEM-002"" covering ""2024-02-01"" to ""2024-02-05""
+    And the item is marked unavailable for that period
+    When the rent record is modified to extend the period to ""2024-02-01"" to ""2024-02-10""
+    Then the item availability query for ""2024-02-06"" to ""2024-02-10"" shall return unavailable status immediately
+    And the system shall not require any manual refresh or delay","Ensures that availability synchronization occurs immediately when an existing rent record is modified, reflecting the extended unavailability period without delay.",E1|E4|E5,"The system shall update availability in real time when rent records are created, modified, cancelled, or completed.|The system shall ensure availability queries reflect the latest rent and item status information.|The system shall automatically update availability status when rent lifecycle events occur.",G41|G42|G82b|I34|I41|I42|I43|R29|R41|R48,Immediate availability synchronization,Immediate availability synchronization,"[1] source=R48 type=Requirement/SrcChunk hops=0 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[2] source=R48 type=Requirement hops=0 rel=TARGET
+Immediate availability synchronization
+
+[3] source=R48 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=R48 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[5] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[6] source=G42 type=Gap/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[7] source=I34 type=Implementation/SrcChunk hops=2 chunk=91e709a501470e81 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[8] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[9] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[10] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[11] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle
+
+[12] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[13] source=I42 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability query API
+
+[14] source=I43 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual availability restrictions
+
+[15] source=R41 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Availability calculation rule
+
+[16] source=R29 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R48 'Immediate availability synchronization' requires the system to update item availability in real time when rental lifecycle events occur, apply availability changes immediately, and ensure availability queries reflect the latest rent and item status. The operative context establishes that availability must be synchronized immediately upon rent creation, modification, cancellation, or completion, and that availability restrictions and maintenance periods take precedence. Ten test cases cover core synchronization scenarios, exception handling, and edge cases to validate that availability changes propagate immediately without delay.","The system shall ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || ## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow users to query item availability for a specified date range. || The system shall automatically update availability status when rent lifecycle events occur. || The system shall allow authorized users to define availability restrictions for items. || The system shall allow authorized users to define maintenance periods for items. || The system shall calculate item availability based on existing rent records. || Availability status reflects the current lifecycle state of rent records. || The system shall mark items as unavailable during maintenance periods. || The system shall prevent rent creation during maintenance periods.",Availability restrictions take precedence over normal availability. || Maintenance periods block rental activity and make items appear non-rentable.,"Earlier discussion suggested using a single fallback delay after certain rental events, but this does not align with the current requirement for immediate availability synchronization.",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"R48 'Immediate availability synchronization' is the target requirement. PRIMARY evidence (12 items) establishes that the system must update availability in real time and apply changes immediately when rental lifecycle events occur. E1 and E5 provide the core specification from TOOLCHAIN-CONF-AVAILABILITY-01.md. E3 and E4 provide JIRA ticket context confirming real-time sync requirements. E6, E7, E8 identify implementation challenges and ambiguities around item status changes and query result clarity. E9 and E10 flag synchronization and scheduling gaps. E11 and E12 reference related implementation items. No CONTEXT evidence was provided. The operative context consolidates all real-time and immediate-update requirements from the specification. Exceptions capture the behavioral overrides (unavailable items cannot be rented, restrictions take precedence, maintenance blocks rentals). Conflicts note the earlier fallback-delay approach that contradicts immediate synchronization. Gaps capture unresolved questions about lifecycle mapping, delivery scheduling interaction, query result clarity, UI distinction for maintenance, and admin override scenarios. Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.",1,0,0,0
+2e8af6f8,R48,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R48_3,Availability updates immediately when rent is cancelled,"Feature: Immediate Availability Synchronization
+  Scenario: Item becomes available immediately when rent is cancelled
+    Given a rent record exists for item ""ITEM-003"" covering ""2024-03-01"" to ""2024-03-10""
+    And the item is marked unavailable for that period
+    When the rent record is cancelled
+    Then the item availability query for ""2024-03-01"" to ""2024-03-10"" shall return available status immediately
+    And no delay or synchronization lag shall occur","Validates that cancelling a rent record immediately restores item availability for the previously rented period, demonstrating real-time synchronization.",E1|E3|E6,"The system shall update availability in real time when rent records are created, modified, cancelled, or completed.|The system shall automatically update availability status when rent lifecycle events occur.|The system shall calculate item availability based on existing rent records.",G41|G42|G82b|I34|I41|I42|I43|R29|R41|R48,Immediate availability synchronization,Immediate availability synchronization,"[1] source=R48 type=Requirement/SrcChunk hops=0 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[2] source=R48 type=Requirement hops=0 rel=TARGET
+Immediate availability synchronization
+
+[3] source=R48 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=R48 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[5] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[6] source=G42 type=Gap/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[7] source=I34 type=Implementation/SrcChunk hops=2 chunk=91e709a501470e81 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[8] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[9] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[10] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[11] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle
+
+[12] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[13] source=I42 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability query API
+
+[14] source=I43 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual availability restrictions
+
+[15] source=R41 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Availability calculation rule
+
+[16] source=R29 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R48 'Immediate availability synchronization' requires the system to update item availability in real time when rental lifecycle events occur, apply availability changes immediately, and ensure availability queries reflect the latest rent and item status. The operative context establishes that availability must be synchronized immediately upon rent creation, modification, cancellation, or completion, and that availability restrictions and maintenance periods take precedence. Ten test cases cover core synchronization scenarios, exception handling, and edge cases to validate that availability changes propagate immediately without delay.","The system shall ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || ## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow users to query item availability for a specified date range. || The system shall automatically update availability status when rent lifecycle events occur. || The system shall allow authorized users to define availability restrictions for items. || The system shall allow authorized users to define maintenance periods for items. || The system shall calculate item availability based on existing rent records. || Availability status reflects the current lifecycle state of rent records. || The system shall mark items as unavailable during maintenance periods. || The system shall prevent rent creation during maintenance periods.",Availability restrictions take precedence over normal availability. || Maintenance periods block rental activity and make items appear non-rentable.,"Earlier discussion suggested using a single fallback delay after certain rental events, but this does not align with the current requirement for immediate availability synchronization.",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"R48 'Immediate availability synchronization' is the target requirement. PRIMARY evidence (12 items) establishes that the system must update availability in real time and apply changes immediately when rental lifecycle events occur. E1 and E5 provide the core specification from TOOLCHAIN-CONF-AVAILABILITY-01.md. E3 and E4 provide JIRA ticket context confirming real-time sync requirements. E6, E7, E8 identify implementation challenges and ambiguities around item status changes and query result clarity. E9 and E10 flag synchronization and scheduling gaps. E11 and E12 reference related implementation items. No CONTEXT evidence was provided. The operative context consolidates all real-time and immediate-update requirements from the specification. Exceptions capture the behavioral overrides (unavailable items cannot be rented, restrictions take precedence, maintenance blocks rentals). Conflicts note the earlier fallback-delay approach that contradicts immediate synchronization. Gaps capture unresolved questions about lifecycle mapping, delivery scheduling interaction, query result clarity, UI distinction for maintenance, and admin override scenarios. Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.",1,0,0,0
+2e8af6f8,R48,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R48_4,Availability updates immediately when rent is completed,"Feature: Immediate Availability Synchronization
+  Scenario: Item becomes available immediately when rent is completed
+    Given a rent record exists for item ""ITEM-004"" with status ""Active"" covering ""2024-04-01"" to ""2024-04-05""
+    And the item is marked unavailable for that period
+    When the rent record status is changed to ""Completed""
+    Then the item availability query for ""2024-04-01"" to ""2024-04-05"" shall return available status immediately
+    And availability status reflects the current lifecycle state of the rent record","Ensures that completing a rent record immediately updates availability, reflecting the current lifecycle state without synchronization delay.",E1|E7|E8,"The system shall update availability in real time when rent records are created, modified, cancelled, or completed.|Availability status reflects the current lifecycle state of rent records.|The system shall automatically update availability status when rent lifecycle events occur.",G41|G42|G82b|I34|I41|I42|I43|R29|R41|R48,Immediate availability synchronization,Immediate availability synchronization,"[1] source=R48 type=Requirement/SrcChunk hops=0 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[2] source=R48 type=Requirement hops=0 rel=TARGET
+Immediate availability synchronization
+
+[3] source=R48 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=R48 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[5] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[6] source=G42 type=Gap/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[7] source=I34 type=Implementation/SrcChunk hops=2 chunk=91e709a501470e81 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[8] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[9] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[10] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[11] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle
+
+[12] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[13] source=I42 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability query API
+
+[14] source=I43 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual availability restrictions
+
+[15] source=R41 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Availability calculation rule
+
+[16] source=R29 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R48 'Immediate availability synchronization' requires the system to update item availability in real time when rental lifecycle events occur, apply availability changes immediately, and ensure availability queries reflect the latest rent and item status. The operative context establishes that availability must be synchronized immediately upon rent creation, modification, cancellation, or completion, and that availability restrictions and maintenance periods take precedence. Ten test cases cover core synchronization scenarios, exception handling, and edge cases to validate that availability changes propagate immediately without delay.","The system shall ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || ## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow users to query item availability for a specified date range. || The system shall automatically update availability status when rent lifecycle events occur. || The system shall allow authorized users to define availability restrictions for items. || The system shall allow authorized users to define maintenance periods for items. || The system shall calculate item availability based on existing rent records. || Availability status reflects the current lifecycle state of rent records. || The system shall mark items as unavailable during maintenance periods. || The system shall prevent rent creation during maintenance periods.",Availability restrictions take precedence over normal availability. || Maintenance periods block rental activity and make items appear non-rentable.,"Earlier discussion suggested using a single fallback delay after certain rental events, but this does not align with the current requirement for immediate availability synchronization.",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"R48 'Immediate availability synchronization' is the target requirement. PRIMARY evidence (12 items) establishes that the system must update availability in real time and apply changes immediately when rental lifecycle events occur. E1 and E5 provide the core specification from TOOLCHAIN-CONF-AVAILABILITY-01.md. E3 and E4 provide JIRA ticket context confirming real-time sync requirements. E6, E7, E8 identify implementation challenges and ambiguities around item status changes and query result clarity. E9 and E10 flag synchronization and scheduling gaps. E11 and E12 reference related implementation items. No CONTEXT evidence was provided. The operative context consolidates all real-time and immediate-update requirements from the specification. Exceptions capture the behavioral overrides (unavailable items cannot be rented, restrictions take precedence, maintenance blocks rentals). Conflicts note the earlier fallback-delay approach that contradicts immediate synchronization. Gaps capture unresolved questions about lifecycle mapping, delivery scheduling interaction, query result clarity, UI distinction for maintenance, and admin override scenarios. Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.",1,0,0,0
+2e8af6f8,R48,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R48_5,Availability restrictions take precedence over normal availability,"Feature: Immediate Availability Synchronization
+  Scenario: Availability restrictions block rentals even when no active rents exist
+    Given an item ""ITEM-005"" has no active rent records
+    And an availability restriction is defined for ""ITEM-005"" covering ""2024-05-10"" to ""2024-05-15""
+    When a user queries availability for ""ITEM-005"" during the restricted period
+    Then the system shall return unavailable status immediately
+    And the restriction shall take precedence over the absence of active rents","Validates the exception that availability restrictions take precedence over normal availability, ensuring immediate enforcement of restrictions.",E2|E4|E9,The system shall allow authorized users to define availability restrictions for items.|Availability restrictions take precedence over normal availability.|The system shall ensure availability queries reflect the latest rent and item status information.,G41|G42|G82b|I34|I41|I42|I43|R29|R41|R48,Immediate availability synchronization,Immediate availability synchronization,"[1] source=R48 type=Requirement/SrcChunk hops=0 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[2] source=R48 type=Requirement hops=0 rel=TARGET
+Immediate availability synchronization
+
+[3] source=R48 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=R48 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[5] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[6] source=G42 type=Gap/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[7] source=I34 type=Implementation/SrcChunk hops=2 chunk=91e709a501470e81 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[8] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[9] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[10] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[11] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle
+
+[12] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[13] source=I42 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability query API
+
+[14] source=I43 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual availability restrictions
+
+[15] source=R41 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Availability calculation rule
+
+[16] source=R29 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R48 'Immediate availability synchronization' requires the system to update item availability in real time when rental lifecycle events occur, apply availability changes immediately, and ensure availability queries reflect the latest rent and item status. The operative context establishes that availability must be synchronized immediately upon rent creation, modification, cancellation, or completion, and that availability restrictions and maintenance periods take precedence. Ten test cases cover core synchronization scenarios, exception handling, and edge cases to validate that availability changes propagate immediately without delay.","The system shall ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || ## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow users to query item availability for a specified date range. || The system shall automatically update availability status when rent lifecycle events occur. || The system shall allow authorized users to define availability restrictions for items. || The system shall allow authorized users to define maintenance periods for items. || The system shall calculate item availability based on existing rent records. || Availability status reflects the current lifecycle state of rent records. || The system shall mark items as unavailable during maintenance periods. || The system shall prevent rent creation during maintenance periods.",Availability restrictions take precedence over normal availability. || Maintenance periods block rental activity and make items appear non-rentable.,"Earlier discussion suggested using a single fallback delay after certain rental events, but this does not align with the current requirement for immediate availability synchronization.",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"R48 'Immediate availability synchronization' is the target requirement. PRIMARY evidence (12 items) establishes that the system must update availability in real time and apply changes immediately when rental lifecycle events occur. E1 and E5 provide the core specification from TOOLCHAIN-CONF-AVAILABILITY-01.md. E3 and E4 provide JIRA ticket context confirming real-time sync requirements. E6, E7, E8 identify implementation challenges and ambiguities around item status changes and query result clarity. E9 and E10 flag synchronization and scheduling gaps. E11 and E12 reference related implementation items. No CONTEXT evidence was provided. The operative context consolidates all real-time and immediate-update requirements from the specification. Exceptions capture the behavioral overrides (unavailable items cannot be rented, restrictions take precedence, maintenance blocks rentals). Conflicts note the earlier fallback-delay approach that contradicts immediate synchronization. Gaps capture unresolved questions about lifecycle mapping, delivery scheduling interaction, query result clarity, UI distinction for maintenance, and admin override scenarios. Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.",1,0,0,0
+2e8af6f8,R48,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R48_6,Maintenance periods block rental activity immediately,"Feature: Immediate Availability Synchronization
+  Scenario: Item becomes non-rentable immediately when maintenance period is defined
+    Given an item ""ITEM-006"" is available for rental
+    When an authorized user defines a maintenance period for ""ITEM-006"" covering ""2024-06-01"" to ""2024-06-07""
+    Then the item shall be marked unavailable immediately for that period
+    And the system shall prevent rent creation during the maintenance period
+    And availability queries shall reflect the maintenance period as unavailable","Ensures that maintenance periods are applied immediately and block rental activity, with availability queries reflecting the maintenance status without delay.",E5|E6|E10,The system shall allow authorized users to define maintenance periods for items.|The system shall mark items as unavailable during maintenance periods.|The system shall prevent rent creation during maintenance periods.|Maintenance periods block rental activity and make items appear non-rentable.,G41|G42|G82b|I34|I41|I42|I43|R29|R41|R48,Immediate availability synchronization,Immediate availability synchronization,"[1] source=R48 type=Requirement/SrcChunk hops=0 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[2] source=R48 type=Requirement hops=0 rel=TARGET
+Immediate availability synchronization
+
+[3] source=R48 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=R48 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[5] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[6] source=G42 type=Gap/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[7] source=I34 type=Implementation/SrcChunk hops=2 chunk=91e709a501470e81 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[8] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[9] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[10] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[11] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle
+
+[12] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[13] source=I42 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability query API
+
+[14] source=I43 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual availability restrictions
+
+[15] source=R41 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Availability calculation rule
+
+[16] source=R29 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R48 'Immediate availability synchronization' requires the system to update item availability in real time when rental lifecycle events occur, apply availability changes immediately, and ensure availability queries reflect the latest rent and item status. The operative context establishes that availability must be synchronized immediately upon rent creation, modification, cancellation, or completion, and that availability restrictions and maintenance periods take precedence. Ten test cases cover core synchronization scenarios, exception handling, and edge cases to validate that availability changes propagate immediately without delay.","The system shall ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || ## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow users to query item availability for a specified date range. || The system shall automatically update availability status when rent lifecycle events occur. || The system shall allow authorized users to define availability restrictions for items. || The system shall allow authorized users to define maintenance periods for items. || The system shall calculate item availability based on existing rent records. || Availability status reflects the current lifecycle state of rent records. || The system shall mark items as unavailable during maintenance periods. || The system shall prevent rent creation during maintenance periods.",Availability restrictions take precedence over normal availability. || Maintenance periods block rental activity and make items appear non-rentable.,"Earlier discussion suggested using a single fallback delay after certain rental events, but this does not align with the current requirement for immediate availability synchronization.",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"R48 'Immediate availability synchronization' is the target requirement. PRIMARY evidence (12 items) establishes that the system must update availability in real time and apply changes immediately when rental lifecycle events occur. E1 and E5 provide the core specification from TOOLCHAIN-CONF-AVAILABILITY-01.md. E3 and E4 provide JIRA ticket context confirming real-time sync requirements. E6, E7, E8 identify implementation challenges and ambiguities around item status changes and query result clarity. E9 and E10 flag synchronization and scheduling gaps. E11 and E12 reference related implementation items. No CONTEXT evidence was provided. The operative context consolidates all real-time and immediate-update requirements from the specification. Exceptions capture the behavioral overrides (unavailable items cannot be rented, restrictions take precedence, maintenance blocks rentals). Conflicts note the earlier fallback-delay approach that contradicts immediate synchronization. Gaps capture unresolved questions about lifecycle mapping, delivery scheduling interaction, query result clarity, UI distinction for maintenance, and admin override scenarios. Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.",1,0,0,0
+2e8af6f8,R48,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R48_7,Availability query reflects latest rent and item status,"Feature: Immediate Availability Synchronization
+  Scenario: Availability query returns current status after multiple rent lifecycle events
+    Given an item ""ITEM-007"" is available
+    When a rent is created for ""2024-07-01"" to ""2024-07-10""
+    And the rent is modified to extend to ""2024-07-15""
+    And the rent is then cancelled
+    Then an availability query for ""2024-07-01"" to ""2024-07-15"" shall return available status
+    And the query shall reflect the latest rent and item status information","Validates that availability queries consistently reflect the latest rent and item status after multiple lifecycle events, ensuring synchronization accuracy.",E2|E3|E4,"The system shall ensure availability queries reflect the latest rent and item status information.|The system shall update availability in real time when rent records are created, modified, cancelled, or completed.|The system shall automatically update availability status when rent lifecycle events occur.",G41|G42|G82b|I34|I41|I42|I43|R29|R41|R48,Immediate availability synchronization,Immediate availability synchronization,"[1] source=R48 type=Requirement/SrcChunk hops=0 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[2] source=R48 type=Requirement hops=0 rel=TARGET
+Immediate availability synchronization
+
+[3] source=R48 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=R48 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[5] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[6] source=G42 type=Gap/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[7] source=I34 type=Implementation/SrcChunk hops=2 chunk=91e709a501470e81 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[8] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[9] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[10] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[11] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle
+
+[12] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[13] source=I42 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability query API
+
+[14] source=I43 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual availability restrictions
+
+[15] source=R41 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Availability calculation rule
+
+[16] source=R29 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R48 'Immediate availability synchronization' requires the system to update item availability in real time when rental lifecycle events occur, apply availability changes immediately, and ensure availability queries reflect the latest rent and item status. The operative context establishes that availability must be synchronized immediately upon rent creation, modification, cancellation, or completion, and that availability restrictions and maintenance periods take precedence. Ten test cases cover core synchronization scenarios, exception handling, and edge cases to validate that availability changes propagate immediately without delay.","The system shall ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || ## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow users to query item availability for a specified date range. || The system shall automatically update availability status when rent lifecycle events occur. || The system shall allow authorized users to define availability restrictions for items. || The system shall allow authorized users to define maintenance periods for items. || The system shall calculate item availability based on existing rent records. || Availability status reflects the current lifecycle state of rent records. || The system shall mark items as unavailable during maintenance periods. || The system shall prevent rent creation during maintenance periods.",Availability restrictions take precedence over normal availability. || Maintenance periods block rental activity and make items appear non-rentable.,"Earlier discussion suggested using a single fallback delay after certain rental events, but this does not align with the current requirement for immediate availability synchronization.",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"R48 'Immediate availability synchronization' is the target requirement. PRIMARY evidence (12 items) establishes that the system must update availability in real time and apply changes immediately when rental lifecycle events occur. E1 and E5 provide the core specification from TOOLCHAIN-CONF-AVAILABILITY-01.md. E3 and E4 provide JIRA ticket context confirming real-time sync requirements. E6, E7, E8 identify implementation challenges and ambiguities around item status changes and query result clarity. E9 and E10 flag synchronization and scheduling gaps. E11 and E12 reference related implementation items. No CONTEXT evidence was provided. The operative context consolidates all real-time and immediate-update requirements from the specification. Exceptions capture the behavioral overrides (unavailable items cannot be rented, restrictions take precedence, maintenance blocks rentals). Conflicts note the earlier fallback-delay approach that contradicts immediate synchronization. Gaps capture unresolved questions about lifecycle mapping, delivery scheduling interaction, query result clarity, UI distinction for maintenance, and admin override scenarios. Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.",1,0,0,0
+2e8af6f8,R48,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R48_8,Overlapping rent periods prevent availability,"Feature: Immediate Availability Synchronization
+  Scenario: Item remains unavailable when overlapping rents exist
+    Given an item ""ITEM-008"" has an active rent covering ""2024-08-01"" to ""2024-08-10""
+    When a second rent is created for the overlapping period ""2024-08-05"" to ""2024-08-15""
+    Then the item shall be marked unavailable for the entire combined period ""2024-08-01"" to ""2024-08-15"" immediately
+    And availability queries shall reflect the combined unavailability without delay",Ensures that overlapping rent periods are handled correctly and availability is updated immediately to reflect the combined unavailability.,E1|E3|E7,"The system shall calculate item availability based on existing rent records.|The system shall update availability in real time when rent records are created, modified, cancelled, or completed.|The system shall automatically update availability status when rent lifecycle events occur.",G41|G42|G82b|I34|I41|I42|I43|R29|R41|R48,Immediate availability synchronization,Immediate availability synchronization,"[1] source=R48 type=Requirement/SrcChunk hops=0 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[2] source=R48 type=Requirement hops=0 rel=TARGET
+Immediate availability synchronization
+
+[3] source=R48 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=R48 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[5] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[6] source=G42 type=Gap/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[7] source=I34 type=Implementation/SrcChunk hops=2 chunk=91e709a501470e81 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[8] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[9] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[10] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[11] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle
+
+[12] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[13] source=I42 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability query API
+
+[14] source=I43 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual availability restrictions
+
+[15] source=R41 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Availability calculation rule
+
+[16] source=R29 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R48 'Immediate availability synchronization' requires the system to update item availability in real time when rental lifecycle events occur, apply availability changes immediately, and ensure availability queries reflect the latest rent and item status. The operative context establishes that availability must be synchronized immediately upon rent creation, modification, cancellation, or completion, and that availability restrictions and maintenance periods take precedence. Ten test cases cover core synchronization scenarios, exception handling, and edge cases to validate that availability changes propagate immediately without delay.","The system shall ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || ## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow users to query item availability for a specified date range. || The system shall automatically update availability status when rent lifecycle events occur. || The system shall allow authorized users to define availability restrictions for items. || The system shall allow authorized users to define maintenance periods for items. || The system shall calculate item availability based on existing rent records. || Availability status reflects the current lifecycle state of rent records. || The system shall mark items as unavailable during maintenance periods. || The system shall prevent rent creation during maintenance periods.",Availability restrictions take precedence over normal availability. || Maintenance periods block rental activity and make items appear non-rentable.,"Earlier discussion suggested using a single fallback delay after certain rental events, but this does not align with the current requirement for immediate availability synchronization.",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"R48 'Immediate availability synchronization' is the target requirement. PRIMARY evidence (12 items) establishes that the system must update availability in real time and apply changes immediately when rental lifecycle events occur. E1 and E5 provide the core specification from TOOLCHAIN-CONF-AVAILABILITY-01.md. E3 and E4 provide JIRA ticket context confirming real-time sync requirements. E6, E7, E8 identify implementation challenges and ambiguities around item status changes and query result clarity. E9 and E10 flag synchronization and scheduling gaps. E11 and E12 reference related implementation items. No CONTEXT evidence was provided. The operative context consolidates all real-time and immediate-update requirements from the specification. Exceptions capture the behavioral overrides (unavailable items cannot be rented, restrictions take precedence, maintenance blocks rentals). Conflicts note the earlier fallback-delay approach that contradicts immediate synchronization. Gaps capture unresolved questions about lifecycle mapping, delivery scheduling interaction, query result clarity, UI distinction for maintenance, and admin override scenarios. Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.",1,0,0,0
+2e8af6f8,R48,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R48_9,Availability status reflects current lifecycle state,"Feature: Immediate Availability Synchronization
+  Scenario: Availability changes as rent lifecycle state transitions
+    Given a rent record for item ""ITEM-009"" with status ""Pending""
+    When the rent status transitions to ""Approved""
+    Then the item shall be marked unavailable immediately
+    When the rent status transitions to ""Active""
+    Then the item shall remain unavailable
+    When the rent status transitions to ""Completed""
+    Then the item shall become available immediately","Validates that availability status immediately reflects the current lifecycle state of rent records, ensuring synchronization across all state transitions.",E4|E5|E8,Availability status reflects the current lifecycle state of rent records.|The system shall automatically update availability status when rent lifecycle events occur.|The system shall ensure availability queries reflect the latest rent and item status information.,G41|G42|G82b|I34|I41|I42|I43|R29|R41|R48,Immediate availability synchronization,Immediate availability synchronization,"[1] source=R48 type=Requirement/SrcChunk hops=0 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[2] source=R48 type=Requirement hops=0 rel=TARGET
+Immediate availability synchronization
+
+[3] source=R48 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=R48 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[5] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[6] source=G42 type=Gap/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[7] source=I34 type=Implementation/SrcChunk hops=2 chunk=91e709a501470e81 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[8] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[9] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[10] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[11] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle
+
+[12] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[13] source=I42 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability query API
+
+[14] source=I43 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual availability restrictions
+
+[15] source=R41 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Availability calculation rule
+
+[16] source=R29 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R48 'Immediate availability synchronization' requires the system to update item availability in real time when rental lifecycle events occur, apply availability changes immediately, and ensure availability queries reflect the latest rent and item status. The operative context establishes that availability must be synchronized immediately upon rent creation, modification, cancellation, or completion, and that availability restrictions and maintenance periods take precedence. Ten test cases cover core synchronization scenarios, exception handling, and edge cases to validate that availability changes propagate immediately without delay.","The system shall ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || ## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow users to query item availability for a specified date range. || The system shall automatically update availability status when rent lifecycle events occur. || The system shall allow authorized users to define availability restrictions for items. || The system shall allow authorized users to define maintenance periods for items. || The system shall calculate item availability based on existing rent records. || Availability status reflects the current lifecycle state of rent records. || The system shall mark items as unavailable during maintenance periods. || The system shall prevent rent creation during maintenance periods.",Availability restrictions take precedence over normal availability. || Maintenance periods block rental activity and make items appear non-rentable.,"Earlier discussion suggested using a single fallback delay after certain rental events, but this does not align with the current requirement for immediate availability synchronization.",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"R48 'Immediate availability synchronization' is the target requirement. PRIMARY evidence (12 items) establishes that the system must update availability in real time and apply changes immediately when rental lifecycle events occur. E1 and E5 provide the core specification from TOOLCHAIN-CONF-AVAILABILITY-01.md. E3 and E4 provide JIRA ticket context confirming real-time sync requirements. E6, E7, E8 identify implementation challenges and ambiguities around item status changes and query result clarity. E9 and E10 flag synchronization and scheduling gaps. E11 and E12 reference related implementation items. No CONTEXT evidence was provided. The operative context consolidates all real-time and immediate-update requirements from the specification. Exceptions capture the behavioral overrides (unavailable items cannot be rented, restrictions take precedence, maintenance blocks rentals). Conflicts note the earlier fallback-delay approach that contradicts immediate synchronization. Gaps capture unresolved questions about lifecycle mapping, delivery scheduling interaction, query result clarity, UI distinction for maintenance, and admin override scenarios. Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.",1,0,0,0
+2e8af6f8,R48,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R48_10,Date range queries return accurate availability status,"Feature: Immediate Availability Synchronization
+  Scenario: Availability query for specific date range returns accurate status
+    Given an item ""ITEM-010"" with multiple rent records:
+      | Start Date | End Date   | Status    |
+      | 2024-09-01 | 2024-09-05 | Completed |
+      | 2024-09-10 | 2024-09-15 | Active    |
+      | 2024-09-20 | 2024-09-25 | Approved  |
+    When a user queries availability for ""2024-09-01"" to ""2024-09-30""
+    Then the system shall return:
+      | Period             | Status      |
+      | 2024-09-01-09-05   | Available   |
+      | 2024-09-06-09-09   | Available   |
+      | 2024-09-10-09-15   | Unavailable |
+      | 2024-09-16-09-19   | Available   |
+      | 2024-09-20-09-25   | Unavailable |
+      | 2024-09-26-09-30   | Available   |","Validates that availability queries for specified date ranges return accurate status reflecting the latest rent records and lifecycle states, demonstrating comprehensive real-time synchronization.",E2|E4|E9,The system shall allow users to query item availability for a specified date range.|The system shall return availability status indicating whether the item is available or unavailable for the requested period.|The system shall ensure availability queries reflect the latest rent and item status information.,G41|G42|G82b|I34|I41|I42|I43|R29|R41|R48,Immediate availability synchronization,Immediate availability synchronization,"[1] source=R48 type=Requirement/SrcChunk hops=0 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=TARGET
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[2] source=R48 type=Requirement hops=0 rel=TARGET
+Immediate availability synchronization
+
+[3] source=R48 type=Requirement/SrcChunk hops=0 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=TARGET
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[4] source=R48 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[5] source=I43 type=Implementation/SrcChunk hops=2 chunk=975fa37f0ec02b1d doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=IN_DOC > IN_DOC
+ystem shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that availability restrictions take precedence over normal availability.
+
+## 4.4 Maintenance and Blocked Periods
+## 4.4.1 The system shall allow authorized users to define maintenance periods for items.
+## 4.4.2 The system shall prevent rent creation during maintenance periods.
+## 4.4.3 The system shall mark items as unavailable during maintenance periods.
+## 4.4.4 The system shall allow modification or removal of maintenance periods by authorized users.
+
+## 4.5 Availability Status Updates
+## 4.5.1 The system shall automatically update availability status when rent lifecycle events occur.
+## 4.5.2 The system shall ensure availability status reflects the current lifecycle state of rent records.
+## 4.5.3 The system shall ensure availability changes are applied immediately.
+
+[6] source=G42 type=Gap/SrcChunk hops=2 chunk=9437222564f7ac64 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+tion"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-22T10:00:00Z"",
+        ""text"": ""Logic check: If an item is currently 'Active' in a rent record, can an admin still set it to 'Unavailable'? The specification says status changes take effect immediately.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-305"",
+    ""summary"": ""Item Deletion Logic (Soft Delete)"",
+    ""description"": ""Implement deletion of items using a soft-delete approach instead of physical removal. Prevent deletion when the item is still referenced by active rental activity, and confirm how the business deletion outcome should map to the current technical status model."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-22T12:00:00Z"",
+        ""text"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items shou
+
+[7] source=I34 type=Implementation/SrcChunk hops=2 chunk=91e709a501470e81 doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[8] source=I43 type=Implementation/SrcChunk hops=2 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=IN_DOC > IN_DOC
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[9] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[10] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[11] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle
+
+[12] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic
+
+[13] source=I42 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability query API
+
+[14] source=I43 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual availability restrictions
+
+[15] source=R41 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Availability calculation rule
+
+[16] source=R29 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R48 'Immediate availability synchronization' requires the system to update item availability in real time when rental lifecycle events occur, apply availability changes immediately, and ensure availability queries reflect the latest rent and item status. The operative context establishes that availability must be synchronized immediately upon rent creation, modification, cancellation, or completion, and that availability restrictions and maintenance periods take precedence. Ten test cases cover core synchronization scenarios, exception handling, and edge cases to validate that availability changes propagate immediately without delay.","The system shall ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || ## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow users to query item availability for a specified date range. || The system shall automatically update availability status when rent lifecycle events occur. || The system shall allow authorized users to define availability restrictions for items. || The system shall allow authorized users to define maintenance periods for items. || The system shall calculate item availability based on existing rent records. || Availability status reflects the current lifecycle state of rent records. || The system shall mark items as unavailable during maintenance periods. || The system shall prevent rent creation during maintenance periods.",Availability restrictions take precedence over normal availability. || Maintenance periods block rental activity and make items appear non-rentable.,"Earlier discussion suggested using a single fallback delay after certain rental events, but this does not align with the current requirement for immediate availability synchronization.",,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12,"R48 'Immediate availability synchronization' is the target requirement. PRIMARY evidence (12 items) establishes that the system must update availability in real time and apply changes immediately when rental lifecycle events occur. E1 and E5 provide the core specification from TOOLCHAIN-CONF-AVAILABILITY-01.md. E3 and E4 provide JIRA ticket context confirming real-time sync requirements. E6, E7, E8 identify implementation challenges and ambiguities around item status changes and query result clarity. E9 and E10 flag synchronization and scheduling gaps. E11 and E12 reference related implementation items. No CONTEXT evidence was provided. The operative context consolidates all real-time and immediate-update requirements from the specification. Exceptions capture the behavioral overrides (unavailable items cannot be rented, restrictions take precedence, maintenance blocks rentals). Conflicts note the earlier fallback-delay approach that contradicts immediate synchronization. Gaps capture unresolved questions about lifecycle mapping, delivery scheduling interaction, query result clarity, UI distinction for maintenance, and admin override scenarios. Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.",1,0,0,0

@@ -1,0 +1,1561 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+1255596f,R64,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R64_1,Generate invoice for Approved rent,"Feature: Invoice Generation for Approved Rents
+  Scenario: System generates invoice when rent is marked Approved
+    Given a rent agreement exists with status ""Approved""
+    When the invoice generation process is triggered
+    Then an invoice shall be generated for that rent
+    And the invoice shall be stored in the system",Validates the core operative rule that the system shall generate an invoice for each Approved rent. This is a primary requirement from the resolved context.,E4|E5,System shall generate an invoice for each Approved or Completed rent|System shall store generated invoices,G63|G72|I63|R64,Invoice generation rule,Invoice generation rule,"[1] source=R64 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R64 type=Requirement hops=0 rel=TARGET
+Invoice generation rule
+
+[3] source=R64 type=Requirement/SrcChunk hops=0 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=TARGET
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[4] source=R64 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I63 type=Implementation/SrcChunk hops=1 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IMPLEMENTS
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=I63 type=Implementation hops=1 rel=IMPLEMENTS
+Invoice generation engine
+
+[8] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[9] source=G72 type=Gap/SrcChunk hops=2 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[10] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict","Generated 10 executable Gherkin tests for R64 (Invoice generation rule). Tests focus on the three operative context items: invoice generation for Approved/Completed rents, payment status recording, and invoice storage. Tests avoid the multi-currency conflict and unspecified category/matrix-based rule gaps. Each test targets a specific aspect of the invoice generation workflow with clear preconditions, actions, and assertions.",System shall generate an invoice for each Approved or Completed rent || ## 6.4.2 The system shall record payment status. || System shall store generated invoices,,Multi-currency conversion rule conflict,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R64 targets invoice generation rule. PRIMARY evidence establishes four core operative rules from TOOLCHAIN-CONF-PAYMENT-01.md (E4, E5). Multiple gaps and concerns are documented in JIRA comments (E1, E3) and internal communications (E6, E8, E9) regarding fraction handling, presentation vs. storage consistency, multi-currency handling, and audit alignment. These gaps prevent promotion of additional rules to operative context. No conflicting evidence found; gaps represent unresolved design decisions rather than contradictions. Filtered abstract or low-relevance operative statements: System shall assign a unique identifier to each invoice | System shall include rent details, pricing, and total amount in the invoice",1,0,1,1
+1255596f,R64,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R64_2,Generate invoice for Completed rent,"Feature: Invoice Generation for Completed Rents
+  Scenario: System generates invoice when rent is marked Completed
+    Given a rent agreement exists with status ""Completed""
+    When the invoice generation process is triggered
+    Then an invoice shall be generated for that rent
+    And the invoice shall be stored in the system",Validates the core operative rule that the system shall generate an invoice for each Completed rent. This is a primary requirement from the resolved context.,E4|E5,System shall generate an invoice for each Approved or Completed rent|System shall store generated invoices,G63|G72|I63|R64,Invoice generation rule,Invoice generation rule,"[1] source=R64 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R64 type=Requirement hops=0 rel=TARGET
+Invoice generation rule
+
+[3] source=R64 type=Requirement/SrcChunk hops=0 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=TARGET
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[4] source=R64 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I63 type=Implementation/SrcChunk hops=1 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IMPLEMENTS
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=I63 type=Implementation hops=1 rel=IMPLEMENTS
+Invoice generation engine
+
+[8] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[9] source=G72 type=Gap/SrcChunk hops=2 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[10] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict","Generated 10 executable Gherkin tests for R64 (Invoice generation rule). Tests focus on the three operative context items: invoice generation for Approved/Completed rents, payment status recording, and invoice storage. Tests avoid the multi-currency conflict and unspecified category/matrix-based rule gaps. Each test targets a specific aspect of the invoice generation workflow with clear preconditions, actions, and assertions.",System shall generate an invoice for each Approved or Completed rent || ## 6.4.2 The system shall record payment status. || System shall store generated invoices,,Multi-currency conversion rule conflict,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R64 targets invoice generation rule. PRIMARY evidence establishes four core operative rules from TOOLCHAIN-CONF-PAYMENT-01.md (E4, E5). Multiple gaps and concerns are documented in JIRA comments (E1, E3) and internal communications (E6, E8, E9) regarding fraction handling, presentation vs. storage consistency, multi-currency handling, and audit alignment. These gaps prevent promotion of additional rules to operative context. No conflicting evidence found; gaps represent unresolved design decisions rather than contradictions. Filtered abstract or low-relevance operative statements: System shall assign a unique identifier to each invoice | System shall include rent details, pricing, and total amount in the invoice",1,0,1,1
+1255596f,R64,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R64_3,Do not generate invoice for Pending rent,"Feature: Invoice Generation Status Validation
+  Scenario: System does not generate invoice for Pending rent
+    Given a rent agreement exists with status ""Pending""
+    When the invoice generation process is triggered
+    Then no invoice shall be generated for that rent","Clarifies the boundary condition of the operative rule by confirming that invoices are only generated for Approved or Completed rents, not for other statuses.",E4|E5,System shall generate an invoice for each Approved or Completed rent,G63|G72|I63|R64,Invoice generation rule,Invoice generation rule,"[1] source=R64 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R64 type=Requirement hops=0 rel=TARGET
+Invoice generation rule
+
+[3] source=R64 type=Requirement/SrcChunk hops=0 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=TARGET
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[4] source=R64 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I63 type=Implementation/SrcChunk hops=1 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IMPLEMENTS
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=I63 type=Implementation hops=1 rel=IMPLEMENTS
+Invoice generation engine
+
+[8] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[9] source=G72 type=Gap/SrcChunk hops=2 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[10] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict","Generated 10 executable Gherkin tests for R64 (Invoice generation rule). Tests focus on the three operative context items: invoice generation for Approved/Completed rents, payment status recording, and invoice storage. Tests avoid the multi-currency conflict and unspecified category/matrix-based rule gaps. Each test targets a specific aspect of the invoice generation workflow with clear preconditions, actions, and assertions.",System shall generate an invoice for each Approved or Completed rent || ## 6.4.2 The system shall record payment status. || System shall store generated invoices,,Multi-currency conversion rule conflict,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R64 targets invoice generation rule. PRIMARY evidence establishes four core operative rules from TOOLCHAIN-CONF-PAYMENT-01.md (E4, E5). Multiple gaps and concerns are documented in JIRA comments (E1, E3) and internal communications (E6, E8, E9) regarding fraction handling, presentation vs. storage consistency, multi-currency handling, and audit alignment. These gaps prevent promotion of additional rules to operative context. No conflicting evidence found; gaps represent unresolved design decisions rather than contradictions. Filtered abstract or low-relevance operative statements: System shall assign a unique identifier to each invoice | System shall include rent details, pricing, and total amount in the invoice",1,0,1,1
+1255596f,R64,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R64_4,Record payment status for generated invoice,"Feature: Payment Status Recording
+  Scenario: System records payment status when invoice is generated
+    Given a rent agreement with status ""Approved""
+    When an invoice is generated
+    Then the system shall record the payment status for that invoice",Validates the operative requirement that the system shall record payment status. This ensures payment tracking is implemented alongside invoice generation.,E4|E5,System shall record payment status|System shall generate an invoice for each Approved or Completed rent,G63|G72|I63|R64,Invoice generation rule,Invoice generation rule,"[1] source=R64 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R64 type=Requirement hops=0 rel=TARGET
+Invoice generation rule
+
+[3] source=R64 type=Requirement/SrcChunk hops=0 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=TARGET
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[4] source=R64 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I63 type=Implementation/SrcChunk hops=1 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IMPLEMENTS
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=I63 type=Implementation hops=1 rel=IMPLEMENTS
+Invoice generation engine
+
+[8] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[9] source=G72 type=Gap/SrcChunk hops=2 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[10] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict","Generated 10 executable Gherkin tests for R64 (Invoice generation rule). Tests focus on the three operative context items: invoice generation for Approved/Completed rents, payment status recording, and invoice storage. Tests avoid the multi-currency conflict and unspecified category/matrix-based rule gaps. Each test targets a specific aspect of the invoice generation workflow with clear preconditions, actions, and assertions.",System shall generate an invoice for each Approved or Completed rent || ## 6.4.2 The system shall record payment status. || System shall store generated invoices,,Multi-currency conversion rule conflict,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R64 targets invoice generation rule. PRIMARY evidence establishes four core operative rules from TOOLCHAIN-CONF-PAYMENT-01.md (E4, E5). Multiple gaps and concerns are documented in JIRA comments (E1, E3) and internal communications (E6, E8, E9) regarding fraction handling, presentation vs. storage consistency, multi-currency handling, and audit alignment. These gaps prevent promotion of additional rules to operative context. No conflicting evidence found; gaps represent unresolved design decisions rather than contradictions. Filtered abstract or low-relevance operative statements: System shall assign a unique identifier to each invoice | System shall include rent details, pricing, and total amount in the invoice",1,0,1,1
+1255596f,R64,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R64_5,Store generated invoice in system,"Feature: Invoice Storage
+  Scenario: System stores generated invoice
+    Given a rent agreement with status ""Approved""
+    When an invoice is generated
+    Then the invoice shall be stored in the system
+    And the stored invoice shall be retrievable",Validates the operative requirement that the system shall store generated invoices. This ensures invoices are persisted and available for later retrieval.,E4|E5,System shall store generated invoices,G63|G72|I63|R64,Invoice generation rule,Invoice generation rule,"[1] source=R64 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R64 type=Requirement hops=0 rel=TARGET
+Invoice generation rule
+
+[3] source=R64 type=Requirement/SrcChunk hops=0 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=TARGET
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[4] source=R64 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I63 type=Implementation/SrcChunk hops=1 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IMPLEMENTS
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=I63 type=Implementation hops=1 rel=IMPLEMENTS
+Invoice generation engine
+
+[8] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[9] source=G72 type=Gap/SrcChunk hops=2 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[10] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict","Generated 10 executable Gherkin tests for R64 (Invoice generation rule). Tests focus on the three operative context items: invoice generation for Approved/Completed rents, payment status recording, and invoice storage. Tests avoid the multi-currency conflict and unspecified category/matrix-based rule gaps. Each test targets a specific aspect of the invoice generation workflow with clear preconditions, actions, and assertions.",System shall generate an invoice for each Approved or Completed rent || ## 6.4.2 The system shall record payment status. || System shall store generated invoices,,Multi-currency conversion rule conflict,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R64 targets invoice generation rule. PRIMARY evidence establishes four core operative rules from TOOLCHAIN-CONF-PAYMENT-01.md (E4, E5). Multiple gaps and concerns are documented in JIRA comments (E1, E3) and internal communications (E6, E8, E9) regarding fraction handling, presentation vs. storage consistency, multi-currency handling, and audit alignment. These gaps prevent promotion of additional rules to operative context. No conflicting evidence found; gaps represent unresolved design decisions rather than contradictions. Filtered abstract or low-relevance operative statements: System shall assign a unique identifier to each invoice | System shall include rent details, pricing, and total amount in the invoice",1,0,1,1
+1255596f,R64,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R64_6,Generate invoice for multiple Approved rents,"Feature: Bulk Invoice Generation
+  Scenario: System generates invoices for multiple Approved rents
+    Given multiple rent agreements exist with status ""Approved""
+    When the invoice generation process is triggered
+    Then an invoice shall be generated for each Approved rent
+    And all invoices shall be stored in the system","Validates that the invoice generation rule applies consistently across multiple rent agreements, ensuring the system can handle batch processing.",E4|E5,System shall generate an invoice for each Approved or Completed rent|System shall store generated invoices,G63|G72|I63|R64,Invoice generation rule,Invoice generation rule,"[1] source=R64 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R64 type=Requirement hops=0 rel=TARGET
+Invoice generation rule
+
+[3] source=R64 type=Requirement/SrcChunk hops=0 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=TARGET
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[4] source=R64 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I63 type=Implementation/SrcChunk hops=1 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IMPLEMENTS
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=I63 type=Implementation hops=1 rel=IMPLEMENTS
+Invoice generation engine
+
+[8] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[9] source=G72 type=Gap/SrcChunk hops=2 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[10] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict","Generated 10 executable Gherkin tests for R64 (Invoice generation rule). Tests focus on the three operative context items: invoice generation for Approved/Completed rents, payment status recording, and invoice storage. Tests avoid the multi-currency conflict and unspecified category/matrix-based rule gaps. Each test targets a specific aspect of the invoice generation workflow with clear preconditions, actions, and assertions.",System shall generate an invoice for each Approved or Completed rent || ## 6.4.2 The system shall record payment status. || System shall store generated invoices,,Multi-currency conversion rule conflict,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R64 targets invoice generation rule. PRIMARY evidence establishes four core operative rules from TOOLCHAIN-CONF-PAYMENT-01.md (E4, E5). Multiple gaps and concerns are documented in JIRA comments (E1, E3) and internal communications (E6, E8, E9) regarding fraction handling, presentation vs. storage consistency, multi-currency handling, and audit alignment. These gaps prevent promotion of additional rules to operative context. No conflicting evidence found; gaps represent unresolved design decisions rather than contradictions. Filtered abstract or low-relevance operative statements: System shall assign a unique identifier to each invoice | System shall include rent details, pricing, and total amount in the invoice",1,0,1,1
+1255596f,R64,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R64_7,Generate invoice for mixed Approved and Completed rents,"Feature: Invoice Generation for Mixed Rent Statuses
+  Scenario: System generates invoices for both Approved and Completed rents
+    Given rent agreements exist with status ""Approved"" and ""Completed""
+    When the invoice generation process is triggered
+    Then an invoice shall be generated for each Approved rent
+    And an invoice shall be generated for each Completed rent
+    And all invoices shall be stored in the system","Validates that the invoice generation rule applies to both Approved and Completed statuses, confirming the OR condition in the operative requirement.",E4|E5,System shall generate an invoice for each Approved or Completed rent|System shall store generated invoices,G63|G72|I63|R64,Invoice generation rule,Invoice generation rule,"[1] source=R64 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R64 type=Requirement hops=0 rel=TARGET
+Invoice generation rule
+
+[3] source=R64 type=Requirement/SrcChunk hops=0 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=TARGET
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[4] source=R64 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I63 type=Implementation/SrcChunk hops=1 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IMPLEMENTS
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=I63 type=Implementation hops=1 rel=IMPLEMENTS
+Invoice generation engine
+
+[8] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[9] source=G72 type=Gap/SrcChunk hops=2 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[10] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict","Generated 10 executable Gherkin tests for R64 (Invoice generation rule). Tests focus on the three operative context items: invoice generation for Approved/Completed rents, payment status recording, and invoice storage. Tests avoid the multi-currency conflict and unspecified category/matrix-based rule gaps. Each test targets a specific aspect of the invoice generation workflow with clear preconditions, actions, and assertions.",System shall generate an invoice for each Approved or Completed rent || ## 6.4.2 The system shall record payment status. || System shall store generated invoices,,Multi-currency conversion rule conflict,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R64 targets invoice generation rule. PRIMARY evidence establishes four core operative rules from TOOLCHAIN-CONF-PAYMENT-01.md (E4, E5). Multiple gaps and concerns are documented in JIRA comments (E1, E3) and internal communications (E6, E8, E9) regarding fraction handling, presentation vs. storage consistency, multi-currency handling, and audit alignment. These gaps prevent promotion of additional rules to operative context. No conflicting evidence found; gaps represent unresolved design decisions rather than contradictions. Filtered abstract or low-relevance operative statements: System shall assign a unique identifier to each invoice | System shall include rent details, pricing, and total amount in the invoice",1,0,1,1
+1255596f,R64,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R64_8,Payment status is recorded as Unpaid for new invoice,"Feature: Initial Payment Status Recording
+  Scenario: System records initial payment status when invoice is generated
+    Given a rent agreement with status ""Approved""
+    When an invoice is generated
+    Then the system shall record the payment status
+    And the initial payment status shall be set appropriately","Validates that payment status recording is implemented with a defined initial state when an invoice is first generated, supporting the payment tracking requirement.",E4|E5,System shall record payment status,G63|G72|I63|R64,Invoice generation rule,Invoice generation rule,"[1] source=R64 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R64 type=Requirement hops=0 rel=TARGET
+Invoice generation rule
+
+[3] source=R64 type=Requirement/SrcChunk hops=0 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=TARGET
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[4] source=R64 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I63 type=Implementation/SrcChunk hops=1 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IMPLEMENTS
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=I63 type=Implementation hops=1 rel=IMPLEMENTS
+Invoice generation engine
+
+[8] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[9] source=G72 type=Gap/SrcChunk hops=2 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[10] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict","Generated 10 executable Gherkin tests for R64 (Invoice generation rule). Tests focus on the three operative context items: invoice generation for Approved/Completed rents, payment status recording, and invoice storage. Tests avoid the multi-currency conflict and unspecified category/matrix-based rule gaps. Each test targets a specific aspect of the invoice generation workflow with clear preconditions, actions, and assertions.",System shall generate an invoice for each Approved or Completed rent || ## 6.4.2 The system shall record payment status. || System shall store generated invoices,,Multi-currency conversion rule conflict,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R64 targets invoice generation rule. PRIMARY evidence establishes four core operative rules from TOOLCHAIN-CONF-PAYMENT-01.md (E4, E5). Multiple gaps and concerns are documented in JIRA comments (E1, E3) and internal communications (E6, E8, E9) regarding fraction handling, presentation vs. storage consistency, multi-currency handling, and audit alignment. These gaps prevent promotion of additional rules to operative context. No conflicting evidence found; gaps represent unresolved design decisions rather than contradictions. Filtered abstract or low-relevance operative statements: System shall assign a unique identifier to each invoice | System shall include rent details, pricing, and total amount in the invoice",1,0,1,1
+1255596f,R64,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R64_9,Invoice remains stored after generation,"Feature: Invoice Persistence
+  Scenario: Generated invoice persists in system storage
+    Given a rent agreement with status ""Approved""
+    When an invoice is generated and stored
+    Then the invoice shall remain in system storage
+    And the invoice shall be accessible for retrieval","Validates that invoices are durably stored and not lost after generation, ensuring data integrity and auditability of the invoice generation process.",E4|E5,System shall store generated invoices,G63|G72|I63|R64,Invoice generation rule,Invoice generation rule,"[1] source=R64 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R64 type=Requirement hops=0 rel=TARGET
+Invoice generation rule
+
+[3] source=R64 type=Requirement/SrcChunk hops=0 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=TARGET
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[4] source=R64 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I63 type=Implementation/SrcChunk hops=1 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IMPLEMENTS
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=I63 type=Implementation hops=1 rel=IMPLEMENTS
+Invoice generation engine
+
+[8] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[9] source=G72 type=Gap/SrcChunk hops=2 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[10] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict","Generated 10 executable Gherkin tests for R64 (Invoice generation rule). Tests focus on the three operative context items: invoice generation for Approved/Completed rents, payment status recording, and invoice storage. Tests avoid the multi-currency conflict and unspecified category/matrix-based rule gaps. Each test targets a specific aspect of the invoice generation workflow with clear preconditions, actions, and assertions.",System shall generate an invoice for each Approved or Completed rent || ## 6.4.2 The system shall record payment status. || System shall store generated invoices,,Multi-currency conversion rule conflict,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R64 targets invoice generation rule. PRIMARY evidence establishes four core operative rules from TOOLCHAIN-CONF-PAYMENT-01.md (E4, E5). Multiple gaps and concerns are documented in JIRA comments (E1, E3) and internal communications (E6, E8, E9) regarding fraction handling, presentation vs. storage consistency, multi-currency handling, and audit alignment. These gaps prevent promotion of additional rules to operative context. No conflicting evidence found; gaps represent unresolved design decisions rather than contradictions. Filtered abstract or low-relevance operative statements: System shall assign a unique identifier to each invoice | System shall include rent details, pricing, and total amount in the invoice",1,0,1,1
+1255596f,R64,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R64_10,Prevent duplicate invoice generation for same rent,"Feature: Duplicate Invoice Prevention
+  Scenario: System prevents generating duplicate invoices for the same rent
+    Given a rent agreement with status ""Approved""
+    And an invoice has already been generated for this rent
+    When the invoice generation process is triggered again
+    Then no duplicate invoice shall be generated
+    And the existing invoice shall remain in storage","Validates that the invoice generation rule includes safeguards against duplicate invoices for the same rent, ensuring data consistency and preventing billing errors.",E4|E5,System shall generate an invoice for each Approved or Completed rent|System shall store generated invoices,G63|G72|I63|R64,Invoice generation rule,Invoice generation rule,"[1] source=R64 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R64 type=Requirement hops=0 rel=TARGET
+Invoice generation rule
+
+[3] source=R64 type=Requirement/SrcChunk hops=0 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=TARGET
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[4] source=R64 type=Requirement/SrcChunk hops=0 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=TARGET
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[5] source=I63 type=Implementation/SrcChunk hops=1 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IMPLEMENTS
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=G63 type=Gap/SrcChunk hops=2 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=IN_DOC > IN_DOC
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[7] source=I63 type=Implementation hops=1 rel=IMPLEMENTS
+Invoice generation engine
+
+[8] source=G72 type=Gap/SrcChunk hops=2 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[9] source=G72 type=Gap/SrcChunk hops=2 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=IN_DOC > IN_DOC
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[10] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict","Generated 10 executable Gherkin tests for R64 (Invoice generation rule). Tests focus on the three operative context items: invoice generation for Approved/Completed rents, payment status recording, and invoice storage. Tests avoid the multi-currency conflict and unspecified category/matrix-based rule gaps. Each test targets a specific aspect of the invoice generation workflow with clear preconditions, actions, and assertions.",System shall generate an invoice for each Approved or Completed rent || ## 6.4.2 The system shall record payment status. || System shall store generated invoices,,Multi-currency conversion rule conflict,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R64 targets invoice generation rule. PRIMARY evidence establishes four core operative rules from TOOLCHAIN-CONF-PAYMENT-01.md (E4, E5). Multiple gaps and concerns are documented in JIRA comments (E1, E3) and internal communications (E6, E8, E9) regarding fraction handling, presentation vs. storage consistency, multi-currency handling, and audit alignment. These gaps prevent promotion of additional rules to operative context. No conflicting evidence found; gaps represent unresolved design decisions rather than contradictions. Filtered abstract or low-relevance operative statements: System shall assign a unique identifier to each invoice | System shall include rent details, pricing, and total amount in the invoice",1,0,1,1

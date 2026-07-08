@@ -1,0 +1,1090 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+98bd8225,R63,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R63_1,"Calculation consistency across calculation, storage, and display","Feature: Calculation Accuracy - Consistency Across Stages
+  Scenario: Verify calculation result matches stored and displayed value
+    Given a rental calculation with duration 5 days and daily rate $100
+    When the system calculates the total cost
+    Then the calculated value should be $500
+    And the stored value in the database should be $500
+    And the displayed value to the user should be $500
+    And all three values must be identical","Ensures that calculation accuracy is maintained consistently across all three stages: calculation logic, persistent storage, and user-facing display. This is a core requirement for R63.",E2|E3|E4,"Calculation accuracy must be consistent across calculation, storage, and user-facing display",G63|I41|I62|R63|R70|R72b,Calculation accuracy rule,Calculation accuracy rule,"[1] source=R63 type=Requirement hops=0 rel=TARGET
+Calculation accuracy rule
+
+[2] source=R63 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R63 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R63 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R72b type=Requirement hops=1 rel=AFFECTS
+Financial report accuracy rule
+
+[7] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[8] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[9] source=R70 type=Requirement hops=1 rel=REFINES
+Rounding rule consistency
+
+[10] source=G63 type=Gap hops=2 rel=REFINES > AFFECTS
+Multi-currency conversion rule conflict
+
+[11] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic","R63 targets calculation accuracy across billing and financial contexts. The requirement ensures consistency across calculation, storage, and user-facing display, with exact matching of persisted and displayed totals. Core concerns include proper handling of edge-case fractions, audit discrepancies, and prevention of currency presentation from silently overriding core pricing logic. Ten test cases cover consistency validation, fraction handling, audit visibility, multi-currency scenarios, and exception cases.",,International billing and currency presentation must not silently override core pricing logic,,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R63 targets calculation accuracy across billing and financial contexts. PRIMARY evidence (E2-E6) establishes core requirements: consistency across calculation/storage/display, exact matching of user-facing and persisted totals, and proper handling of edge-case fractions. E3-E4 highlight audit discrepancies and source-of-truth concerns. CONTEXT evidence (E9-E11) indicates related requirements on financial reporting accuracy, rounding consistency, and multi-currency conflicts. Key gaps remain on fraction handling specifics and audit visibility model. Currency presentation must not override core pricing logic (E5). Filtered abstract or low-relevance operative statements: Calculation accuracy must be consistent across calculation, storage, and user-facing display | Rental cost calculation must be derived consistently based on duration and pricing rules | Edge-case fractions in calculations require explicit handling rules at each calculation stage",0,0,0,0
+98bd8225,R63,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R63_2,Exact matching of persisted and displayed totals,"Feature: Calculation Accuracy - Persisted vs Displayed Totals
+  Scenario: Verify persisted total exactly matches displayed total
+    Given a billing transaction with subtotal $1,234.56
+    When the transaction is persisted to the database
+    And the transaction is retrieved and displayed to the user
+    Then the persisted total should exactly match the displayed total
+    And there should be no rounding discrepancies between storage and display","Addresses the requirement that user-facing totals must exactly match persisted values, preventing audit discrepancies and source-of-truth concerns identified in E3-E4.",E3|E4|E5,Exact matching of user-facing and persisted totals,G63|I41|I62|R63|R70|R72b,Calculation accuracy rule,Calculation accuracy rule,"[1] source=R63 type=Requirement hops=0 rel=TARGET
+Calculation accuracy rule
+
+[2] source=R63 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R63 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R63 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R72b type=Requirement hops=1 rel=AFFECTS
+Financial report accuracy rule
+
+[7] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[8] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[9] source=R70 type=Requirement hops=1 rel=REFINES
+Rounding rule consistency
+
+[10] source=G63 type=Gap hops=2 rel=REFINES > AFFECTS
+Multi-currency conversion rule conflict
+
+[11] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic","R63 targets calculation accuracy across billing and financial contexts. The requirement ensures consistency across calculation, storage, and user-facing display, with exact matching of persisted and displayed totals. Core concerns include proper handling of edge-case fractions, audit discrepancies, and prevention of currency presentation from silently overriding core pricing logic. Ten test cases cover consistency validation, fraction handling, audit visibility, multi-currency scenarios, and exception cases.",,International billing and currency presentation must not silently override core pricing logic,,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R63 targets calculation accuracy across billing and financial contexts. PRIMARY evidence (E2-E6) establishes core requirements: consistency across calculation/storage/display, exact matching of user-facing and persisted totals, and proper handling of edge-case fractions. E3-E4 highlight audit discrepancies and source-of-truth concerns. CONTEXT evidence (E9-E11) indicates related requirements on financial reporting accuracy, rounding consistency, and multi-currency conflicts. Key gaps remain on fraction handling specifics and audit visibility model. Currency presentation must not override core pricing logic (E5). Filtered abstract or low-relevance operative statements: Calculation accuracy must be consistent across calculation, storage, and user-facing display | Rental cost calculation must be derived consistently based on duration and pricing rules | Edge-case fractions in calculations require explicit handling rules at each calculation stage",0,0,0,0
+98bd8225,R63,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R63_3,Edge-case fraction handling in calculations,"Feature: Calculation Accuracy - Fraction Handling
+  Scenario: Handle fractional amounts in calculation stages
+    Given a rental cost calculation with duration 3 days and daily rate $33.33
+    When the system calculates the total cost
+    Then the result should be $99.99
+    And the fractional component should be explicitly handled
+    And the calculation should not lose precision at any stage","Ensures proper handling of edge-case fractions at each calculation stage, preventing precision loss and rounding errors that could accumulate across multiple transactions.",E2|E6,Edge-case fractions in calculations require explicit handling rules at each calculation stage,G63|I41|I62|R63|R70|R72b,Calculation accuracy rule,Calculation accuracy rule,"[1] source=R63 type=Requirement hops=0 rel=TARGET
+Calculation accuracy rule
+
+[2] source=R63 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R63 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R63 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R72b type=Requirement hops=1 rel=AFFECTS
+Financial report accuracy rule
+
+[7] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[8] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[9] source=R70 type=Requirement hops=1 rel=REFINES
+Rounding rule consistency
+
+[10] source=G63 type=Gap hops=2 rel=REFINES > AFFECTS
+Multi-currency conversion rule conflict
+
+[11] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic","R63 targets calculation accuracy across billing and financial contexts. The requirement ensures consistency across calculation, storage, and user-facing display, with exact matching of persisted and displayed totals. Core concerns include proper handling of edge-case fractions, audit discrepancies, and prevention of currency presentation from silently overriding core pricing logic. Ten test cases cover consistency validation, fraction handling, audit visibility, multi-currency scenarios, and exception cases.",,International billing and currency presentation must not silently override core pricing logic,,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R63 targets calculation accuracy across billing and financial contexts. PRIMARY evidence (E2-E6) establishes core requirements: consistency across calculation/storage/display, exact matching of user-facing and persisted totals, and proper handling of edge-case fractions. E3-E4 highlight audit discrepancies and source-of-truth concerns. CONTEXT evidence (E9-E11) indicates related requirements on financial reporting accuracy, rounding consistency, and multi-currency conflicts. Key gaps remain on fraction handling specifics and audit visibility model. Currency presentation must not override core pricing logic (E5). Filtered abstract or low-relevance operative statements: Calculation accuracy must be consistent across calculation, storage, and user-facing display | Rental cost calculation must be derived consistently based on duration and pricing rules | Edge-case fractions in calculations require explicit handling rules at each calculation stage",0,0,0,0
+98bd8225,R63,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R63_4,Rental cost calculation consistency based on duration and pricing rules,"Feature: Calculation Accuracy - Rental Cost Derivation
+  Scenario: Verify rental cost is consistently derived from duration and pricing rules
+    Given a rental with duration 7 days
+    And a base daily rate of $50
+    And a weekend surcharge of 20%
+    When the system calculates the rental cost
+    Then the cost should be derived consistently from duration and pricing rules
+    And the calculation should be repeatable with identical results
+    And the calculation should match the documented pricing formula","Validates that rental cost calculations are consistently derived based on duration and pricing rules, ensuring deterministic and auditable results.",E2|E5,Rental cost calculation must be derived consistently based on duration and pricing rules,G63|I41|I62|R63|R70|R72b,Calculation accuracy rule,Calculation accuracy rule,"[1] source=R63 type=Requirement hops=0 rel=TARGET
+Calculation accuracy rule
+
+[2] source=R63 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R63 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R63 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R72b type=Requirement hops=1 rel=AFFECTS
+Financial report accuracy rule
+
+[7] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[8] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[9] source=R70 type=Requirement hops=1 rel=REFINES
+Rounding rule consistency
+
+[10] source=G63 type=Gap hops=2 rel=REFINES > AFFECTS
+Multi-currency conversion rule conflict
+
+[11] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic","R63 targets calculation accuracy across billing and financial contexts. The requirement ensures consistency across calculation, storage, and user-facing display, with exact matching of persisted and displayed totals. Core concerns include proper handling of edge-case fractions, audit discrepancies, and prevention of currency presentation from silently overriding core pricing logic. Ten test cases cover consistency validation, fraction handling, audit visibility, multi-currency scenarios, and exception cases.",,International billing and currency presentation must not silently override core pricing logic,,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R63 targets calculation accuracy across billing and financial contexts. PRIMARY evidence (E2-E6) establishes core requirements: consistency across calculation/storage/display, exact matching of user-facing and persisted totals, and proper handling of edge-case fractions. E3-E4 highlight audit discrepancies and source-of-truth concerns. CONTEXT evidence (E9-E11) indicates related requirements on financial reporting accuracy, rounding consistency, and multi-currency conflicts. Key gaps remain on fraction handling specifics and audit visibility model. Currency presentation must not override core pricing logic (E5). Filtered abstract or low-relevance operative statements: Calculation accuracy must be consistent across calculation, storage, and user-facing display | Rental cost calculation must be derived consistently based on duration and pricing rules | Edge-case fractions in calculations require explicit handling rules at each calculation stage",0,0,0,0
+98bd8225,R63,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R63_5,Currency presentation does not override core pricing logic,"Feature: Calculation Accuracy - Currency Presentation Exception
+  Scenario: Verify currency presentation does not silently override pricing logic
+    Given a transaction with core price of $100.00 USD
+    When the system presents the price in EUR with exchange rate 0.92
+    Then the displayed EUR amount should be €92.00
+    And the core pricing logic should remain unchanged
+    And the original USD amount should be preserved in the system
+    And no silent overrides of pricing logic should occur","Addresses the explicit exception that international billing and currency presentation must not silently override core pricing logic, preventing financial discrepancies.",E5,International billing and currency presentation must not silently override core pricing logic,G63|I41|I62|R63|R70|R72b,Calculation accuracy rule,Calculation accuracy rule,"[1] source=R63 type=Requirement hops=0 rel=TARGET
+Calculation accuracy rule
+
+[2] source=R63 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R63 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R63 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R72b type=Requirement hops=1 rel=AFFECTS
+Financial report accuracy rule
+
+[7] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[8] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[9] source=R70 type=Requirement hops=1 rel=REFINES
+Rounding rule consistency
+
+[10] source=G63 type=Gap hops=2 rel=REFINES > AFFECTS
+Multi-currency conversion rule conflict
+
+[11] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic","R63 targets calculation accuracy across billing and financial contexts. The requirement ensures consistency across calculation, storage, and user-facing display, with exact matching of persisted and displayed totals. Core concerns include proper handling of edge-case fractions, audit discrepancies, and prevention of currency presentation from silently overriding core pricing logic. Ten test cases cover consistency validation, fraction handling, audit visibility, multi-currency scenarios, and exception cases.",,International billing and currency presentation must not silently override core pricing logic,,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R63 targets calculation accuracy across billing and financial contexts. PRIMARY evidence (E2-E6) establishes core requirements: consistency across calculation/storage/display, exact matching of user-facing and persisted totals, and proper handling of edge-case fractions. E3-E4 highlight audit discrepancies and source-of-truth concerns. CONTEXT evidence (E9-E11) indicates related requirements on financial reporting accuracy, rounding consistency, and multi-currency conflicts. Key gaps remain on fraction handling specifics and audit visibility model. Currency presentation must not override core pricing logic (E5). Filtered abstract or low-relevance operative statements: Calculation accuracy must be consistent across calculation, storage, and user-facing display | Rental cost calculation must be derived consistently based on duration and pricing rules | Edge-case fractions in calculations require explicit handling rules at each calculation stage",0,0,0,0
+98bd8225,R63,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R63_6,Audit trail visibility for calculation accuracy,"Feature: Calculation Accuracy - Audit Visibility
+  Scenario: Verify calculation steps are auditable
+    Given a complex billing calculation with multiple components
+    When the calculation is performed
+    Then each calculation step should be logged
+    And the audit trail should show the calculation path
+    And discrepancies should be traceable to their source
+    And the audit trail should support financial reconciliation","Ensures that calculation accuracy can be verified through audit trails, addressing audit discrepancies and source-of-truth concerns identified in E3-E4.",E3|E4,Audit discrepancies and source-of-truth concerns,G63|I41|I62|R63|R70|R72b,Calculation accuracy rule,Calculation accuracy rule,"[1] source=R63 type=Requirement hops=0 rel=TARGET
+Calculation accuracy rule
+
+[2] source=R63 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R63 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R63 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R72b type=Requirement hops=1 rel=AFFECTS
+Financial report accuracy rule
+
+[7] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[8] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[9] source=R70 type=Requirement hops=1 rel=REFINES
+Rounding rule consistency
+
+[10] source=G63 type=Gap hops=2 rel=REFINES > AFFECTS
+Multi-currency conversion rule conflict
+
+[11] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic","R63 targets calculation accuracy across billing and financial contexts. The requirement ensures consistency across calculation, storage, and user-facing display, with exact matching of persisted and displayed totals. Core concerns include proper handling of edge-case fractions, audit discrepancies, and prevention of currency presentation from silently overriding core pricing logic. Ten test cases cover consistency validation, fraction handling, audit visibility, multi-currency scenarios, and exception cases.",,International billing and currency presentation must not silently override core pricing logic,,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R63 targets calculation accuracy across billing and financial contexts. PRIMARY evidence (E2-E6) establishes core requirements: consistency across calculation/storage/display, exact matching of user-facing and persisted totals, and proper handling of edge-case fractions. E3-E4 highlight audit discrepancies and source-of-truth concerns. CONTEXT evidence (E9-E11) indicates related requirements on financial reporting accuracy, rounding consistency, and multi-currency conflicts. Key gaps remain on fraction handling specifics and audit visibility model. Currency presentation must not override core pricing logic (E5). Filtered abstract or low-relevance operative statements: Calculation accuracy must be consistent across calculation, storage, and user-facing display | Rental cost calculation must be derived consistently based on duration and pricing rules | Edge-case fractions in calculations require explicit handling rules at each calculation stage",0,0,0,0
+98bd8225,R63,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R63_7,Multi-currency calculation consistency,"Feature: Calculation Accuracy - Multi-Currency Consistency
+  Scenario: Verify calculations remain consistent across multiple currencies
+    Given a transaction in USD with amount $100.00
+    When the transaction is converted to EUR at rate 0.92
+    And then converted back to USD at the inverse rate
+    Then the final USD amount should match the original amount
+    And rounding should be applied consistently across all conversions
+    And no precision should be lost in multi-currency operations","Validates that calculation accuracy is maintained across multi-currency scenarios, addressing context evidence E9-E11 on financial reporting accuracy and rounding consistency.",E9|E10|E11,Multi-currency conflicts and rounding consistency,G63|I41|I62|R63|R70|R72b,Calculation accuracy rule,Calculation accuracy rule,"[1] source=R63 type=Requirement hops=0 rel=TARGET
+Calculation accuracy rule
+
+[2] source=R63 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R63 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R63 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R72b type=Requirement hops=1 rel=AFFECTS
+Financial report accuracy rule
+
+[7] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[8] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[9] source=R70 type=Requirement hops=1 rel=REFINES
+Rounding rule consistency
+
+[10] source=G63 type=Gap hops=2 rel=REFINES > AFFECTS
+Multi-currency conversion rule conflict
+
+[11] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic","R63 targets calculation accuracy across billing and financial contexts. The requirement ensures consistency across calculation, storage, and user-facing display, with exact matching of persisted and displayed totals. Core concerns include proper handling of edge-case fractions, audit discrepancies, and prevention of currency presentation from silently overriding core pricing logic. Ten test cases cover consistency validation, fraction handling, audit visibility, multi-currency scenarios, and exception cases.",,International billing and currency presentation must not silently override core pricing logic,,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R63 targets calculation accuracy across billing and financial contexts. PRIMARY evidence (E2-E6) establishes core requirements: consistency across calculation/storage/display, exact matching of user-facing and persisted totals, and proper handling of edge-case fractions. E3-E4 highlight audit discrepancies and source-of-truth concerns. CONTEXT evidence (E9-E11) indicates related requirements on financial reporting accuracy, rounding consistency, and multi-currency conflicts. Key gaps remain on fraction handling specifics and audit visibility model. Currency presentation must not override core pricing logic (E5). Filtered abstract or low-relevance operative statements: Calculation accuracy must be consistent across calculation, storage, and user-facing display | Rental cost calculation must be derived consistently based on duration and pricing rules | Edge-case fractions in calculations require explicit handling rules at each calculation stage",0,0,0,0
+98bd8225,R63,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R63_8,Precision preservation in fractional calculations,"Feature: Calculation Accuracy - Precision Preservation
+  Scenario: Verify precision is preserved in fractional calculations
+    Given a calculation involving division: $100 / 3
+    When the system performs the calculation
+    Then the result should maintain sufficient precision
+    And the stored value should preserve the fractional component
+    And the displayed value should be rounded consistently
+    And the rounding method should be documented and applied uniformly","Ensures that fractional calculations maintain precision throughout the calculation pipeline, preventing cumulative rounding errors.",E2|E6,Edge-case fractions in calculations require explicit handling rules,G63|I41|I62|R63|R70|R72b,Calculation accuracy rule,Calculation accuracy rule,"[1] source=R63 type=Requirement hops=0 rel=TARGET
+Calculation accuracy rule
+
+[2] source=R63 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R63 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R63 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R72b type=Requirement hops=1 rel=AFFECTS
+Financial report accuracy rule
+
+[7] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[8] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[9] source=R70 type=Requirement hops=1 rel=REFINES
+Rounding rule consistency
+
+[10] source=G63 type=Gap hops=2 rel=REFINES > AFFECTS
+Multi-currency conversion rule conflict
+
+[11] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic","R63 targets calculation accuracy across billing and financial contexts. The requirement ensures consistency across calculation, storage, and user-facing display, with exact matching of persisted and displayed totals. Core concerns include proper handling of edge-case fractions, audit discrepancies, and prevention of currency presentation from silently overriding core pricing logic. Ten test cases cover consistency validation, fraction handling, audit visibility, multi-currency scenarios, and exception cases.",,International billing and currency presentation must not silently override core pricing logic,,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R63 targets calculation accuracy across billing and financial contexts. PRIMARY evidence (E2-E6) establishes core requirements: consistency across calculation/storage/display, exact matching of user-facing and persisted totals, and proper handling of edge-case fractions. E3-E4 highlight audit discrepancies and source-of-truth concerns. CONTEXT evidence (E9-E11) indicates related requirements on financial reporting accuracy, rounding consistency, and multi-currency conflicts. Key gaps remain on fraction handling specifics and audit visibility model. Currency presentation must not override core pricing logic (E5). Filtered abstract or low-relevance operative statements: Calculation accuracy must be consistent across calculation, storage, and user-facing display | Rental cost calculation must be derived consistently based on duration and pricing rules | Edge-case fractions in calculations require explicit handling rules at each calculation stage",0,0,0,0
+98bd8225,R63,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R63_9,Calculation accuracy validation across system boundaries,"Feature: Calculation Accuracy - System Boundary Validation
+  Scenario: Verify calculations remain accurate across system boundaries
+    Given a calculation performed in the billing service
+    When the result is transmitted to the reporting service
+    And then displayed in the user interface
+    Then the value should remain unchanged across all boundaries
+    And no data loss should occur during transmission
+    And the final displayed value should match the original calculation","Validates that calculation accuracy is maintained when values cross system boundaries, ensuring consistency in distributed systems.",E2|E3,"Calculation accuracy must be consistent across calculation, storage, and user-facing display",G63|I41|I62|R63|R70|R72b,Calculation accuracy rule,Calculation accuracy rule,"[1] source=R63 type=Requirement hops=0 rel=TARGET
+Calculation accuracy rule
+
+[2] source=R63 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R63 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R63 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R72b type=Requirement hops=1 rel=AFFECTS
+Financial report accuracy rule
+
+[7] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[8] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[9] source=R70 type=Requirement hops=1 rel=REFINES
+Rounding rule consistency
+
+[10] source=G63 type=Gap hops=2 rel=REFINES > AFFECTS
+Multi-currency conversion rule conflict
+
+[11] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic","R63 targets calculation accuracy across billing and financial contexts. The requirement ensures consistency across calculation, storage, and user-facing display, with exact matching of persisted and displayed totals. Core concerns include proper handling of edge-case fractions, audit discrepancies, and prevention of currency presentation from silently overriding core pricing logic. Ten test cases cover consistency validation, fraction handling, audit visibility, multi-currency scenarios, and exception cases.",,International billing and currency presentation must not silently override core pricing logic,,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R63 targets calculation accuracy across billing and financial contexts. PRIMARY evidence (E2-E6) establishes core requirements: consistency across calculation/storage/display, exact matching of user-facing and persisted totals, and proper handling of edge-case fractions. E3-E4 highlight audit discrepancies and source-of-truth concerns. CONTEXT evidence (E9-E11) indicates related requirements on financial reporting accuracy, rounding consistency, and multi-currency conflicts. Key gaps remain on fraction handling specifics and audit visibility model. Currency presentation must not override core pricing logic (E5). Filtered abstract or low-relevance operative statements: Calculation accuracy must be consistent across calculation, storage, and user-facing display | Rental cost calculation must be derived consistently based on duration and pricing rules | Edge-case fractions in calculations require explicit handling rules at each calculation stage",0,0,0,0
+98bd8225,R63,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R63_10,Exception handling for calculation accuracy violations,"Feature: Calculation Accuracy - Exception Handling
+  Scenario: System detects and handles calculation accuracy violations
+    Given a calculation that produces a discrepancy between stored and displayed values
+    When the system detects this discrepancy
+    Then an exception should be raised
+    And the discrepancy should be logged for audit purposes
+    And the transaction should not proceed until the discrepancy is resolved
+    And the user should be notified of the accuracy issue","Ensures that calculation accuracy violations are detected and handled appropriately, preventing silent failures and maintaining financial integrity.",E3|E4,Calculation accuracy violations must be detected and handled,G63|I41|I62|R63|R70|R72b,Calculation accuracy rule,Calculation accuracy rule,"[1] source=R63 type=Requirement hops=0 rel=TARGET
+Calculation accuracy rule
+
+[2] source=R63 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[3] source=R63 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[4] source=R63 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R72b type=Requirement hops=1 rel=AFFECTS
+Financial report accuracy rule
+
+[7] source=I62 type=Implementation/SrcChunk hops=1 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=IMPLEMENTS
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[8] source=I62 type=Implementation hops=1 rel=IMPLEMENTS
+Price calculation logic
+
+[9] source=R70 type=Requirement hops=1 rel=REFINES
+Rounding rule consistency
+
+[10] source=G63 type=Gap hops=2 rel=REFINES > AFFECTS
+Multi-currency conversion rule conflict
+
+[11] source=I41 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Availability calculation logic","R63 targets calculation accuracy across billing and financial contexts. The requirement ensures consistency across calculation, storage, and user-facing display, with exact matching of persisted and displayed totals. Core concerns include proper handling of edge-case fractions, audit discrepancies, and prevention of currency presentation from silently overriding core pricing logic. Ten test cases cover consistency validation, fraction handling, audit visibility, multi-currency scenarios, and exception cases.",,International billing and currency presentation must not silently override core pricing logic,,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11,"R63 targets calculation accuracy across billing and financial contexts. PRIMARY evidence (E2-E6) establishes core requirements: consistency across calculation/storage/display, exact matching of user-facing and persisted totals, and proper handling of edge-case fractions. E3-E4 highlight audit discrepancies and source-of-truth concerns. CONTEXT evidence (E9-E11) indicates related requirements on financial reporting accuracy, rounding consistency, and multi-currency conflicts. Key gaps remain on fraction handling specifics and audit visibility model. Currency presentation must not override core pricing logic (E5). Filtered abstract or low-relevance operative statements: Calculation accuracy must be consistent across calculation, storage, and user-facing display | Rental cost calculation must be derived consistently based on duration and pricing rules | Edge-case fractions in calculations require explicit handling rules at each calculation stage",0,0,0,0

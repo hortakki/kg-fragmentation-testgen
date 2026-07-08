@@ -1,0 +1,1545 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+1374c0ec,R61,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R61_1,Authorized user defines pricing for a rentable item,"Feature: Pricing Configuration Rule
+  Scenario: Authorized user defines pricing for a rentable item
+    Given an authorized user is logged into the system
+    And a rentable item exists in the catalog
+    When the user defines pricing for the item
+    Then the pricing information is stored and associated with the item
+    And the pricing becomes available for rental cost calculations","Validates that authorized users can define and store pricing information for rentable items, which is a core requirement from the operative context. This establishes the foundation for pricing configuration.",E1|E2,Authorized users can define pricing for rentable items|Pricing information is stored associated with each rentable item,G63|I61|I63|I64|R61|R62,Pricing configuration rule,Pricing configuration rule,"[1] source=R61 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R61 type=Requirement hops=0 rel=TARGET
+Pricing configuration rule
+
+[3] source=R61 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R61 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[5] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=I61 type=Implementation hops=1 rel=IMPLEMENTS
+Pricing configuration service
+
+[7] source=I63 type=Implementation/SrcChunk hops=2 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[8] source=I64 type=Implementation/SrcChunk hops=2 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=R62 type=Requirement hops=2 rel=DEFINED_IN > DEFINED_IN
+Rental cost calculation rule","Generated 10 executable Gherkin tests for R61 (Pricing configuration rule) targeting core pricing definition, storage, and configuration requirements. Tests focus on authorized user pricing definition, item-level pricing storage, calculation basis, and exception handling around currency/billing clarity. Multi-currency conversion conflicts and unspecified category/matrix rules are excluded per guidance. Tests validate that pricing configuration is properly stored, applied to rental cost calculations, and does not silently override core logic.",## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration. || Pricing information is stored associated with each rentable item || Authorized users can define pricing for rentable items,"International billing and currency presentation must not silently override core pricing logic || Currency conversion, display format, and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation",Multi-currency conversion rule conflict exists and must be resolved,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R61 targets pricing configuration rule. Primary evidence establishes core pricing definition, storage, and calculation requirements from TOOLCHAIN-CONF-PAYMENT-01.md and JIRA-Payment.md. Developer and QA comments highlight unresolved precision and consistency concerns between calculation stages and display layers. Finance email (E3) raises multi-currency handling ambiguity. Gap G63 signals multi-currency conversion rule conflict. Related requirement R62 (Rental cost calculation rule) is defined in same document set. No context evidence provided. All operative rules are target-specific and directly supported by primary evidence."" Filtered abstract or low-relevance operative statements: Pricing can be defined per time unit (hourly, daily, weekly) | Pricing changes do not affect already created rental records | Rental cost is calculated based on item pricing and rental duration",1,0,0,1
+1374c0ec,R61,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R61_2,System calculates rental cost using stored item pricing and duration,"Feature: Pricing Configuration Rule
+  Scenario: System calculates rental cost using stored item pricing and duration
+    Given a rentable item has pricing information stored
+    And a rental record is created for that item
+    When the rental duration is specified
+    Then the system calculates the rental cost based on the stored pricing and duration
+    And the calculated cost is recorded in the rental record",Directly validates the core requirement that the system shall calculate rental cost based on item pricing and rental duration. This is the primary function of the pricing configuration rule.,E1|E2,The system shall calculate rental cost based on item pricing and rental duration|Pricing information is stored associated with each rentable item,G63|I61|I63|I64|R61|R62,Pricing configuration rule,Pricing configuration rule,"[1] source=R61 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R61 type=Requirement hops=0 rel=TARGET
+Pricing configuration rule
+
+[3] source=R61 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R61 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[5] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=I61 type=Implementation hops=1 rel=IMPLEMENTS
+Pricing configuration service
+
+[7] source=I63 type=Implementation/SrcChunk hops=2 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[8] source=I64 type=Implementation/SrcChunk hops=2 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=R62 type=Requirement hops=2 rel=DEFINED_IN > DEFINED_IN
+Rental cost calculation rule","Generated 10 executable Gherkin tests for R61 (Pricing configuration rule) targeting core pricing definition, storage, and configuration requirements. Tests focus on authorized user pricing definition, item-level pricing storage, calculation basis, and exception handling around currency/billing clarity. Multi-currency conversion conflicts and unspecified category/matrix rules are excluded per guidance. Tests validate that pricing configuration is properly stored, applied to rental cost calculations, and does not silently override core logic.",## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration. || Pricing information is stored associated with each rentable item || Authorized users can define pricing for rentable items,"International billing and currency presentation must not silently override core pricing logic || Currency conversion, display format, and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation",Multi-currency conversion rule conflict exists and must be resolved,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R61 targets pricing configuration rule. Primary evidence establishes core pricing definition, storage, and calculation requirements from TOOLCHAIN-CONF-PAYMENT-01.md and JIRA-Payment.md. Developer and QA comments highlight unresolved precision and consistency concerns between calculation stages and display layers. Finance email (E3) raises multi-currency handling ambiguity. Gap G63 signals multi-currency conversion rule conflict. Related requirement R62 (Rental cost calculation rule) is defined in same document set. No context evidence provided. All operative rules are target-specific and directly supported by primary evidence."" Filtered abstract or low-relevance operative statements: Pricing can be defined per time unit (hourly, daily, weekly) | Pricing changes do not affect already created rental records | Rental cost is calculated based on item pricing and rental duration",1,0,0,1
+1374c0ec,R61,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R61_3,Pricing configuration does not silently override core pricing logic,"Feature: Pricing Configuration Rule
+  Scenario: Pricing configuration does not silently override core pricing logic
+    Given a rentable item has pricing configuration defined
+    And the pricing configuration is applied to a rental calculation
+    When the rental cost is calculated
+    Then the calculation uses the configured pricing explicitly
+    And no silent overrides or hidden adjustments occur to the core pricing logic
+    And the calculation method remains transparent and auditable",Addresses the exception requirement that international billing and currency presentation must not silently override core pricing logic. This ensures pricing configuration maintains integrity and transparency.,E3|E4,International billing and currency presentation must not silently override core pricing logic,G63|I61|I63|I64|R61|R62,Pricing configuration rule,Pricing configuration rule,"[1] source=R61 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R61 type=Requirement hops=0 rel=TARGET
+Pricing configuration rule
+
+[3] source=R61 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R61 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[5] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=I61 type=Implementation hops=1 rel=IMPLEMENTS
+Pricing configuration service
+
+[7] source=I63 type=Implementation/SrcChunk hops=2 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[8] source=I64 type=Implementation/SrcChunk hops=2 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=R62 type=Requirement hops=2 rel=DEFINED_IN > DEFINED_IN
+Rental cost calculation rule","Generated 10 executable Gherkin tests for R61 (Pricing configuration rule) targeting core pricing definition, storage, and configuration requirements. Tests focus on authorized user pricing definition, item-level pricing storage, calculation basis, and exception handling around currency/billing clarity. Multi-currency conversion conflicts and unspecified category/matrix rules are excluded per guidance. Tests validate that pricing configuration is properly stored, applied to rental cost calculations, and does not silently override core logic.",## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration. || Pricing information is stored associated with each rentable item || Authorized users can define pricing for rentable items,"International billing and currency presentation must not silently override core pricing logic || Currency conversion, display format, and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation",Multi-currency conversion rule conflict exists and must be resolved,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R61 targets pricing configuration rule. Primary evidence establishes core pricing definition, storage, and calculation requirements from TOOLCHAIN-CONF-PAYMENT-01.md and JIRA-Payment.md. Developer and QA comments highlight unresolved precision and consistency concerns between calculation stages and display layers. Finance email (E3) raises multi-currency handling ambiguity. Gap G63 signals multi-currency conversion rule conflict. Related requirement R62 (Rental cost calculation rule) is defined in same document set. No context evidence provided. All operative rules are target-specific and directly supported by primary evidence."" Filtered abstract or low-relevance operative statements: Pricing can be defined per time unit (hourly, daily, weekly) | Pricing changes do not affect already created rental records | Rental cost is calculated based on item pricing and rental duration",1,0,0,1
+1374c0ec,R61,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R61_4,Pricing information is retrieved for rental cost calculation,"Feature: Pricing Configuration Rule
+  Scenario: Pricing information is retrieved for rental cost calculation
+    Given a rentable item with stored pricing information
+    When a rental cost calculation is initiated
+    Then the system retrieves the pricing information associated with the item
+    And the pricing is used as the basis for the cost calculation","Validates that pricing configuration is properly retrieved and used as the basis for rental cost calculations, ensuring the configuration rule is operationally effective.",E1|E2,Pricing information is stored associated with each rentable item|The system shall calculate rental cost based on item pricing and rental duration,G63|I61|I63|I64|R61|R62,Pricing configuration rule,Pricing configuration rule,"[1] source=R61 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R61 type=Requirement hops=0 rel=TARGET
+Pricing configuration rule
+
+[3] source=R61 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R61 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[5] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=I61 type=Implementation hops=1 rel=IMPLEMENTS
+Pricing configuration service
+
+[7] source=I63 type=Implementation/SrcChunk hops=2 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[8] source=I64 type=Implementation/SrcChunk hops=2 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=R62 type=Requirement hops=2 rel=DEFINED_IN > DEFINED_IN
+Rental cost calculation rule","Generated 10 executable Gherkin tests for R61 (Pricing configuration rule) targeting core pricing definition, storage, and configuration requirements. Tests focus on authorized user pricing definition, item-level pricing storage, calculation basis, and exception handling around currency/billing clarity. Multi-currency conversion conflicts and unspecified category/matrix rules are excluded per guidance. Tests validate that pricing configuration is properly stored, applied to rental cost calculations, and does not silently override core logic.",## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration. || Pricing information is stored associated with each rentable item || Authorized users can define pricing for rentable items,"International billing and currency presentation must not silently override core pricing logic || Currency conversion, display format, and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation",Multi-currency conversion rule conflict exists and must be resolved,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R61 targets pricing configuration rule. Primary evidence establishes core pricing definition, storage, and calculation requirements from TOOLCHAIN-CONF-PAYMENT-01.md and JIRA-Payment.md. Developer and QA comments highlight unresolved precision and consistency concerns between calculation stages and display layers. Finance email (E3) raises multi-currency handling ambiguity. Gap G63 signals multi-currency conversion rule conflict. Related requirement R62 (Rental cost calculation rule) is defined in same document set. No context evidence provided. All operative rules are target-specific and directly supported by primary evidence."" Filtered abstract or low-relevance operative statements: Pricing can be defined per time unit (hourly, daily, weekly) | Pricing changes do not affect already created rental records | Rental cost is calculated based on item pricing and rental duration",1,0,0,1
+1374c0ec,R61,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R61_5,Multiple pricing configurations can be defined for different time units,"Feature: Pricing Configuration Rule
+  Scenario: Multiple pricing configurations can be defined for different time units
+    Given an authorized user is logged into the system
+    And a rentable item exists
+    When the user defines pricing for hourly rental
+    And the user defines pricing for daily rental
+    And the user defines pricing for weekly rental
+    Then all pricing configurations are stored for the item
+    And each configuration is associated with its respective time unit","Validates that pricing can be configured per time unit (hourly, daily, weekly) as indicated in the operative context, allowing flexible pricing strategies.",E2|E5,"Authorized users can define pricing for rentable items|Pricing can be defined per time unit (hourly, daily, weekly)",G63|I61|I63|I64|R61|R62,Pricing configuration rule,Pricing configuration rule,"[1] source=R61 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R61 type=Requirement hops=0 rel=TARGET
+Pricing configuration rule
+
+[3] source=R61 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R61 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[5] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=I61 type=Implementation hops=1 rel=IMPLEMENTS
+Pricing configuration service
+
+[7] source=I63 type=Implementation/SrcChunk hops=2 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[8] source=I64 type=Implementation/SrcChunk hops=2 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=R62 type=Requirement hops=2 rel=DEFINED_IN > DEFINED_IN
+Rental cost calculation rule","Generated 10 executable Gherkin tests for R61 (Pricing configuration rule) targeting core pricing definition, storage, and configuration requirements. Tests focus on authorized user pricing definition, item-level pricing storage, calculation basis, and exception handling around currency/billing clarity. Multi-currency conversion conflicts and unspecified category/matrix rules are excluded per guidance. Tests validate that pricing configuration is properly stored, applied to rental cost calculations, and does not silently override core logic.",## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration. || Pricing information is stored associated with each rentable item || Authorized users can define pricing for rentable items,"International billing and currency presentation must not silently override core pricing logic || Currency conversion, display format, and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation",Multi-currency conversion rule conflict exists and must be resolved,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R61 targets pricing configuration rule. Primary evidence establishes core pricing definition, storage, and calculation requirements from TOOLCHAIN-CONF-PAYMENT-01.md and JIRA-Payment.md. Developer and QA comments highlight unresolved precision and consistency concerns between calculation stages and display layers. Finance email (E3) raises multi-currency handling ambiguity. Gap G63 signals multi-currency conversion rule conflict. Related requirement R62 (Rental cost calculation rule) is defined in same document set. No context evidence provided. All operative rules are target-specific and directly supported by primary evidence."" Filtered abstract or low-relevance operative statements: Pricing can be defined per time unit (hourly, daily, weekly) | Pricing changes do not affect already created rental records | Rental cost is calculated based on item pricing and rental duration",1,0,0,1
+1374c0ec,R61,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R61_6,Pricing changes do not affect existing rental records,"Feature: Pricing Configuration Rule
+  Scenario: Pricing changes do not affect existing rental records
+    Given a rental record exists with a calculated cost based on original pricing
+    When the pricing configuration for the item is updated
+    Then the existing rental record retains its original calculated cost
+    And only new rental records use the updated pricing configuration","Validates that pricing configuration changes are applied prospectively only, ensuring historical rental records maintain their original cost calculations and data integrity.",E6,Pricing changes do not affect already created rental records,G63|I61|I63|I64|R61|R62,Pricing configuration rule,Pricing configuration rule,"[1] source=R61 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R61 type=Requirement hops=0 rel=TARGET
+Pricing configuration rule
+
+[3] source=R61 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R61 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[5] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=I61 type=Implementation hops=1 rel=IMPLEMENTS
+Pricing configuration service
+
+[7] source=I63 type=Implementation/SrcChunk hops=2 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[8] source=I64 type=Implementation/SrcChunk hops=2 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=R62 type=Requirement hops=2 rel=DEFINED_IN > DEFINED_IN
+Rental cost calculation rule","Generated 10 executable Gherkin tests for R61 (Pricing configuration rule) targeting core pricing definition, storage, and configuration requirements. Tests focus on authorized user pricing definition, item-level pricing storage, calculation basis, and exception handling around currency/billing clarity. Multi-currency conversion conflicts and unspecified category/matrix rules are excluded per guidance. Tests validate that pricing configuration is properly stored, applied to rental cost calculations, and does not silently override core logic.",## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration. || Pricing information is stored associated with each rentable item || Authorized users can define pricing for rentable items,"International billing and currency presentation must not silently override core pricing logic || Currency conversion, display format, and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation",Multi-currency conversion rule conflict exists and must be resolved,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R61 targets pricing configuration rule. Primary evidence establishes core pricing definition, storage, and calculation requirements from TOOLCHAIN-CONF-PAYMENT-01.md and JIRA-Payment.md. Developer and QA comments highlight unresolved precision and consistency concerns between calculation stages and display layers. Finance email (E3) raises multi-currency handling ambiguity. Gap G63 signals multi-currency conversion rule conflict. Related requirement R62 (Rental cost calculation rule) is defined in same document set. No context evidence provided. All operative rules are target-specific and directly supported by primary evidence."" Filtered abstract or low-relevance operative statements: Pricing can be defined per time unit (hourly, daily, weekly) | Pricing changes do not affect already created rental records | Rental cost is calculated based on item pricing and rental duration",1,0,0,1
+1374c0ec,R61,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R61_7,Unauthorized user cannot define pricing for rentable items,"Feature: Pricing Configuration Rule
+  Scenario: Unauthorized user cannot define pricing for rentable items
+    Given an unauthorized user is logged into the system
+    And a rentable item exists in the catalog
+    When the user attempts to define pricing for the item
+    Then the system denies the pricing definition request
+    And no pricing information is stored or modified",Validates the authorization requirement by ensuring only authorized users can define pricing. This protects pricing configuration integrity and prevents unauthorized modifications.,E2,Authorized users can define pricing for rentable items,G63|I61|I63|I64|R61|R62,Pricing configuration rule,Pricing configuration rule,"[1] source=R61 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R61 type=Requirement hops=0 rel=TARGET
+Pricing configuration rule
+
+[3] source=R61 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R61 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[5] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=I61 type=Implementation hops=1 rel=IMPLEMENTS
+Pricing configuration service
+
+[7] source=I63 type=Implementation/SrcChunk hops=2 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[8] source=I64 type=Implementation/SrcChunk hops=2 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=R62 type=Requirement hops=2 rel=DEFINED_IN > DEFINED_IN
+Rental cost calculation rule","Generated 10 executable Gherkin tests for R61 (Pricing configuration rule) targeting core pricing definition, storage, and configuration requirements. Tests focus on authorized user pricing definition, item-level pricing storage, calculation basis, and exception handling around currency/billing clarity. Multi-currency conversion conflicts and unspecified category/matrix rules are excluded per guidance. Tests validate that pricing configuration is properly stored, applied to rental cost calculations, and does not silently override core logic.",## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration. || Pricing information is stored associated with each rentable item || Authorized users can define pricing for rentable items,"International billing and currency presentation must not silently override core pricing logic || Currency conversion, display format, and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation",Multi-currency conversion rule conflict exists and must be resolved,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R61 targets pricing configuration rule. Primary evidence establishes core pricing definition, storage, and calculation requirements from TOOLCHAIN-CONF-PAYMENT-01.md and JIRA-Payment.md. Developer and QA comments highlight unresolved precision and consistency concerns between calculation stages and display layers. Finance email (E3) raises multi-currency handling ambiguity. Gap G63 signals multi-currency conversion rule conflict. Related requirement R62 (Rental cost calculation rule) is defined in same document set. No context evidence provided. All operative rules are target-specific and directly supported by primary evidence."" Filtered abstract or low-relevance operative statements: Pricing can be defined per time unit (hourly, daily, weekly) | Pricing changes do not affect already created rental records | Rental cost is calculated based on item pricing and rental duration",1,0,0,1
+1374c0ec,R61,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R61_8,Currency handling must be clarified before pricing calculation,"Feature: Pricing Configuration Rule
+  Scenario: Currency handling must be clarified before pricing calculation
+    Given a pricing configuration is defined for a rentable item
+    And the pricing includes currency information
+    When the system prepares to calculate rental cost
+    Then the currency conversion, display format, and invoice currency handling are explicitly defined
+    And the system does not apply ambiguous or undocumented currency rules
+    And the behavior is documented as either strict accounting rule, pilot behavior, or presentation convention","Addresses the exception requirement that currency conversion and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation. This prevents silent overrides and ensures clarity.",E3|E4,"Currency conversion, display format, and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation",G63|I61|I63|I64|R61|R62,Pricing configuration rule,Pricing configuration rule,"[1] source=R61 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R61 type=Requirement hops=0 rel=TARGET
+Pricing configuration rule
+
+[3] source=R61 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R61 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[5] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=I61 type=Implementation hops=1 rel=IMPLEMENTS
+Pricing configuration service
+
+[7] source=I63 type=Implementation/SrcChunk hops=2 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[8] source=I64 type=Implementation/SrcChunk hops=2 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=R62 type=Requirement hops=2 rel=DEFINED_IN > DEFINED_IN
+Rental cost calculation rule","Generated 10 executable Gherkin tests for R61 (Pricing configuration rule) targeting core pricing definition, storage, and configuration requirements. Tests focus on authorized user pricing definition, item-level pricing storage, calculation basis, and exception handling around currency/billing clarity. Multi-currency conversion conflicts and unspecified category/matrix rules are excluded per guidance. Tests validate that pricing configuration is properly stored, applied to rental cost calculations, and does not silently override core logic.",## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration. || Pricing information is stored associated with each rentable item || Authorized users can define pricing for rentable items,"International billing and currency presentation must not silently override core pricing logic || Currency conversion, display format, and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation",Multi-currency conversion rule conflict exists and must be resolved,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R61 targets pricing configuration rule. Primary evidence establishes core pricing definition, storage, and calculation requirements from TOOLCHAIN-CONF-PAYMENT-01.md and JIRA-Payment.md. Developer and QA comments highlight unresolved precision and consistency concerns between calculation stages and display layers. Finance email (E3) raises multi-currency handling ambiguity. Gap G63 signals multi-currency conversion rule conflict. Related requirement R62 (Rental cost calculation rule) is defined in same document set. No context evidence provided. All operative rules are target-specific and directly supported by primary evidence."" Filtered abstract or low-relevance operative statements: Pricing can be defined per time unit (hourly, daily, weekly) | Pricing changes do not affect already created rental records | Rental cost is calculated based on item pricing and rental duration",1,0,0,1
+1374c0ec,R61,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R61_9,Pricing configuration is associated with specific rentable item,"Feature: Pricing Configuration Rule
+  Scenario: Pricing configuration is associated with specific rentable item
+    Given multiple rentable items exist in the system
+    When an authorized user defines pricing for item A
+    And an authorized user defines different pricing for item B
+    Then the pricing for item A is stored only for item A
+    And the pricing for item B is stored only for item B
+    And the pricing configurations do not cross-contaminate between items","Validates that pricing information is correctly associated with individual rentable items, ensuring pricing configuration isolation and preventing calculation errors across different items.",E1|E2,Pricing information is stored associated with each rentable item,G63|I61|I63|I64|R61|R62,Pricing configuration rule,Pricing configuration rule,"[1] source=R61 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R61 type=Requirement hops=0 rel=TARGET
+Pricing configuration rule
+
+[3] source=R61 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R61 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[5] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=I61 type=Implementation hops=1 rel=IMPLEMENTS
+Pricing configuration service
+
+[7] source=I63 type=Implementation/SrcChunk hops=2 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[8] source=I64 type=Implementation/SrcChunk hops=2 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=R62 type=Requirement hops=2 rel=DEFINED_IN > DEFINED_IN
+Rental cost calculation rule","Generated 10 executable Gherkin tests for R61 (Pricing configuration rule) targeting core pricing definition, storage, and configuration requirements. Tests focus on authorized user pricing definition, item-level pricing storage, calculation basis, and exception handling around currency/billing clarity. Multi-currency conversion conflicts and unspecified category/matrix rules are excluded per guidance. Tests validate that pricing configuration is properly stored, applied to rental cost calculations, and does not silently override core logic.",## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration. || Pricing information is stored associated with each rentable item || Authorized users can define pricing for rentable items,"International billing and currency presentation must not silently override core pricing logic || Currency conversion, display format, and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation",Multi-currency conversion rule conflict exists and must be resolved,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R61 targets pricing configuration rule. Primary evidence establishes core pricing definition, storage, and calculation requirements from TOOLCHAIN-CONF-PAYMENT-01.md and JIRA-Payment.md. Developer and QA comments highlight unresolved precision and consistency concerns between calculation stages and display layers. Finance email (E3) raises multi-currency handling ambiguity. Gap G63 signals multi-currency conversion rule conflict. Related requirement R62 (Rental cost calculation rule) is defined in same document set. No context evidence provided. All operative rules are target-specific and directly supported by primary evidence."" Filtered abstract or low-relevance operative statements: Pricing can be defined per time unit (hourly, daily, weekly) | Pricing changes do not affect already created rental records | Rental cost is calculated based on item pricing and rental duration",1,0,0,1
+1374c0ec,R61,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R61_10,Pricing configuration rule supports rental cost calculation requirement,"Feature: Pricing Configuration Rule
+  Scenario: Pricing configuration rule supports rental cost calculation requirement
+    Given the system has a pricing configuration rule in place
+    And a rentable item has pricing defined
+    When a rental is created for that item with a specified duration
+    Then the pricing configuration rule enables the system to calculate rental cost
+    And the calculated cost is based on the configured item pricing and rental duration
+    And the calculation is consistent and repeatable","Validates that the pricing configuration rule fulfills its primary purpose of enabling rental cost calculation based on item pricing and duration, ensuring the rule is operationally effective and consistent.",E1|E2|E5,The system shall calculate rental cost based on item pricing and rental duration|Pricing information is stored associated with each rentable item|Authorized users can define pricing for rentable items,G63|I61|I63|I64|R61|R62,Pricing configuration rule,Pricing configuration rule,"[1] source=R61 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R61 type=Requirement hops=0 rel=TARGET
+Pricing configuration rule
+
+[3] source=R61 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R61 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[5] source=I63 type=Implementation/SrcChunk hops=2 chunk=a8cca88eadd00cc3 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-PAYMENT-01
+# Description: Payments and Billing
+# Status: Effective
+
+## 6. Payments and Billing
+
+## 6.1 Pricing Configuration
+## 6.1.1 The system shall allow authorized users to define pricing for rentable items.
+## 6.1.2 The system shall allow pricing to be defined per time unit (e.g., hourly, daily, weekly).
+## 6.1.3 The system shall store pricing information associated with each rentable item.
+## 6.1.4 The system shall ensure pricing changes do not affect already created rent records.
+
+## 6.2 Price Calculation
+## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration.
+## 6.2.2 The system shall calculate the total rental cost before confirming the rent.
+## 6.2.3 The system shall ensure price calculation accuracy.
+## 6.2.4 The system shall store the calculated price with the rent record.
+
+## 6.3 Invoice Generation
+## 6.3.1 The system shall generate an invoice for each Approved or Completed rent.
+## 6.3.2 The system shall assign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment
+
+[6] source=I61 type=Implementation hops=1 rel=IMPLEMENTS
+Pricing configuration service
+
+[7] source=I63 type=Implementation/SrcChunk hops=2 chunk=854f7de27dc6118d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identifiers, and store the invoice content together with the relevant rental and pricing details."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-604"",
+    ""summary"": ""Payment Processing Integration"",
+    ""description"": ""Implement payment handling, including payment-state tracking and linkage between payment, invoice, and rental records. Clarify how unsuccessful payment outcomes should affect downstream rental and availability behavior."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-03-02T09:00:00Z"",
+        ""text"": ""There is a cross-module ambiguity here: when a payment attempt does not complete successfully, I do not yet know whether the related rental should remain operationally blocked, return to normal availability, or wait for a separate business decision.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-605"",
+    ""summary"": ""Duplicate Payment Prevention"",
+    ""description"": ""Implement idempotent payment prote
+
+[8] source=I64 type=Implementation/SrcChunk hops=2 chunk=9e3f51f0494d6d62 doc=TOOLCHAIN-CONF-PAYMENT-01.md rel=IN_DOC > IN_DOC
+ssign a unique identifier to each invoice.
+## 6.3.3 The system shall include rent details, pricing, and total amount in the invoice.
+## 6.3.4 The system shall store generated invoices.
+
+## 6.4 Payment Processing
+## 6.4.1 The system shall allow users to make payments for invoices.
+## 6.4.2 The system shall record payment status.
+## 6.4.3 The system shall support payment status values including Pending, Paid, and Failed.
+## 6.4.4 The system shall associate payment records with the corresponding invoice and rent record.
+
+## 6.5 Payment Status Management
+## 6.5.1 The system shall update invoice status upon successful payment.
+## 6.5.2 The system shall prevent duplicate payments for the same invoice.
+## 6.5.3 The system shall allow authorized users to view payment status.
+
+## 6.6 Refund Management
+## 6.6.1 The system shall allow authorized users to initiate refunds.
+## 6.6.2 The system shall record refund status.
+## 6.6.3 The system shall associate refunds with the corresponding payment record.
+## 6.6.4 The system shall ensure refund amount does not exceed original payment amount.
+
+## 6.7 Billing History
+## 6.7.1 The system shall maintain billing history for each user.
+## 6.7.2 The syst
+
+[9] source=G63 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Multi-currency conversion rule conflict
+
+[10] source=R62 type=Requirement hops=2 rel=DEFINED_IN > DEFINED_IN
+Rental cost calculation rule","Generated 10 executable Gherkin tests for R61 (Pricing configuration rule) targeting core pricing definition, storage, and configuration requirements. Tests focus on authorized user pricing definition, item-level pricing storage, calculation basis, and exception handling around currency/billing clarity. Multi-currency conversion conflicts and unspecified category/matrix rules are excluded per guidance. Tests validate that pricing configuration is properly stored, applied to rental cost calculations, and does not silently override core logic.",## 6.2.1 The system shall calculate rental cost based on item pricing and rental duration. || Pricing information is stored associated with each rentable item || Authorized users can define pricing for rentable items,"International billing and currency presentation must not silently override core pricing logic || Currency conversion, display format, and invoice currency handling must be clarified as strict accounting rules, temporary pilot behavior, or presentation-layer convention before implementation",Multi-currency conversion rule conflict exists and must be resolved,Exact behavior depends on a category- or matrix-based rule that is not fully specified in the retrieved evidence.,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R61 targets pricing configuration rule. Primary evidence establishes core pricing definition, storage, and calculation requirements from TOOLCHAIN-CONF-PAYMENT-01.md and JIRA-Payment.md. Developer and QA comments highlight unresolved precision and consistency concerns between calculation stages and display layers. Finance email (E3) raises multi-currency handling ambiguity. Gap G63 signals multi-currency conversion rule conflict. Related requirement R62 (Rental cost calculation rule) is defined in same document set. No context evidence provided. All operative rules are target-specific and directly supported by primary evidence."" Filtered abstract or low-relevance operative statements: Pricing can be defined per time unit (hourly, daily, weekly) | Pricing changes do not affect already created rental records | Rental cost is calculated based on item pricing and rental duration",1,0,0,1

@@ -1,0 +1,2699 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+7a73d6ab,R26,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R26_1,Authorized OPERATOR user can cancel active rent,"Feature: Rent Cancellation Authorization
+  Scenario: OPERATOR role user cancels active rent
+    Given a rent record with status ""Active""
+    And the current user has role ""OPERATOR""
+    When the user initiates rent cancellation
+    Then the cancellation request is accepted
+    And the rent status transitions to ""Cancelled""",Confirms that authorized users with OPERATOR role can trigger cancellation-related actions as stated in the exception context. This is a foundational authorization test for R26.,E1|E4,Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,3453478160ad1947|9dd628a82a09c2ba|D21|D22|G1|G22|G23|G44|I24|I25|I94b|R21|R22|R23|R24|R25|R26|R29|R30|R52c,Rent cancellation rules,Rent cancellation rules,"[1] source=R26 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[2] source=R26 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[3] source=R26 type=Requirement hops=0 rel=TARGET
+Rent cancellation rules
+
+[4] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=R52c type=Requirement/SrcChunk hops=1 chunk=bfd9d8de995ec51f doc=TOOLCHAIN-CONF-NOTIFICATION-01.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-NOTIFICATION-01
+# Description: Notifications
+# Status: Effective
+
+## 5. Notifications
+## 5.1 Notification Events
+
+## 5.1.1 The system shall generate notifications for rent lifecycle events.
+## 5.1.2 The system shall generate a notification when a rent request is created.
+## 5.1.3 The system shall generate a notification when a rent request is approved.
+## 5.1.4 The system shall generate a notification when a rent request is rejected.
+## 5.1.5 The system shall generate a notification when a rent becomes Active.
+## 5.1.6 The system shall generate a notification when a rent is Completed.
+## 5.1.7 The system shall generate a notification when a rent is Cancelled.
+
+## 5.2 Notification Delivery
+## 5.2.1 The system shall send notifications via email.
+## 5.2.2 The system shall send notifications to the email address associated with the user account.
+## 5.2.3 The system shall ensure that notification delivery is reliable.
+## 5.2.4 The system shall retry notification delivery in case of failure.
+
+## 5.3 Reminder Notifications
+## 5.3.1 The system shall send reminder notifications before rent start date.
+## 5.3.2 The system shall send reminder notifications befo
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[9] source=D21 type=Specification hops=1 rel=DEFINED_IN
+Rent Lifecycle v1.0
+
+[10] source=I94b type=Implementation/SrcChunk hops=2 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=IN_DOC > IN_DOC
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[11] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[12] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[13] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[14] source=D22 type=Specification hops=2 rel=DEFINED_IN > SUPERSEDES
+Rent Lifecycle v1.1 (Cleaning)
+
+[15] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity
+
+[16] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[17] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[18] source=I25 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Cancellation penalty bug
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R23 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent approval workflow
+
+[21] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[22] source=R25 type=Requirement hops=2 rel=AFFECTS > AFFECTS
+End-of-rent lifecycle transition
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R30 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Operator grace-period cancellation
+
+[25] source=R25 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS > AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R26 targets rent cancellation rules with focus on status transitions, penalty application, authorization controls, and the documented gap regarding early cancellation tolerance windows. The operative context confirms that rent status updates to Active at start date, authorized users (OPERATOR/ADMIN) can trigger cancellation actions, and penalties may apply. However, the core cancellation mechanics and the previously-documented tolerance window exemption are missing from v1.2 specification. Tests address: (1) cancellation authorization by role, (2) penalty application on early cancellation, (3) status transitions during cancellation, (4) cancellation notifications, (5) the documented gap regarding tolerance window exemption, and (6) edge cases around active rent cancellation.",## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,Early cancellation within operator tolerance window may exempt penalty (status unclear) || Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,"Earlier lifecycle guidance may have included penalty exemption for early cancellation within tolerance window, but this language appears to be missing or removed from v1.2 specification",,E1|E2|E4|E5|E8|E14,"R26 targets rent cancellation rules but lacks explicit definition of cancellation mechanics. PRIMARY evidence (E1, E4) indicates a documented gap: earlier lifecycle versions may have included a tolerance window exempting penalties for early operator cancellation, but this rule is missing from v1.2. E2 and E5 show rent lifecycle specifications but do not explicitly detail cancellation rules. E8 confirms penalty application exists for late returns and damage. E14 confirms cancellation notifications are generated. The core cancellation rule itself (what states allow cancellation, what the default behavior is) is not directly stated in provided evidence; only penalty application context and notification requirements are confirmed. Filtered abstract or low-relevance operative statements: System allows authorized users to cancel active rent records | Penalty fees may be applied to early cancellations | Cancellation rules are defined in rent lifecycle specifications",1,0,0,0
+7a73d6ab,R26,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R26_2,Authorized ADMIN user can cancel active rent,"Feature: Rent Cancellation Authorization
+  Scenario: ADMIN role user cancels active rent
+    Given a rent record with status ""Active""
+    And the current user has role ""ADMIN""
+    When the user initiates rent cancellation
+    Then the cancellation request is accepted
+    And the rent status transitions to ""Cancelled""",Confirms that authorized users with ADMIN role can trigger cancellation-related actions. Tests the second authorized role mentioned in the exception context.,E1|E4,Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,3453478160ad1947|9dd628a82a09c2ba|D21|D22|G1|G22|G23|G44|I24|I25|I94b|R21|R22|R23|R24|R25|R26|R29|R30|R52c,Rent cancellation rules,Rent cancellation rules,"[1] source=R26 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[2] source=R26 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[3] source=R26 type=Requirement hops=0 rel=TARGET
+Rent cancellation rules
+
+[4] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=R52c type=Requirement/SrcChunk hops=1 chunk=bfd9d8de995ec51f doc=TOOLCHAIN-CONF-NOTIFICATION-01.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-NOTIFICATION-01
+# Description: Notifications
+# Status: Effective
+
+## 5. Notifications
+## 5.1 Notification Events
+
+## 5.1.1 The system shall generate notifications for rent lifecycle events.
+## 5.1.2 The system shall generate a notification when a rent request is created.
+## 5.1.3 The system shall generate a notification when a rent request is approved.
+## 5.1.4 The system shall generate a notification when a rent request is rejected.
+## 5.1.5 The system shall generate a notification when a rent becomes Active.
+## 5.1.6 The system shall generate a notification when a rent is Completed.
+## 5.1.7 The system shall generate a notification when a rent is Cancelled.
+
+## 5.2 Notification Delivery
+## 5.2.1 The system shall send notifications via email.
+## 5.2.2 The system shall send notifications to the email address associated with the user account.
+## 5.2.3 The system shall ensure that notification delivery is reliable.
+## 5.2.4 The system shall retry notification delivery in case of failure.
+
+## 5.3 Reminder Notifications
+## 5.3.1 The system shall send reminder notifications before rent start date.
+## 5.3.2 The system shall send reminder notifications befo
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[9] source=D21 type=Specification hops=1 rel=DEFINED_IN
+Rent Lifecycle v1.0
+
+[10] source=I94b type=Implementation/SrcChunk hops=2 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=IN_DOC > IN_DOC
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[11] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[12] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[13] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[14] source=D22 type=Specification hops=2 rel=DEFINED_IN > SUPERSEDES
+Rent Lifecycle v1.1 (Cleaning)
+
+[15] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity
+
+[16] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[17] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[18] source=I25 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Cancellation penalty bug
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R23 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent approval workflow
+
+[21] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[22] source=R25 type=Requirement hops=2 rel=AFFECTS > AFFECTS
+End-of-rent lifecycle transition
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R30 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Operator grace-period cancellation
+
+[25] source=R25 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS > AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R26 targets rent cancellation rules with focus on status transitions, penalty application, authorization controls, and the documented gap regarding early cancellation tolerance windows. The operative context confirms that rent status updates to Active at start date, authorized users (OPERATOR/ADMIN) can trigger cancellation actions, and penalties may apply. However, the core cancellation mechanics and the previously-documented tolerance window exemption are missing from v1.2 specification. Tests address: (1) cancellation authorization by role, (2) penalty application on early cancellation, (3) status transitions during cancellation, (4) cancellation notifications, (5) the documented gap regarding tolerance window exemption, and (6) edge cases around active rent cancellation.",## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,Early cancellation within operator tolerance window may exempt penalty (status unclear) || Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,"Earlier lifecycle guidance may have included penalty exemption for early cancellation within tolerance window, but this language appears to be missing or removed from v1.2 specification",,E1|E2|E4|E5|E8|E14,"R26 targets rent cancellation rules but lacks explicit definition of cancellation mechanics. PRIMARY evidence (E1, E4) indicates a documented gap: earlier lifecycle versions may have included a tolerance window exempting penalties for early operator cancellation, but this rule is missing from v1.2. E2 and E5 show rent lifecycle specifications but do not explicitly detail cancellation rules. E8 confirms penalty application exists for late returns and damage. E14 confirms cancellation notifications are generated. The core cancellation rule itself (what states allow cancellation, what the default behavior is) is not directly stated in provided evidence; only penalty application context and notification requirements are confirmed. Filtered abstract or low-relevance operative statements: System allows authorized users to cancel active rent records | Penalty fees may be applied to early cancellations | Cancellation rules are defined in rent lifecycle specifications",1,0,0,0
+7a73d6ab,R26,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R26_3,Unauthorized user cannot cancel active rent,"Feature: Rent Cancellation Authorization
+  Scenario: User without OPERATOR or ADMIN role attempts cancellation
+    Given a rent record with status ""Active""
+    And the current user has role ""CUSTOMER""
+    When the user attempts to initiate rent cancellation
+    Then the cancellation request is rejected
+    And an authorization error is returned",Validates that only authorized roles (OPERATOR/ADMIN) can cancel rent. This is a negative test ensuring authorization controls are enforced.,E1|E4,Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,3453478160ad1947|9dd628a82a09c2ba|D21|D22|G1|G22|G23|G44|I24|I25|I94b|R21|R22|R23|R24|R25|R26|R29|R30|R52c,Rent cancellation rules,Rent cancellation rules,"[1] source=R26 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[2] source=R26 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[3] source=R26 type=Requirement hops=0 rel=TARGET
+Rent cancellation rules
+
+[4] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=R52c type=Requirement/SrcChunk hops=1 chunk=bfd9d8de995ec51f doc=TOOLCHAIN-CONF-NOTIFICATION-01.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-NOTIFICATION-01
+# Description: Notifications
+# Status: Effective
+
+## 5. Notifications
+## 5.1 Notification Events
+
+## 5.1.1 The system shall generate notifications for rent lifecycle events.
+## 5.1.2 The system shall generate a notification when a rent request is created.
+## 5.1.3 The system shall generate a notification when a rent request is approved.
+## 5.1.4 The system shall generate a notification when a rent request is rejected.
+## 5.1.5 The system shall generate a notification when a rent becomes Active.
+## 5.1.6 The system shall generate a notification when a rent is Completed.
+## 5.1.7 The system shall generate a notification when a rent is Cancelled.
+
+## 5.2 Notification Delivery
+## 5.2.1 The system shall send notifications via email.
+## 5.2.2 The system shall send notifications to the email address associated with the user account.
+## 5.2.3 The system shall ensure that notification delivery is reliable.
+## 5.2.4 The system shall retry notification delivery in case of failure.
+
+## 5.3 Reminder Notifications
+## 5.3.1 The system shall send reminder notifications before rent start date.
+## 5.3.2 The system shall send reminder notifications befo
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[9] source=D21 type=Specification hops=1 rel=DEFINED_IN
+Rent Lifecycle v1.0
+
+[10] source=I94b type=Implementation/SrcChunk hops=2 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=IN_DOC > IN_DOC
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[11] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[12] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[13] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[14] source=D22 type=Specification hops=2 rel=DEFINED_IN > SUPERSEDES
+Rent Lifecycle v1.1 (Cleaning)
+
+[15] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity
+
+[16] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[17] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[18] source=I25 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Cancellation penalty bug
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R23 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent approval workflow
+
+[21] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[22] source=R25 type=Requirement hops=2 rel=AFFECTS > AFFECTS
+End-of-rent lifecycle transition
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R30 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Operator grace-period cancellation
+
+[25] source=R25 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS > AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R26 targets rent cancellation rules with focus on status transitions, penalty application, authorization controls, and the documented gap regarding early cancellation tolerance windows. The operative context confirms that rent status updates to Active at start date, authorized users (OPERATOR/ADMIN) can trigger cancellation actions, and penalties may apply. However, the core cancellation mechanics and the previously-documented tolerance window exemption are missing from v1.2 specification. Tests address: (1) cancellation authorization by role, (2) penalty application on early cancellation, (3) status transitions during cancellation, (4) cancellation notifications, (5) the documented gap regarding tolerance window exemption, and (6) edge cases around active rent cancellation.",## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,Early cancellation within operator tolerance window may exempt penalty (status unclear) || Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,"Earlier lifecycle guidance may have included penalty exemption for early cancellation within tolerance window, but this language appears to be missing or removed from v1.2 specification",,E1|E2|E4|E5|E8|E14,"R26 targets rent cancellation rules but lacks explicit definition of cancellation mechanics. PRIMARY evidence (E1, E4) indicates a documented gap: earlier lifecycle versions may have included a tolerance window exempting penalties for early operator cancellation, but this rule is missing from v1.2. E2 and E5 show rent lifecycle specifications but do not explicitly detail cancellation rules. E8 confirms penalty application exists for late returns and damage. E14 confirms cancellation notifications are generated. The core cancellation rule itself (what states allow cancellation, what the default behavior is) is not directly stated in provided evidence; only penalty application context and notification requirements are confirmed. Filtered abstract or low-relevance operative statements: System allows authorized users to cancel active rent records | Penalty fees may be applied to early cancellations | Cancellation rules are defined in rent lifecycle specifications",1,0,0,0
+7a73d6ab,R26,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R26_4,Penalty is applied when rent is cancelled early,"Feature: Rent Cancellation Penalties
+  Scenario: Early cancellation incurs penalty fee
+    Given a rent record with status ""Active""
+    And the rental period has not yet completed
+    And the current user has role ""OPERATOR""
+    When the user initiates rent cancellation
+    Then the cancellation is processed
+    And a penalty fee is calculated and applied
+    And the penalty amount is deducted from the rental account",Confirms that penalty fees are applied to early cancellations as indicated in the operative context. This addresses the penalty application rule for R26.,E8,Penalty fees may be applied to early cancellations,3453478160ad1947|9dd628a82a09c2ba|D21|D22|G1|G22|G23|G44|I24|I25|I94b|R21|R22|R23|R24|R25|R26|R29|R30|R52c,Rent cancellation rules,Rent cancellation rules,"[1] source=R26 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[2] source=R26 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[3] source=R26 type=Requirement hops=0 rel=TARGET
+Rent cancellation rules
+
+[4] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=R52c type=Requirement/SrcChunk hops=1 chunk=bfd9d8de995ec51f doc=TOOLCHAIN-CONF-NOTIFICATION-01.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-NOTIFICATION-01
+# Description: Notifications
+# Status: Effective
+
+## 5. Notifications
+## 5.1 Notification Events
+
+## 5.1.1 The system shall generate notifications for rent lifecycle events.
+## 5.1.2 The system shall generate a notification when a rent request is created.
+## 5.1.3 The system shall generate a notification when a rent request is approved.
+## 5.1.4 The system shall generate a notification when a rent request is rejected.
+## 5.1.5 The system shall generate a notification when a rent becomes Active.
+## 5.1.6 The system shall generate a notification when a rent is Completed.
+## 5.1.7 The system shall generate a notification when a rent is Cancelled.
+
+## 5.2 Notification Delivery
+## 5.2.1 The system shall send notifications via email.
+## 5.2.2 The system shall send notifications to the email address associated with the user account.
+## 5.2.3 The system shall ensure that notification delivery is reliable.
+## 5.2.4 The system shall retry notification delivery in case of failure.
+
+## 5.3 Reminder Notifications
+## 5.3.1 The system shall send reminder notifications before rent start date.
+## 5.3.2 The system shall send reminder notifications befo
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[9] source=D21 type=Specification hops=1 rel=DEFINED_IN
+Rent Lifecycle v1.0
+
+[10] source=I94b type=Implementation/SrcChunk hops=2 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=IN_DOC > IN_DOC
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[11] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[12] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[13] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[14] source=D22 type=Specification hops=2 rel=DEFINED_IN > SUPERSEDES
+Rent Lifecycle v1.1 (Cleaning)
+
+[15] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity
+
+[16] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[17] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[18] source=I25 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Cancellation penalty bug
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R23 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent approval workflow
+
+[21] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[22] source=R25 type=Requirement hops=2 rel=AFFECTS > AFFECTS
+End-of-rent lifecycle transition
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R30 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Operator grace-period cancellation
+
+[25] source=R25 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS > AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R26 targets rent cancellation rules with focus on status transitions, penalty application, authorization controls, and the documented gap regarding early cancellation tolerance windows. The operative context confirms that rent status updates to Active at start date, authorized users (OPERATOR/ADMIN) can trigger cancellation actions, and penalties may apply. However, the core cancellation mechanics and the previously-documented tolerance window exemption are missing from v1.2 specification. Tests address: (1) cancellation authorization by role, (2) penalty application on early cancellation, (3) status transitions during cancellation, (4) cancellation notifications, (5) the documented gap regarding tolerance window exemption, and (6) edge cases around active rent cancellation.",## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,Early cancellation within operator tolerance window may exempt penalty (status unclear) || Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,"Earlier lifecycle guidance may have included penalty exemption for early cancellation within tolerance window, but this language appears to be missing or removed from v1.2 specification",,E1|E2|E4|E5|E8|E14,"R26 targets rent cancellation rules but lacks explicit definition of cancellation mechanics. PRIMARY evidence (E1, E4) indicates a documented gap: earlier lifecycle versions may have included a tolerance window exempting penalties for early operator cancellation, but this rule is missing from v1.2. E2 and E5 show rent lifecycle specifications but do not explicitly detail cancellation rules. E8 confirms penalty application exists for late returns and damage. E14 confirms cancellation notifications are generated. The core cancellation rule itself (what states allow cancellation, what the default behavior is) is not directly stated in provided evidence; only penalty application context and notification requirements are confirmed. Filtered abstract or low-relevance operative statements: System allows authorized users to cancel active rent records | Penalty fees may be applied to early cancellations | Cancellation rules are defined in rent lifecycle specifications",1,0,0,0
+7a73d6ab,R26,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R26_5,Cancellation notification is generated when rent is cancelled,"Feature: Rent Cancellation Notifications
+  Scenario: Cancellation triggers notification
+    Given a rent record with status ""Active""
+    And the current user has role ""OPERATOR""
+    When the user initiates rent cancellation
+    Then the cancellation is processed
+    And a cancellation notification is generated
+    And the notification is sent to relevant parties",Validates that cancellation notifications are generated as confirmed by evidence E14. This ensures stakeholders are informed of cancellation events.,E14,Cancellation rules are defined in rent lifecycle specifications,3453478160ad1947|9dd628a82a09c2ba|D21|D22|G1|G22|G23|G44|I24|I25|I94b|R21|R22|R23|R24|R25|R26|R29|R30|R52c,Rent cancellation rules,Rent cancellation rules,"[1] source=R26 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[2] source=R26 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[3] source=R26 type=Requirement hops=0 rel=TARGET
+Rent cancellation rules
+
+[4] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=R52c type=Requirement/SrcChunk hops=1 chunk=bfd9d8de995ec51f doc=TOOLCHAIN-CONF-NOTIFICATION-01.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-NOTIFICATION-01
+# Description: Notifications
+# Status: Effective
+
+## 5. Notifications
+## 5.1 Notification Events
+
+## 5.1.1 The system shall generate notifications for rent lifecycle events.
+## 5.1.2 The system shall generate a notification when a rent request is created.
+## 5.1.3 The system shall generate a notification when a rent request is approved.
+## 5.1.4 The system shall generate a notification when a rent request is rejected.
+## 5.1.5 The system shall generate a notification when a rent becomes Active.
+## 5.1.6 The system shall generate a notification when a rent is Completed.
+## 5.1.7 The system shall generate a notification when a rent is Cancelled.
+
+## 5.2 Notification Delivery
+## 5.2.1 The system shall send notifications via email.
+## 5.2.2 The system shall send notifications to the email address associated with the user account.
+## 5.2.3 The system shall ensure that notification delivery is reliable.
+## 5.2.4 The system shall retry notification delivery in case of failure.
+
+## 5.3 Reminder Notifications
+## 5.3.1 The system shall send reminder notifications before rent start date.
+## 5.3.2 The system shall send reminder notifications befo
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[9] source=D21 type=Specification hops=1 rel=DEFINED_IN
+Rent Lifecycle v1.0
+
+[10] source=I94b type=Implementation/SrcChunk hops=2 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=IN_DOC > IN_DOC
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[11] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[12] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[13] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[14] source=D22 type=Specification hops=2 rel=DEFINED_IN > SUPERSEDES
+Rent Lifecycle v1.1 (Cleaning)
+
+[15] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity
+
+[16] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[17] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[18] source=I25 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Cancellation penalty bug
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R23 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent approval workflow
+
+[21] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[22] source=R25 type=Requirement hops=2 rel=AFFECTS > AFFECTS
+End-of-rent lifecycle transition
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R30 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Operator grace-period cancellation
+
+[25] source=R25 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS > AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R26 targets rent cancellation rules with focus on status transitions, penalty application, authorization controls, and the documented gap regarding early cancellation tolerance windows. The operative context confirms that rent status updates to Active at start date, authorized users (OPERATOR/ADMIN) can trigger cancellation actions, and penalties may apply. However, the core cancellation mechanics and the previously-documented tolerance window exemption are missing from v1.2 specification. Tests address: (1) cancellation authorization by role, (2) penalty application on early cancellation, (3) status transitions during cancellation, (4) cancellation notifications, (5) the documented gap regarding tolerance window exemption, and (6) edge cases around active rent cancellation.",## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,Early cancellation within operator tolerance window may exempt penalty (status unclear) || Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,"Earlier lifecycle guidance may have included penalty exemption for early cancellation within tolerance window, but this language appears to be missing or removed from v1.2 specification",,E1|E2|E4|E5|E8|E14,"R26 targets rent cancellation rules but lacks explicit definition of cancellation mechanics. PRIMARY evidence (E1, E4) indicates a documented gap: earlier lifecycle versions may have included a tolerance window exempting penalties for early operator cancellation, but this rule is missing from v1.2. E2 and E5 show rent lifecycle specifications but do not explicitly detail cancellation rules. E8 confirms penalty application exists for late returns and damage. E14 confirms cancellation notifications are generated. The core cancellation rule itself (what states allow cancellation, what the default behavior is) is not directly stated in provided evidence; only penalty application context and notification requirements are confirmed. Filtered abstract or low-relevance operative statements: System allows authorized users to cancel active rent records | Penalty fees may be applied to early cancellations | Cancellation rules are defined in rent lifecycle specifications",1,0,0,0
+7a73d6ab,R26,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R26_6,Rent status transitions from Active to Cancelled,"Feature: Rent Cancellation Status Transition
+  Scenario: Active rent transitions to Cancelled status
+    Given a rent record with status ""Active""
+    And the rental start date has been reached
+    And the current user has role ""OPERATOR""
+    When the user initiates rent cancellation
+    Then the rent status is updated to ""Cancelled""
+    And the cancellation timestamp is recorded",Confirms the status transition rule for cancellation. The operative context indicates rent status updates to Active at start date; this test validates the transition to Cancelled state.,E2|E5,The system shall update the rent status to Active when the rental start date is reached,3453478160ad1947|9dd628a82a09c2ba|D21|D22|G1|G22|G23|G44|I24|I25|I94b|R21|R22|R23|R24|R25|R26|R29|R30|R52c,Rent cancellation rules,Rent cancellation rules,"[1] source=R26 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[2] source=R26 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[3] source=R26 type=Requirement hops=0 rel=TARGET
+Rent cancellation rules
+
+[4] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=R52c type=Requirement/SrcChunk hops=1 chunk=bfd9d8de995ec51f doc=TOOLCHAIN-CONF-NOTIFICATION-01.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-NOTIFICATION-01
+# Description: Notifications
+# Status: Effective
+
+## 5. Notifications
+## 5.1 Notification Events
+
+## 5.1.1 The system shall generate notifications for rent lifecycle events.
+## 5.1.2 The system shall generate a notification when a rent request is created.
+## 5.1.3 The system shall generate a notification when a rent request is approved.
+## 5.1.4 The system shall generate a notification when a rent request is rejected.
+## 5.1.5 The system shall generate a notification when a rent becomes Active.
+## 5.1.6 The system shall generate a notification when a rent is Completed.
+## 5.1.7 The system shall generate a notification when a rent is Cancelled.
+
+## 5.2 Notification Delivery
+## 5.2.1 The system shall send notifications via email.
+## 5.2.2 The system shall send notifications to the email address associated with the user account.
+## 5.2.3 The system shall ensure that notification delivery is reliable.
+## 5.2.4 The system shall retry notification delivery in case of failure.
+
+## 5.3 Reminder Notifications
+## 5.3.1 The system shall send reminder notifications before rent start date.
+## 5.3.2 The system shall send reminder notifications befo
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[9] source=D21 type=Specification hops=1 rel=DEFINED_IN
+Rent Lifecycle v1.0
+
+[10] source=I94b type=Implementation/SrcChunk hops=2 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=IN_DOC > IN_DOC
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[11] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[12] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[13] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[14] source=D22 type=Specification hops=2 rel=DEFINED_IN > SUPERSEDES
+Rent Lifecycle v1.1 (Cleaning)
+
+[15] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity
+
+[16] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[17] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[18] source=I25 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Cancellation penalty bug
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R23 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent approval workflow
+
+[21] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[22] source=R25 type=Requirement hops=2 rel=AFFECTS > AFFECTS
+End-of-rent lifecycle transition
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R30 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Operator grace-period cancellation
+
+[25] source=R25 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS > AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R26 targets rent cancellation rules with focus on status transitions, penalty application, authorization controls, and the documented gap regarding early cancellation tolerance windows. The operative context confirms that rent status updates to Active at start date, authorized users (OPERATOR/ADMIN) can trigger cancellation actions, and penalties may apply. However, the core cancellation mechanics and the previously-documented tolerance window exemption are missing from v1.2 specification. Tests address: (1) cancellation authorization by role, (2) penalty application on early cancellation, (3) status transitions during cancellation, (4) cancellation notifications, (5) the documented gap regarding tolerance window exemption, and (6) edge cases around active rent cancellation.",## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,Early cancellation within operator tolerance window may exempt penalty (status unclear) || Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,"Earlier lifecycle guidance may have included penalty exemption for early cancellation within tolerance window, but this language appears to be missing or removed from v1.2 specification",,E1|E2|E4|E5|E8|E14,"R26 targets rent cancellation rules but lacks explicit definition of cancellation mechanics. PRIMARY evidence (E1, E4) indicates a documented gap: earlier lifecycle versions may have included a tolerance window exempting penalties for early operator cancellation, but this rule is missing from v1.2. E2 and E5 show rent lifecycle specifications but do not explicitly detail cancellation rules. E8 confirms penalty application exists for late returns and damage. E14 confirms cancellation notifications are generated. The core cancellation rule itself (what states allow cancellation, what the default behavior is) is not directly stated in provided evidence; only penalty application context and notification requirements are confirmed. Filtered abstract or low-relevance operative statements: System allows authorized users to cancel active rent records | Penalty fees may be applied to early cancellations | Cancellation rules are defined in rent lifecycle specifications",1,0,0,0
+7a73d6ab,R26,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R26_7,Gap: Early cancellation tolerance window exemption is not defined in v1.2,"Feature: Rent Cancellation Tolerance Window
+  Scenario: Early cancellation within tolerance window (gap identified)
+    Given a rent record with status ""Active""
+    And the rental period has not yet completed
+    And the current user has role ""OPERATOR""
+    When the user initiates rent cancellation within the tolerance window
+    Then the system behavior is undefined
+    And no penalty exemption rule is documented in v1.2 specification","Documents the identified gap: earlier lifecycle versions may have included a tolerance window exempting penalties for early operator cancellation, but this rule is missing from v1.2. This test highlights the specification gap rather than testing a defined behavior.",E1|E4,"Early cancellation within operator tolerance window may exempt penalty (status unclear)|Earlier lifecycle guidance may have included penalty exemption for early cancellation within tolerance window, but this language appears to be missing or removed from v1.2 specification",3453478160ad1947|9dd628a82a09c2ba|D21|D22|G1|G22|G23|G44|I24|I25|I94b|R21|R22|R23|R24|R25|R26|R29|R30|R52c,Rent cancellation rules,Rent cancellation rules,"[1] source=R26 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[2] source=R26 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[3] source=R26 type=Requirement hops=0 rel=TARGET
+Rent cancellation rules
+
+[4] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=R52c type=Requirement/SrcChunk hops=1 chunk=bfd9d8de995ec51f doc=TOOLCHAIN-CONF-NOTIFICATION-01.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-NOTIFICATION-01
+# Description: Notifications
+# Status: Effective
+
+## 5. Notifications
+## 5.1 Notification Events
+
+## 5.1.1 The system shall generate notifications for rent lifecycle events.
+## 5.1.2 The system shall generate a notification when a rent request is created.
+## 5.1.3 The system shall generate a notification when a rent request is approved.
+## 5.1.4 The system shall generate a notification when a rent request is rejected.
+## 5.1.5 The system shall generate a notification when a rent becomes Active.
+## 5.1.6 The system shall generate a notification when a rent is Completed.
+## 5.1.7 The system shall generate a notification when a rent is Cancelled.
+
+## 5.2 Notification Delivery
+## 5.2.1 The system shall send notifications via email.
+## 5.2.2 The system shall send notifications to the email address associated with the user account.
+## 5.2.3 The system shall ensure that notification delivery is reliable.
+## 5.2.4 The system shall retry notification delivery in case of failure.
+
+## 5.3 Reminder Notifications
+## 5.3.1 The system shall send reminder notifications before rent start date.
+## 5.3.2 The system shall send reminder notifications befo
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[9] source=D21 type=Specification hops=1 rel=DEFINED_IN
+Rent Lifecycle v1.0
+
+[10] source=I94b type=Implementation/SrcChunk hops=2 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=IN_DOC > IN_DOC
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[11] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[12] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[13] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[14] source=D22 type=Specification hops=2 rel=DEFINED_IN > SUPERSEDES
+Rent Lifecycle v1.1 (Cleaning)
+
+[15] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity
+
+[16] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[17] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[18] source=I25 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Cancellation penalty bug
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R23 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent approval workflow
+
+[21] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[22] source=R25 type=Requirement hops=2 rel=AFFECTS > AFFECTS
+End-of-rent lifecycle transition
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R30 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Operator grace-period cancellation
+
+[25] source=R25 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS > AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R26 targets rent cancellation rules with focus on status transitions, penalty application, authorization controls, and the documented gap regarding early cancellation tolerance windows. The operative context confirms that rent status updates to Active at start date, authorized users (OPERATOR/ADMIN) can trigger cancellation actions, and penalties may apply. However, the core cancellation mechanics and the previously-documented tolerance window exemption are missing from v1.2 specification. Tests address: (1) cancellation authorization by role, (2) penalty application on early cancellation, (3) status transitions during cancellation, (4) cancellation notifications, (5) the documented gap regarding tolerance window exemption, and (6) edge cases around active rent cancellation.",## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,Early cancellation within operator tolerance window may exempt penalty (status unclear) || Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,"Earlier lifecycle guidance may have included penalty exemption for early cancellation within tolerance window, but this language appears to be missing or removed from v1.2 specification",,E1|E2|E4|E5|E8|E14,"R26 targets rent cancellation rules but lacks explicit definition of cancellation mechanics. PRIMARY evidence (E1, E4) indicates a documented gap: earlier lifecycle versions may have included a tolerance window exempting penalties for early operator cancellation, but this rule is missing from v1.2. E2 and E5 show rent lifecycle specifications but do not explicitly detail cancellation rules. E8 confirms penalty application exists for late returns and damage. E14 confirms cancellation notifications are generated. The core cancellation rule itself (what states allow cancellation, what the default behavior is) is not directly stated in provided evidence; only penalty application context and notification requirements are confirmed. Filtered abstract or low-relevance operative statements: System allows authorized users to cancel active rent records | Penalty fees may be applied to early cancellations | Cancellation rules are defined in rent lifecycle specifications",1,0,0,0
+7a73d6ab,R26,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R26_8,Cancellation is rejected for non-Active rent status,"Feature: Rent Cancellation Status Validation
+  Scenario: Cancellation attempt on non-Active rent
+    Given a rent record with status ""Completed""
+    And the current user has role ""OPERATOR""
+    When the user attempts to initiate rent cancellation
+    Then the cancellation request is rejected
+    And an error indicating invalid status is returned",Validates that cancellation can only be performed on Active rent records. This ensures cancellation rules respect the rent lifecycle state machine.,E2|E5,The system shall update the rent status to Active when the rental start date is reached,3453478160ad1947|9dd628a82a09c2ba|D21|D22|G1|G22|G23|G44|I24|I25|I94b|R21|R22|R23|R24|R25|R26|R29|R30|R52c,Rent cancellation rules,Rent cancellation rules,"[1] source=R26 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[2] source=R26 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[3] source=R26 type=Requirement hops=0 rel=TARGET
+Rent cancellation rules
+
+[4] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=R52c type=Requirement/SrcChunk hops=1 chunk=bfd9d8de995ec51f doc=TOOLCHAIN-CONF-NOTIFICATION-01.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-NOTIFICATION-01
+# Description: Notifications
+# Status: Effective
+
+## 5. Notifications
+## 5.1 Notification Events
+
+## 5.1.1 The system shall generate notifications for rent lifecycle events.
+## 5.1.2 The system shall generate a notification when a rent request is created.
+## 5.1.3 The system shall generate a notification when a rent request is approved.
+## 5.1.4 The system shall generate a notification when a rent request is rejected.
+## 5.1.5 The system shall generate a notification when a rent becomes Active.
+## 5.1.6 The system shall generate a notification when a rent is Completed.
+## 5.1.7 The system shall generate a notification when a rent is Cancelled.
+
+## 5.2 Notification Delivery
+## 5.2.1 The system shall send notifications via email.
+## 5.2.2 The system shall send notifications to the email address associated with the user account.
+## 5.2.3 The system shall ensure that notification delivery is reliable.
+## 5.2.4 The system shall retry notification delivery in case of failure.
+
+## 5.3 Reminder Notifications
+## 5.3.1 The system shall send reminder notifications before rent start date.
+## 5.3.2 The system shall send reminder notifications befo
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[9] source=D21 type=Specification hops=1 rel=DEFINED_IN
+Rent Lifecycle v1.0
+
+[10] source=I94b type=Implementation/SrcChunk hops=2 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=IN_DOC > IN_DOC
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[11] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[12] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[13] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[14] source=D22 type=Specification hops=2 rel=DEFINED_IN > SUPERSEDES
+Rent Lifecycle v1.1 (Cleaning)
+
+[15] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity
+
+[16] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[17] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[18] source=I25 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Cancellation penalty bug
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R23 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent approval workflow
+
+[21] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[22] source=R25 type=Requirement hops=2 rel=AFFECTS > AFFECTS
+End-of-rent lifecycle transition
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R30 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Operator grace-period cancellation
+
+[25] source=R25 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS > AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R26 targets rent cancellation rules with focus on status transitions, penalty application, authorization controls, and the documented gap regarding early cancellation tolerance windows. The operative context confirms that rent status updates to Active at start date, authorized users (OPERATOR/ADMIN) can trigger cancellation actions, and penalties may apply. However, the core cancellation mechanics and the previously-documented tolerance window exemption are missing from v1.2 specification. Tests address: (1) cancellation authorization by role, (2) penalty application on early cancellation, (3) status transitions during cancellation, (4) cancellation notifications, (5) the documented gap regarding tolerance window exemption, and (6) edge cases around active rent cancellation.",## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,Early cancellation within operator tolerance window may exempt penalty (status unclear) || Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,"Earlier lifecycle guidance may have included penalty exemption for early cancellation within tolerance window, but this language appears to be missing or removed from v1.2 specification",,E1|E2|E4|E5|E8|E14,"R26 targets rent cancellation rules but lacks explicit definition of cancellation mechanics. PRIMARY evidence (E1, E4) indicates a documented gap: earlier lifecycle versions may have included a tolerance window exempting penalties for early operator cancellation, but this rule is missing from v1.2. E2 and E5 show rent lifecycle specifications but do not explicitly detail cancellation rules. E8 confirms penalty application exists for late returns and damage. E14 confirms cancellation notifications are generated. The core cancellation rule itself (what states allow cancellation, what the default behavior is) is not directly stated in provided evidence; only penalty application context and notification requirements are confirmed. Filtered abstract or low-relevance operative statements: System allows authorized users to cancel active rent records | Penalty fees may be applied to early cancellations | Cancellation rules are defined in rent lifecycle specifications",1,0,0,0
+7a73d6ab,R26,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R26_9,Penalty application respects damage and late return rules,"Feature: Rent Cancellation Penalty Consistency
+  Scenario: Cancellation penalty aligns with damage and late return penalties
+    Given a rent record with status ""Active""
+    And the rental period has not yet completed
+    And the current user has role ""OPERATOR""
+    When the user initiates rent cancellation
+    Then the penalty calculation includes early cancellation fees
+    And the penalty calculation is consistent with damage and late return penalty rules","Confirms that penalty application for cancellation is consistent with other penalty scenarios (damage, late returns) as indicated by evidence E8. This ensures penalty logic is unified.",E8,Penalty fees may be applied to early cancellations,3453478160ad1947|9dd628a82a09c2ba|D21|D22|G1|G22|G23|G44|I24|I25|I94b|R21|R22|R23|R24|R25|R26|R29|R30|R52c,Rent cancellation rules,Rent cancellation rules,"[1] source=R26 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[2] source=R26 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[3] source=R26 type=Requirement hops=0 rel=TARGET
+Rent cancellation rules
+
+[4] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=R52c type=Requirement/SrcChunk hops=1 chunk=bfd9d8de995ec51f doc=TOOLCHAIN-CONF-NOTIFICATION-01.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-NOTIFICATION-01
+# Description: Notifications
+# Status: Effective
+
+## 5. Notifications
+## 5.1 Notification Events
+
+## 5.1.1 The system shall generate notifications for rent lifecycle events.
+## 5.1.2 The system shall generate a notification when a rent request is created.
+## 5.1.3 The system shall generate a notification when a rent request is approved.
+## 5.1.4 The system shall generate a notification when a rent request is rejected.
+## 5.1.5 The system shall generate a notification when a rent becomes Active.
+## 5.1.6 The system shall generate a notification when a rent is Completed.
+## 5.1.7 The system shall generate a notification when a rent is Cancelled.
+
+## 5.2 Notification Delivery
+## 5.2.1 The system shall send notifications via email.
+## 5.2.2 The system shall send notifications to the email address associated with the user account.
+## 5.2.3 The system shall ensure that notification delivery is reliable.
+## 5.2.4 The system shall retry notification delivery in case of failure.
+
+## 5.3 Reminder Notifications
+## 5.3.1 The system shall send reminder notifications before rent start date.
+## 5.3.2 The system shall send reminder notifications befo
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[9] source=D21 type=Specification hops=1 rel=DEFINED_IN
+Rent Lifecycle v1.0
+
+[10] source=I94b type=Implementation/SrcChunk hops=2 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=IN_DOC > IN_DOC
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[11] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[12] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[13] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[14] source=D22 type=Specification hops=2 rel=DEFINED_IN > SUPERSEDES
+Rent Lifecycle v1.1 (Cleaning)
+
+[15] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity
+
+[16] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[17] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[18] source=I25 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Cancellation penalty bug
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R23 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent approval workflow
+
+[21] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[22] source=R25 type=Requirement hops=2 rel=AFFECTS > AFFECTS
+End-of-rent lifecycle transition
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R30 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Operator grace-period cancellation
+
+[25] source=R25 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS > AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R26 targets rent cancellation rules with focus on status transitions, penalty application, authorization controls, and the documented gap regarding early cancellation tolerance windows. The operative context confirms that rent status updates to Active at start date, authorized users (OPERATOR/ADMIN) can trigger cancellation actions, and penalties may apply. However, the core cancellation mechanics and the previously-documented tolerance window exemption are missing from v1.2 specification. Tests address: (1) cancellation authorization by role, (2) penalty application on early cancellation, (3) status transitions during cancellation, (4) cancellation notifications, (5) the documented gap regarding tolerance window exemption, and (6) edge cases around active rent cancellation.",## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,Early cancellation within operator tolerance window may exempt penalty (status unclear) || Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,"Earlier lifecycle guidance may have included penalty exemption for early cancellation within tolerance window, but this language appears to be missing or removed from v1.2 specification",,E1|E2|E4|E5|E8|E14,"R26 targets rent cancellation rules but lacks explicit definition of cancellation mechanics. PRIMARY evidence (E1, E4) indicates a documented gap: earlier lifecycle versions may have included a tolerance window exempting penalties for early operator cancellation, but this rule is missing from v1.2. E2 and E5 show rent lifecycle specifications but do not explicitly detail cancellation rules. E8 confirms penalty application exists for late returns and damage. E14 confirms cancellation notifications are generated. The core cancellation rule itself (what states allow cancellation, what the default behavior is) is not directly stated in provided evidence; only penalty application context and notification requirements are confirmed. Filtered abstract or low-relevance operative statements: System allows authorized users to cancel active rent records | Penalty fees may be applied to early cancellations | Cancellation rules are defined in rent lifecycle specifications",1,0,0,0
+7a73d6ab,R26,graph,full,anthropic,claude-haiku-4-5-20251001,0,2026-07-03.v3,R26_10,Cancellation can be initiated only by authorized roles,"Feature: Rent Cancellation Authorization Enforcement
+  Scenario: Only OPERATOR and ADMIN roles can trigger cancellation
+    Given a rent record with status ""Active""
+    When a user with role ""OPERATOR"" initiates cancellation
+    Then the cancellation is processed successfully
+    When a user with role ""ADMIN"" initiates cancellation
+    Then the cancellation is processed successfully
+    When a user with role ""CUSTOMER"" attempts cancellation
+    Then the cancellation is rejected with authorization error","Comprehensive test validating that only OPERATOR and ADMIN roles are authorized to trigger cancellation actions, enforcing the authorization rule stated in the exception context.",E1|E4,Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,3453478160ad1947|9dd628a82a09c2ba|D21|D22|G1|G22|G23|G44|I24|I25|I94b|R21|R22|R23|R24|R25|R26|R29|R30|R52c,Rent cancellation rules,Rent cancellation rules,"[1] source=R26 type=Requirement/SrcChunk hops=0 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=TARGET
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[2] source=R26 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[3] source=R26 type=Requirement hops=0 rel=TARGET
+Rent cancellation rules
+
+[4] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=AFFECTS > AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[5] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[6] source=R52c type=Requirement/SrcChunk hops=1 chunk=bfd9d8de995ec51f doc=TOOLCHAIN-CONF-NOTIFICATION-01.md rel=AFFECTS
+# Documentum ID: TOOLCHAIN-CONF-NOTIFICATION-01
+# Description: Notifications
+# Status: Effective
+
+## 5. Notifications
+## 5.1 Notification Events
+
+## 5.1.1 The system shall generate notifications for rent lifecycle events.
+## 5.1.2 The system shall generate a notification when a rent request is created.
+## 5.1.3 The system shall generate a notification when a rent request is approved.
+## 5.1.4 The system shall generate a notification when a rent request is rejected.
+## 5.1.5 The system shall generate a notification when a rent becomes Active.
+## 5.1.6 The system shall generate a notification when a rent is Completed.
+## 5.1.7 The system shall generate a notification when a rent is Cancelled.
+
+## 5.2 Notification Delivery
+## 5.2.1 The system shall send notifications via email.
+## 5.2.2 The system shall send notifications to the email address associated with the user account.
+## 5.2.3 The system shall ensure that notification delivery is reliable.
+## 5.2.4 The system shall retry notification delivery in case of failure.
+
+## 5.3 Reminder Notifications
+## 5.3.1 The system shall send reminder notifications before rent start date.
+## 5.3.2 The system shall send reminder notifications befo
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[9] source=D21 type=Specification hops=1 rel=DEFINED_IN
+Rent Lifecycle v1.0
+
+[10] source=I94b type=Implementation/SrcChunk hops=2 chunk=88cf695dfa82d282 doc=TOOLCHAIN-CONF-REWARDS&PANELTIES-01.md rel=IN_DOC > IN_DOC
+9.2.5 The system shall record loyalty redemption transactions.
+
+## 9.3 Loyalty Tier Management
+## 9.3.1 The system shall support configurable loyalty tiers.
+## 9.3.2 The system shall assign loyalty tier based on configured thresholds.
+## 9.3.3 The system shall automatically update user loyalty tier status.
+
+## 9.4 Penalty Application
+## 9.4.1 The system shall apply penalties for late returns.
+## 9.4.2 The system shall calculate penalties based on configured penalty rules.
+## 9.4.3 The system shall apply penalties for damage incidents.
+## 9.4.4 The system shall associate penalties with rent records.
+## 9.4.5 The system shall include penalties in invoices.
+
+## 9.5 Penalty Management
+## 9.5.1 The system shall allow authorized users to create penalty records.
+## 9.5.2 The system shall allow authorized users to modify penalty records before invoice finalization.
+## 9.5.3 The system shall prevent unauthorized modification of penalty records.
+
+## 9.6 Dispute Management
+## 9.6.1 The system shall allow users to submit disputes for penalties.
+## 9.6.2 The system shall store dispute status including Open, Under Review, Approved, and Rejected.
+## 9.6.3 The system shall allow authorized users t
+
+[11] source=G1 type=Gap/SrcChunk hops=2 chunk=2fb79f7446b24909 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+o the activation link sent in CONF-AUTH-01 1.5? The link has no expiry in the docs. We need to ensure the link doesn't trigger a 500 error on a non-existent account.""
+    },
+    {
+      ""author"": ""Security Engineer Viktor"",
+      ""timestamp"": ""2026-02-17T10:10:00Z"",
+      ""text"": ""Clarification Needed: When a user manually requests account deletion, should it be immediate, or do we provide a 14-day 'grace period' for recovery before the permanent wipe?""
+    }
+  ]
+},
+  {
+    ""ticket_id"": ""JIRA-Auth-113"",
+    ""summary"": ""Registration - Password policy enforcement"",
+    ""description"": ""Enforce password policy rules during registration and prevent weak passwords."",
+    ""comments"": [
+      {
+        ""author"": ""Security Engineer Viktor"",
+        ""timestamp"": ""2026-02-16T13:12:00Z"",
+        ""text"": ""Missing details: minimum length, complexity requirements, common password blacklist, and whether passphrases are allowed.""
+      }
+    ],
+    ""attachments"": [""EMAIL_CTO_Security_Update.txt""]
+  },
+{
+  ""ticket_id"": ""JIRA-Auth-114"",
+  ""summary"": ""Allow registration without phone number"",
+  ""description"": ""Some users are reluctant to provide their phone number during registration. Consider making 
+
+[12] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[13] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[14] source=D22 type=Specification hops=2 rel=DEFINED_IN > SUPERSEDES
+Rent Lifecycle v1.1 (Cleaning)
+
+[15] source=G23 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Grace-period cancellation rule ambiguity
+
+[16] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[17] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[18] source=I25 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Cancellation penalty bug
+
+[19] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[20] source=R23 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent approval workflow
+
+[21] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[22] source=R25 type=Requirement hops=2 rel=AFFECTS > AFFECTS
+End-of-rent lifecycle transition
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R30 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Operator grace-period cancellation
+
+[25] source=R25 type=Requirement/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=AFFECTS > AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,","R26 targets rent cancellation rules with focus on status transitions, penalty application, authorization controls, and the documented gap regarding early cancellation tolerance windows. The operative context confirms that rent status updates to Active at start date, authorized users (OPERATOR/ADMIN) can trigger cancellation actions, and penalties may apply. However, the core cancellation mechanics and the previously-documented tolerance window exemption are missing from v1.2 specification. Tests address: (1) cancellation authorization by role, (2) penalty application on early cancellation, (3) status transitions during cancellation, (4) cancellation notifications, (5) the documented gap regarding tolerance window exemption, and (6) edge cases around active rent cancellation.",## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.,Early cancellation within operator tolerance window may exempt penalty (status unclear) || Authorized users with OPERATOR or ADMIN roles can trigger cancellation-related actions,"Earlier lifecycle guidance may have included penalty exemption for early cancellation within tolerance window, but this language appears to be missing or removed from v1.2 specification",,E1|E2|E4|E5|E8|E14,"R26 targets rent cancellation rules but lacks explicit definition of cancellation mechanics. PRIMARY evidence (E1, E4) indicates a documented gap: earlier lifecycle versions may have included a tolerance window exempting penalties for early operator cancellation, but this rule is missing from v1.2. E2 and E5 show rent lifecycle specifications but do not explicitly detail cancellation rules. E8 confirms penalty application exists for late returns and damage. E14 confirms cancellation notifications are generated. The core cancellation rule itself (what states allow cancellation, what the default behavior is) is not directly stated in provided evidence; only penalty application context and notification requirements are confirmed. Filtered abstract or low-relevance operative statements: System allows authorized users to cancel active rent records | Penalty fees may be applied to early cancellations | Cancellation rules are defined in rent lifecycle specifications",1,0,0,0

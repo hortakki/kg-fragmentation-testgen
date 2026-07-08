@@ -1,0 +1,2802 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+9730b77a,R50,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R50_1,Test real-time availability update on rent record creation,"Feature: Real-time availability updates
+  Scenario: User creates a new rent record
+    Given an item is available for rent
+    When a user creates a rent record for the item
+    Then the availability status of the item should be updated to unavailable
+    And the system should reflect this change in real time","To ensure that the system updates availability status immediately when a rent record is created, preventing misleading information.",E1,"The system shall update availability in real time when rent records are created, modified, cancelled, or completed.",G22|G41|G42|G43|G64|G82b|I2|I32|I34|I42|I44|R45|R50,Availability state semantics separation,Availability state semantics separation,"[1] source=R50 type=Requirement hops=0 rel=TARGET
+Availability state semantics separation
+
+[2] source=R50 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[3] source=R50 type=Requirement/SrcChunk hops=0 chunk=91e709a501470e81 doc=JIRA-Item.md rel=TARGET
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[4] source=R50 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[5] source=R45 type=Requirement/SrcChunk hops=1 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[6] source=I44 type=Implementation/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I44 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[8] source=I32 type=Implementation/SrcChunk hops=2 chunk=c99e70662a0dd39c doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and persistence may diverge unless we separate the business identifier from the operational one.""
+      }
+    ],
+    ""attachments"": [""EMAIL_LOGISTICS_Barcode_Requirement.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-302"",
+    ""summary"": ""Item Creation UI with Mandatory Fields"",
+    ""description"": ""Create the admin interface for item creation. The screen must capture all required attributes defined in the current item management specification, including the core identifier and the availability-related inputs needed at creation time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-21T14:00:00Z"",
+        ""text"": ""The screen is ready, but I aligned the visible identifier label with the terminology commonly used by warehouse staff rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+  
+
+[9] source=I32 type=Implementation/SrcChunk hops=2 chunk=2cc02dcda359772d doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-ITEM-301"",
+    ""summary"": ""Database schema for Item Identification and Tracking"",
+    ""description"": ""Implement the data model for rentable items, including a stable identifier strategy and support for availability tracking. The backend design should remain compatible with warehouse operations, while staying aligned with the business-facing item model defined in the current specification."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-21T09:00:00Z"",
+        ""text"": ""Technical note: our indexing and downstream storage path would be simpler with a scanner-friendly numeric identifier than with the mixed-format code used in the business documentation. I need confirmation on whether the warehouse-facing identifier and the formal item identifier are supposed to be the same thing.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:30:00Z"",
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and pe
+
+[10] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=I42 type=Implementation hops=1 rel=CONFLICTS_WITH
+Availability query API
+
+[12] source=R45 type=Requirement hops=1 rel=REFINES
+Availability query correctness
+
+[13] source=G22 type=Gap/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[14] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,
+
+[15] source=G82b type=Gap/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[16] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[17] source=G42 type=Gap hops=2 rel=REFINES > AFFECTS
+Deleted vs unavailable state ambiguity
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[20] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle",This document outlines Gherkin tests for the requirement of separating availability state semantics to ensure clarity in item availability status for users.,"Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || The system shall allow users to query item availability for a specified date range. || The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow authorized users to define availability restrictions for items. || The system shall calculate item availability based on existing rent records.",,Ambiguity in query results after recent item-management changes may mislead users about item availability.,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15,Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.,1,0,0,0
+9730b77a,R50,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R50_2,Test availability status for a specified date range,"Feature: Query item availability
+  Scenario: User queries availability for a specific date range
+    Given an item is available for rent
+    When a user queries the availability for the item from '2023-10-01' to '2023-10-10'
+    Then the system should return availability status for the specified date range","To verify that users can check item availability for specific periods, ensuring accurate information is provided.",E2,The system shall allow users to query item availability for a specified date range.,G22|G41|G42|G43|G64|G82b|I2|I32|I34|I42|I44|R45|R50,Availability state semantics separation,Availability state semantics separation,"[1] source=R50 type=Requirement hops=0 rel=TARGET
+Availability state semantics separation
+
+[2] source=R50 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[3] source=R50 type=Requirement/SrcChunk hops=0 chunk=91e709a501470e81 doc=JIRA-Item.md rel=TARGET
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[4] source=R50 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[5] source=R45 type=Requirement/SrcChunk hops=1 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[6] source=I44 type=Implementation/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I44 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[8] source=I32 type=Implementation/SrcChunk hops=2 chunk=c99e70662a0dd39c doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and persistence may diverge unless we separate the business identifier from the operational one.""
+      }
+    ],
+    ""attachments"": [""EMAIL_LOGISTICS_Barcode_Requirement.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-302"",
+    ""summary"": ""Item Creation UI with Mandatory Fields"",
+    ""description"": ""Create the admin interface for item creation. The screen must capture all required attributes defined in the current item management specification, including the core identifier and the availability-related inputs needed at creation time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-21T14:00:00Z"",
+        ""text"": ""The screen is ready, but I aligned the visible identifier label with the terminology commonly used by warehouse staff rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+  
+
+[9] source=I32 type=Implementation/SrcChunk hops=2 chunk=2cc02dcda359772d doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-ITEM-301"",
+    ""summary"": ""Database schema for Item Identification and Tracking"",
+    ""description"": ""Implement the data model for rentable items, including a stable identifier strategy and support for availability tracking. The backend design should remain compatible with warehouse operations, while staying aligned with the business-facing item model defined in the current specification."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-21T09:00:00Z"",
+        ""text"": ""Technical note: our indexing and downstream storage path would be simpler with a scanner-friendly numeric identifier than with the mixed-format code used in the business documentation. I need confirmation on whether the warehouse-facing identifier and the formal item identifier are supposed to be the same thing.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:30:00Z"",
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and pe
+
+[10] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=I42 type=Implementation hops=1 rel=CONFLICTS_WITH
+Availability query API
+
+[12] source=R45 type=Requirement hops=1 rel=REFINES
+Availability query correctness
+
+[13] source=G22 type=Gap/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[14] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,
+
+[15] source=G82b type=Gap/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[16] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[17] source=G42 type=Gap hops=2 rel=REFINES > AFFECTS
+Deleted vs unavailable state ambiguity
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[20] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle",This document outlines Gherkin tests for the requirement of separating availability state semantics to ensure clarity in item availability status for users.,"Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || The system shall allow users to query item availability for a specified date range. || The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow authorized users to define availability restrictions for items. || The system shall calculate item availability based on existing rent records.",,Ambiguity in query results after recent item-management changes may mislead users about item availability.,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15,Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.,1,0,0,0
+9730b77a,R50,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R50_3,Test availability status reflects latest rent and item status,"Feature: Latest availability status
+  Scenario: User checks availability after a rent record modification
+    Given an item is currently rented
+    When the rent record is modified
+    Then the availability status should reflect the latest rent and item status",To confirm that the system accurately reflects the latest status of items based on current rent records.,E3,The system shall ensure availability queries reflect the latest rent and item status information.,G22|G41|G42|G43|G64|G82b|I2|I32|I34|I42|I44|R45|R50,Availability state semantics separation,Availability state semantics separation,"[1] source=R50 type=Requirement hops=0 rel=TARGET
+Availability state semantics separation
+
+[2] source=R50 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[3] source=R50 type=Requirement/SrcChunk hops=0 chunk=91e709a501470e81 doc=JIRA-Item.md rel=TARGET
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[4] source=R50 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[5] source=R45 type=Requirement/SrcChunk hops=1 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[6] source=I44 type=Implementation/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I44 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[8] source=I32 type=Implementation/SrcChunk hops=2 chunk=c99e70662a0dd39c doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and persistence may diverge unless we separate the business identifier from the operational one.""
+      }
+    ],
+    ""attachments"": [""EMAIL_LOGISTICS_Barcode_Requirement.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-302"",
+    ""summary"": ""Item Creation UI with Mandatory Fields"",
+    ""description"": ""Create the admin interface for item creation. The screen must capture all required attributes defined in the current item management specification, including the core identifier and the availability-related inputs needed at creation time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-21T14:00:00Z"",
+        ""text"": ""The screen is ready, but I aligned the visible identifier label with the terminology commonly used by warehouse staff rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+  
+
+[9] source=I32 type=Implementation/SrcChunk hops=2 chunk=2cc02dcda359772d doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-ITEM-301"",
+    ""summary"": ""Database schema for Item Identification and Tracking"",
+    ""description"": ""Implement the data model for rentable items, including a stable identifier strategy and support for availability tracking. The backend design should remain compatible with warehouse operations, while staying aligned with the business-facing item model defined in the current specification."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-21T09:00:00Z"",
+        ""text"": ""Technical note: our indexing and downstream storage path would be simpler with a scanner-friendly numeric identifier than with the mixed-format code used in the business documentation. I need confirmation on whether the warehouse-facing identifier and the formal item identifier are supposed to be the same thing.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:30:00Z"",
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and pe
+
+[10] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=I42 type=Implementation hops=1 rel=CONFLICTS_WITH
+Availability query API
+
+[12] source=R45 type=Requirement hops=1 rel=REFINES
+Availability query correctness
+
+[13] source=G22 type=Gap/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[14] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,
+
+[15] source=G82b type=Gap/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[16] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[17] source=G42 type=Gap hops=2 rel=REFINES > AFFECTS
+Deleted vs unavailable state ambiguity
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[20] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle",This document outlines Gherkin tests for the requirement of separating availability state semantics to ensure clarity in item availability status for users.,"Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || The system shall allow users to query item availability for a specified date range. || The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow authorized users to define availability restrictions for items. || The system shall calculate item availability based on existing rent records.",,Ambiguity in query results after recent item-management changes may mislead users about item availability.,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15,Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.,1,0,0,0
+9730b77a,R50,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R50_4,Test availability restrictions defined by authorized users,"Feature: Define availability restrictions
+  Scenario: Authorized user sets availability restrictions
+    Given an authorized user
+    When the user defines availability restrictions for an item
+    Then the item should reflect the defined restrictions in its availability status",To ensure that the system allows authorized users to set restrictions that affect item availability.,E4,The system shall allow authorized users to define availability restrictions for items.,G22|G41|G42|G43|G64|G82b|I2|I32|I34|I42|I44|R45|R50,Availability state semantics separation,Availability state semantics separation,"[1] source=R50 type=Requirement hops=0 rel=TARGET
+Availability state semantics separation
+
+[2] source=R50 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[3] source=R50 type=Requirement/SrcChunk hops=0 chunk=91e709a501470e81 doc=JIRA-Item.md rel=TARGET
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[4] source=R50 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[5] source=R45 type=Requirement/SrcChunk hops=1 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[6] source=I44 type=Implementation/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I44 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[8] source=I32 type=Implementation/SrcChunk hops=2 chunk=c99e70662a0dd39c doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and persistence may diverge unless we separate the business identifier from the operational one.""
+      }
+    ],
+    ""attachments"": [""EMAIL_LOGISTICS_Barcode_Requirement.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-302"",
+    ""summary"": ""Item Creation UI with Mandatory Fields"",
+    ""description"": ""Create the admin interface for item creation. The screen must capture all required attributes defined in the current item management specification, including the core identifier and the availability-related inputs needed at creation time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-21T14:00:00Z"",
+        ""text"": ""The screen is ready, but I aligned the visible identifier label with the terminology commonly used by warehouse staff rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+  
+
+[9] source=I32 type=Implementation/SrcChunk hops=2 chunk=2cc02dcda359772d doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-ITEM-301"",
+    ""summary"": ""Database schema for Item Identification and Tracking"",
+    ""description"": ""Implement the data model for rentable items, including a stable identifier strategy and support for availability tracking. The backend design should remain compatible with warehouse operations, while staying aligned with the business-facing item model defined in the current specification."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-21T09:00:00Z"",
+        ""text"": ""Technical note: our indexing and downstream storage path would be simpler with a scanner-friendly numeric identifier than with the mixed-format code used in the business documentation. I need confirmation on whether the warehouse-facing identifier and the formal item identifier are supposed to be the same thing.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:30:00Z"",
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and pe
+
+[10] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=I42 type=Implementation hops=1 rel=CONFLICTS_WITH
+Availability query API
+
+[12] source=R45 type=Requirement hops=1 rel=REFINES
+Availability query correctness
+
+[13] source=G22 type=Gap/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[14] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,
+
+[15] source=G82b type=Gap/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[16] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[17] source=G42 type=Gap hops=2 rel=REFINES > AFFECTS
+Deleted vs unavailable state ambiguity
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[20] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle",This document outlines Gherkin tests for the requirement of separating availability state semantics to ensure clarity in item availability status for users.,"Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || The system shall allow users to query item availability for a specified date range. || The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow authorized users to define availability restrictions for items. || The system shall calculate item availability based on existing rent records.",,Ambiguity in query results after recent item-management changes may mislead users about item availability.,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15,Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.,1,0,0,0
+9730b77a,R50,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R50_5,Test calculation of item availability based on rent records,"Feature: Item availability calculation
+  Scenario: Calculate availability based on existing rent records
+    Given an item has existing rent records
+    When the system calculates availability
+    Then the item should be marked as unavailable for the periods covered by the rent records","To validate that the system correctly calculates availability based on current rent records, preventing overlaps.",E5,The system shall calculate item availability based on existing rent records.,G22|G41|G42|G43|G64|G82b|I2|I32|I34|I42|I44|R45|R50,Availability state semantics separation,Availability state semantics separation,"[1] source=R50 type=Requirement hops=0 rel=TARGET
+Availability state semantics separation
+
+[2] source=R50 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[3] source=R50 type=Requirement/SrcChunk hops=0 chunk=91e709a501470e81 doc=JIRA-Item.md rel=TARGET
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[4] source=R50 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[5] source=R45 type=Requirement/SrcChunk hops=1 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[6] source=I44 type=Implementation/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I44 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[8] source=I32 type=Implementation/SrcChunk hops=2 chunk=c99e70662a0dd39c doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and persistence may diverge unless we separate the business identifier from the operational one.""
+      }
+    ],
+    ""attachments"": [""EMAIL_LOGISTICS_Barcode_Requirement.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-302"",
+    ""summary"": ""Item Creation UI with Mandatory Fields"",
+    ""description"": ""Create the admin interface for item creation. The screen must capture all required attributes defined in the current item management specification, including the core identifier and the availability-related inputs needed at creation time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-21T14:00:00Z"",
+        ""text"": ""The screen is ready, but I aligned the visible identifier label with the terminology commonly used by warehouse staff rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+  
+
+[9] source=I32 type=Implementation/SrcChunk hops=2 chunk=2cc02dcda359772d doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-ITEM-301"",
+    ""summary"": ""Database schema for Item Identification and Tracking"",
+    ""description"": ""Implement the data model for rentable items, including a stable identifier strategy and support for availability tracking. The backend design should remain compatible with warehouse operations, while staying aligned with the business-facing item model defined in the current specification."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-21T09:00:00Z"",
+        ""text"": ""Technical note: our indexing and downstream storage path would be simpler with a scanner-friendly numeric identifier than with the mixed-format code used in the business documentation. I need confirmation on whether the warehouse-facing identifier and the formal item identifier are supposed to be the same thing.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:30:00Z"",
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and pe
+
+[10] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=I42 type=Implementation hops=1 rel=CONFLICTS_WITH
+Availability query API
+
+[12] source=R45 type=Requirement hops=1 rel=REFINES
+Availability query correctness
+
+[13] source=G22 type=Gap/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[14] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,
+
+[15] source=G82b type=Gap/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[16] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[17] source=G42 type=Gap hops=2 rel=REFINES > AFFECTS
+Deleted vs unavailable state ambiguity
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[20] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle",This document outlines Gherkin tests for the requirement of separating availability state semantics to ensure clarity in item availability status for users.,"Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || The system shall allow users to query item availability for a specified date range. || The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow authorized users to define availability restrictions for items. || The system shall calculate item availability based on existing rent records.",,Ambiguity in query results after recent item-management changes may mislead users about item availability.,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15,Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.,1,0,0,0
+9730b77a,R50,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R50_6,Test misleading availability wording for non-rentable items,"Feature: Availability wording clarity
+  Scenario: Item is no longer operationally valid
+    Given an item is no longer operationally valid
+    When the system displays availability status
+    Then the wording should clearly indicate that the item is not rentable",To ensure that users are not misled by ambiguous availability wording for items that are not rentable.,E6,Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items.,G22|G41|G42|G43|G64|G82b|I2|I32|I34|I42|I44|R45|R50,Availability state semantics separation,Availability state semantics separation,"[1] source=R50 type=Requirement hops=0 rel=TARGET
+Availability state semantics separation
+
+[2] source=R50 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[3] source=R50 type=Requirement/SrcChunk hops=0 chunk=91e709a501470e81 doc=JIRA-Item.md rel=TARGET
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[4] source=R50 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[5] source=R45 type=Requirement/SrcChunk hops=1 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[6] source=I44 type=Implementation/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I44 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[8] source=I32 type=Implementation/SrcChunk hops=2 chunk=c99e70662a0dd39c doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and persistence may diverge unless we separate the business identifier from the operational one.""
+      }
+    ],
+    ""attachments"": [""EMAIL_LOGISTICS_Barcode_Requirement.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-302"",
+    ""summary"": ""Item Creation UI with Mandatory Fields"",
+    ""description"": ""Create the admin interface for item creation. The screen must capture all required attributes defined in the current item management specification, including the core identifier and the availability-related inputs needed at creation time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-21T14:00:00Z"",
+        ""text"": ""The screen is ready, but I aligned the visible identifier label with the terminology commonly used by warehouse staff rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+  
+
+[9] source=I32 type=Implementation/SrcChunk hops=2 chunk=2cc02dcda359772d doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-ITEM-301"",
+    ""summary"": ""Database schema for Item Identification and Tracking"",
+    ""description"": ""Implement the data model for rentable items, including a stable identifier strategy and support for availability tracking. The backend design should remain compatible with warehouse operations, while staying aligned with the business-facing item model defined in the current specification."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-21T09:00:00Z"",
+        ""text"": ""Technical note: our indexing and downstream storage path would be simpler with a scanner-friendly numeric identifier than with the mixed-format code used in the business documentation. I need confirmation on whether the warehouse-facing identifier and the formal item identifier are supposed to be the same thing.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:30:00Z"",
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and pe
+
+[10] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=I42 type=Implementation hops=1 rel=CONFLICTS_WITH
+Availability query API
+
+[12] source=R45 type=Requirement hops=1 rel=REFINES
+Availability query correctness
+
+[13] source=G22 type=Gap/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[14] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,
+
+[15] source=G82b type=Gap/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[16] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[17] source=G42 type=Gap hops=2 rel=REFINES > AFFECTS
+Deleted vs unavailable state ambiguity
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[20] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle",This document outlines Gherkin tests for the requirement of separating availability state semantics to ensure clarity in item availability status for users.,"Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || The system shall allow users to query item availability for a specified date range. || The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow authorized users to define availability restrictions for items. || The system shall calculate item availability based on existing rent records.",,Ambiguity in query results after recent item-management changes may mislead users about item availability.,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15,Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.,1,0,0,0
+9730b77a,R50,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R50_7,Test system response to item availability query,"Feature: Item availability query response
+  Scenario: User queries item availability
+    Given an item is available for rent
+    When a user queries the item availability
+    Then the system should return 'available' status",To confirm that the system correctly responds to availability queries with accurate status information.,E7,The system shall return availability status indicating whether the item is available or unavailable for the requested period.,G22|G41|G42|G43|G64|G82b|I2|I32|I34|I42|I44|R45|R50,Availability state semantics separation,Availability state semantics separation,"[1] source=R50 type=Requirement hops=0 rel=TARGET
+Availability state semantics separation
+
+[2] source=R50 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[3] source=R50 type=Requirement/SrcChunk hops=0 chunk=91e709a501470e81 doc=JIRA-Item.md rel=TARGET
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[4] source=R50 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[5] source=R45 type=Requirement/SrcChunk hops=1 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[6] source=I44 type=Implementation/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I44 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[8] source=I32 type=Implementation/SrcChunk hops=2 chunk=c99e70662a0dd39c doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and persistence may diverge unless we separate the business identifier from the operational one.""
+      }
+    ],
+    ""attachments"": [""EMAIL_LOGISTICS_Barcode_Requirement.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-302"",
+    ""summary"": ""Item Creation UI with Mandatory Fields"",
+    ""description"": ""Create the admin interface for item creation. The screen must capture all required attributes defined in the current item management specification, including the core identifier and the availability-related inputs needed at creation time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-21T14:00:00Z"",
+        ""text"": ""The screen is ready, but I aligned the visible identifier label with the terminology commonly used by warehouse staff rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+  
+
+[9] source=I32 type=Implementation/SrcChunk hops=2 chunk=2cc02dcda359772d doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-ITEM-301"",
+    ""summary"": ""Database schema for Item Identification and Tracking"",
+    ""description"": ""Implement the data model for rentable items, including a stable identifier strategy and support for availability tracking. The backend design should remain compatible with warehouse operations, while staying aligned with the business-facing item model defined in the current specification."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-21T09:00:00Z"",
+        ""text"": ""Technical note: our indexing and downstream storage path would be simpler with a scanner-friendly numeric identifier than with the mixed-format code used in the business documentation. I need confirmation on whether the warehouse-facing identifier and the formal item identifier are supposed to be the same thing.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:30:00Z"",
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and pe
+
+[10] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=I42 type=Implementation hops=1 rel=CONFLICTS_WITH
+Availability query API
+
+[12] source=R45 type=Requirement hops=1 rel=REFINES
+Availability query correctness
+
+[13] source=G22 type=Gap/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[14] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,
+
+[15] source=G82b type=Gap/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[16] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[17] source=G42 type=Gap hops=2 rel=REFINES > AFFECTS
+Deleted vs unavailable state ambiguity
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[20] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle",This document outlines Gherkin tests for the requirement of separating availability state semantics to ensure clarity in item availability status for users.,"Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || The system shall allow users to query item availability for a specified date range. || The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow authorized users to define availability restrictions for items. || The system shall calculate item availability based on existing rent records.",,Ambiguity in query results after recent item-management changes may mislead users about item availability.,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15,Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.,1,0,0,0
+9730b77a,R50,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R50_8,Test system behavior when no rent records exist,"Feature: Availability with no rent records
+  Scenario: Query availability with no existing rent records
+    Given an item has no existing rent records
+    When a user queries the availability
+    Then the system should return 'available' status for the item",To ensure that the system correctly identifies items as available when there are no conflicting rent records.,E8,The system shall return availability status indicating whether the item is available or unavailable for the requested period.,G22|G41|G42|G43|G64|G82b|I2|I32|I34|I42|I44|R45|R50,Availability state semantics separation,Availability state semantics separation,"[1] source=R50 type=Requirement hops=0 rel=TARGET
+Availability state semantics separation
+
+[2] source=R50 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[3] source=R50 type=Requirement/SrcChunk hops=0 chunk=91e709a501470e81 doc=JIRA-Item.md rel=TARGET
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[4] source=R50 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[5] source=R45 type=Requirement/SrcChunk hops=1 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[6] source=I44 type=Implementation/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I44 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[8] source=I32 type=Implementation/SrcChunk hops=2 chunk=c99e70662a0dd39c doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and persistence may diverge unless we separate the business identifier from the operational one.""
+      }
+    ],
+    ""attachments"": [""EMAIL_LOGISTICS_Barcode_Requirement.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-302"",
+    ""summary"": ""Item Creation UI with Mandatory Fields"",
+    ""description"": ""Create the admin interface for item creation. The screen must capture all required attributes defined in the current item management specification, including the core identifier and the availability-related inputs needed at creation time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-21T14:00:00Z"",
+        ""text"": ""The screen is ready, but I aligned the visible identifier label with the terminology commonly used by warehouse staff rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+  
+
+[9] source=I32 type=Implementation/SrcChunk hops=2 chunk=2cc02dcda359772d doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-ITEM-301"",
+    ""summary"": ""Database schema for Item Identification and Tracking"",
+    ""description"": ""Implement the data model for rentable items, including a stable identifier strategy and support for availability tracking. The backend design should remain compatible with warehouse operations, while staying aligned with the business-facing item model defined in the current specification."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-21T09:00:00Z"",
+        ""text"": ""Technical note: our indexing and downstream storage path would be simpler with a scanner-friendly numeric identifier than with the mixed-format code used in the business documentation. I need confirmation on whether the warehouse-facing identifier and the formal item identifier are supposed to be the same thing.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:30:00Z"",
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and pe
+
+[10] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=I42 type=Implementation hops=1 rel=CONFLICTS_WITH
+Availability query API
+
+[12] source=R45 type=Requirement hops=1 rel=REFINES
+Availability query correctness
+
+[13] source=G22 type=Gap/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[14] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,
+
+[15] source=G82b type=Gap/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[16] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[17] source=G42 type=Gap hops=2 rel=REFINES > AFFECTS
+Deleted vs unavailable state ambiguity
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[20] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle",This document outlines Gherkin tests for the requirement of separating availability state semantics to ensure clarity in item availability status for users.,"Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || The system shall allow users to query item availability for a specified date range. || The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow authorized users to define availability restrictions for items. || The system shall calculate item availability based on existing rent records.",,Ambiguity in query results after recent item-management changes may mislead users about item availability.,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15,Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.,1,0,0,0
+9730b77a,R50,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R50_9,Test system updates availability on rent record cancellation,"Feature: Availability update on rent cancellation
+  Scenario: User cancels a rent record
+    Given an item is currently rented
+    When the user cancels the rent record
+    Then the availability status should be updated to available",To verify that the system updates availability status correctly when a rent record is cancelled.,E9,"The system shall update availability in real time when rent records are created, modified, cancelled, or completed.",G22|G41|G42|G43|G64|G82b|I2|I32|I34|I42|I44|R45|R50,Availability state semantics separation,Availability state semantics separation,"[1] source=R50 type=Requirement hops=0 rel=TARGET
+Availability state semantics separation
+
+[2] source=R50 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[3] source=R50 type=Requirement/SrcChunk hops=0 chunk=91e709a501470e81 doc=JIRA-Item.md rel=TARGET
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[4] source=R50 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[5] source=R45 type=Requirement/SrcChunk hops=1 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[6] source=I44 type=Implementation/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I44 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[8] source=I32 type=Implementation/SrcChunk hops=2 chunk=c99e70662a0dd39c doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and persistence may diverge unless we separate the business identifier from the operational one.""
+      }
+    ],
+    ""attachments"": [""EMAIL_LOGISTICS_Barcode_Requirement.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-302"",
+    ""summary"": ""Item Creation UI with Mandatory Fields"",
+    ""description"": ""Create the admin interface for item creation. The screen must capture all required attributes defined in the current item management specification, including the core identifier and the availability-related inputs needed at creation time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-21T14:00:00Z"",
+        ""text"": ""The screen is ready, but I aligned the visible identifier label with the terminology commonly used by warehouse staff rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+  
+
+[9] source=I32 type=Implementation/SrcChunk hops=2 chunk=2cc02dcda359772d doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-ITEM-301"",
+    ""summary"": ""Database schema for Item Identification and Tracking"",
+    ""description"": ""Implement the data model for rentable items, including a stable identifier strategy and support for availability tracking. The backend design should remain compatible with warehouse operations, while staying aligned with the business-facing item model defined in the current specification."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-21T09:00:00Z"",
+        ""text"": ""Technical note: our indexing and downstream storage path would be simpler with a scanner-friendly numeric identifier than with the mixed-format code used in the business documentation. I need confirmation on whether the warehouse-facing identifier and the formal item identifier are supposed to be the same thing.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:30:00Z"",
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and pe
+
+[10] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=I42 type=Implementation hops=1 rel=CONFLICTS_WITH
+Availability query API
+
+[12] source=R45 type=Requirement hops=1 rel=REFINES
+Availability query correctness
+
+[13] source=G22 type=Gap/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[14] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,
+
+[15] source=G82b type=Gap/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[16] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[17] source=G42 type=Gap hops=2 rel=REFINES > AFFECTS
+Deleted vs unavailable state ambiguity
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[20] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle",This document outlines Gherkin tests for the requirement of separating availability state semantics to ensure clarity in item availability status for users.,"Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || The system shall allow users to query item availability for a specified date range. || The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow authorized users to define availability restrictions for items. || The system shall calculate item availability based on existing rent records.",,Ambiguity in query results after recent item-management changes may mislead users about item availability.,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15,Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.,1,0,0,0
+9730b77a,R50,graph,full,openai,gpt-4o-mini,0,2026-07-03.v3,R50_10,Test system prevents rent creation during restricted periods,"Feature: Prevent rent creation during restrictions
+  Scenario: User attempts to create rent during restricted period
+    Given an item has defined availability restrictions
+    When a user attempts to create a rent record during the restricted period
+    Then the system should prevent the rent creation",To ensure that the system enforces availability restrictions set by authorized users.,E10,The system shall prevent rent creation during restricted periods.,G22|G41|G42|G43|G64|G82b|I2|I32|I34|I42|I44|R45|R50,Availability state semantics separation,Availability state semantics separation,"[1] source=R50 type=Requirement hops=0 rel=TARGET
+Availability state semantics separation
+
+[2] source=R50 type=Requirement/SrcChunk hops=0 chunk=b4b9828c7c30c5a0 doc=JIRA-Availability.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-AVAIL-401"",
+    ""summary"": ""Availability Calculation Logic"",
+    ""description"": ""Implement the core availability calculation so the system derives rentable periods from existing rental activity, prevents invalid overlaps, and refreshes results as lifecycle changes happen. The implementation should remain consistent with the current availability specification and avoid relying on outdated uniform timing assumptions."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-23T09:00:00Z"",
+        ""text"": ""Completed the overlap checks and lifecycle-triggered refresh flow. One implementation note: an earlier discussion suggested using a single fallback delay after certain rental events, so I initially followed that interpretation before rechecking the current availability rules.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-402"",
+    ""summary"": ""Availability Query API"",
+    ""description"": ""Develop the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Pro
+
+[3] source=R50 type=Requirement/SrcChunk hops=0 chunk=91e709a501470e81 doc=JIRA-Item.md rel=TARGET
+f rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-303"",
+    ""summary"": ""Implement Item Modification and Validation"",
+    ""description"": ""Allow authorized users to modify item details. The system must validate all required fields before saving changes and should preserve identifier consistency for downstream operational processes."",
+    ""status"": ""To Do"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-22T08:15:00Z"",
+        ""text"": ""Do modifications include the operational identifier as well, or only the business-facing item details? If warehouse scanning depends on a stable machine-readable identifier, we may need to restrict edits after creation.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-304"",
+    ""summary"": ""Item Availability Status Toggle"",
+    ""description"": ""Implement the immediate status change for items (Available/Unavailable). Ensure items marked Unavailable cannot be rented."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""aut
+
+[4] source=R50 type=Requirement/SrcChunk hops=0 chunk=9978dc0dcd43a512 doc=JIRA-Item.md rel=TARGET
+"": ""Terminology check: the deletion outcome described in the specification does not map cleanly to the status values currently supported in the database. I need confirmation whether deleted items should reuse a non-rentable status or whether this requires a separate lifecycle value.""
+      }
+    ]
+  }
+]
+
+[5] source=R45 type=Requirement/SrcChunk hops=1 chunk=0c02b362bc44df63 doc=TOOLCHAIN-CONF-AVAILABILITY-01.md rel=REFINES
+# Documentum ID: TOOLCHAIN-CONF-AVAILABILITY-01
+# Description: Availability Management
+# Status: Effective
+
+## 4. Availability Management
+
+## 4.1 Availability Calculation
+## 4.1.1 The system shall calculate item availability based on existing rent records.
+## 4.1.2 The system shall mark an item as unavailable for any period where an Active or Approved rent exists.
+## 4.1.3 The system shall ensure that availability calculation prevents overlapping rent periods.
+## 4.1.4 The system shall update availability in real time when rent records are created, modified, cancelled, or completed.
+
+## 4.2 Availability Query
+## 4.2.1 The system shall allow users to query item availability for a specified date range.
+## 4.2.2 The system shall return availability status indicating whether the item is available or unavailable for the requested period.
+## 4.2.3 The system shall ensure availability queries reflect the latest rent and item status information.
+
+## 4.3 Availability Restrictions
+## 4.3.1 The system shall allow authorized users to define availability restrictions for items.
+## 4.3.2 The system shall prevent rent creation during restricted periods.
+## 4.3.3 The system shall ensure that avail
+
+[6] source=I44 type=Implementation/SrcChunk hops=1 chunk=8f047482d7206346 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+op the endpoint for checking whether an item can be rented within a requested period, ensuring the response reflects the latest rental and item-state information at query time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-23T11:00:00Z"",
+        ""text"": ""Found an ambiguity in query results after the recent item-management changes. Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-403"",
+    ""summary"": ""Manual Availability Restrictions"",
+    ""description"": ""Allow authorized users to define manual non-rentable periods and ensure those restrictions take precedence over otherwise rentable time windows."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-404"",
+    ""summary"": ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance 
+
+[7] source=I44 type=Implementation/SrcChunk hops=1 chunk=e6716dab172b3183 doc=JIRA-Availability.md rel=CONFLICTS_WITH
+: ""Maintenance Period Management"",
+    ""description"": ""Implement maintenance windows for items, ensure those periods block rental activity, and make the item appear non-rentable while the maintenance window is in effect."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Tomas"",
+        ""timestamp"": ""2026-02-24T10:00:00Z"",
+        ""text"": ""Current implementation path uses the existing non-rentable status handling for maintenance-related periods as well. We should confirm whether the user interface needs to distinguish maintenance from other forms of temporary unavailability.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-AVAIL-405"",
+    ""summary"": ""Real-time Status Sync"",
+    ""description"": ""Ensure availability changes are applied immediately when relevant rental lifecycle events or availability controls are updated."",
+    ""status"": ""To Do""
+  }
+]
+
+[8] source=I32 type=Implementation/SrcChunk hops=2 chunk=c99e70662a0dd39c doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and persistence may diverge unless we separate the business identifier from the operational one.""
+      }
+    ],
+    ""attachments"": [""EMAIL_LOGISTICS_Barcode_Requirement.txt""]
+  },
+  {
+    ""ticket_id"": ""JIRA-ITEM-302"",
+    ""summary"": ""Item Creation UI with Mandatory Fields"",
+    ""description"": ""Create the admin interface for item creation. The screen must capture all required attributes defined in the current item management specification, including the core identifier and the availability-related inputs needed at creation time."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-21T14:00:00Z"",
+        ""text"": ""The screen is ready, but I aligned the visible identifier label with the terminology commonly used by warehouse staff rather than the formal wording from the specification. Please confirm whether this should remain only a UI alias or whether the underlying field meaning is also different.""
+      }
+    ]
+  },
+  {
+  
+
+[9] source=I32 type=Implementation/SrcChunk hops=2 chunk=2cc02dcda359772d doc=JIRA-Item.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-ITEM-301"",
+    ""summary"": ""Database schema for Item Identification and Tracking"",
+    ""description"": ""Implement the data model for rentable items, including a stable identifier strategy and support for availability tracking. The backend design should remain compatible with warehouse operations, while staying aligned with the business-facing item model defined in the current specification."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-21T09:00:00Z"",
+        ""text"": ""Technical note: our indexing and downstream storage path would be simpler with a scanner-friendly numeric identifier than with the mixed-format code used in the business documentation. I need confirmation on whether the warehouse-facing identifier and the formal item identifier are supposed to be the same thing.""
+      },
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:30:00Z"",
+        ""text"": ""Please clarify the source of truth. The current specification describes the item identifier differently from the implementation direction discussed here, so frontend validation and pe
+
+[10] source=G64 type=Gap/SrcChunk hops=2 chunk=ebea956274025791 doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[11] source=I42 type=Implementation hops=1 rel=CONFLICTS_WITH
+Availability query API
+
+[12] source=R45 type=Requirement hops=1 rel=REFINES
+Availability query correctness
+
+[13] source=G22 type=Gap/SrcChunk hops=2 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[14] source=I2 type=Implementation/SrcChunk hops=2 chunk=2f105702c1c1c3f3 doc=JIRA-Auth.md rel=IN_DOC > IN_DOC
+t: Clear error messages"",
+  ""description"": ""Our support team reports that users are confused by generic messages. We need to provide clear, actionable feedback during registration.\n\nRequirement:\nIf an email address is already registered, the system should clearly state: 'This email address is already registered. Please log in or reset your password.'"",
+  ""comments"": [
+    {
+      ""author"": ""UX Writer Nora"",
+      ""timestamp"": ""2026-02-17T09:30:00Z"",
+      ""text"": ""Generic messages lead to high drop-off rates. Users think the system is broken if they don't get a specific reason for failure.""
+    }
+  ]
+},
+{
+  ""ticket_id"": ""JIRA-Auth-116"",
+  ""summary"": ""Initial login implementation without MFA"",
+  ""description"": ""The first implementation of the login endpoint will support email and password authentication only. Multi-factor authentication (MFA) is part of the security roadmap, but will not be implemented in this sprint. Future iterations should extend the authentication flow to support a second factor when enabled."",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-18T10:00:00Z"",
+      ""text"": ""Login logic is ready. MFA is not part of this sprint,
+
+[15] source=G82b type=Gap/SrcChunk hops=2 chunk=beb42617cfc95144 doc=JIRA-Delivery-Control.md rel=IN_DOC > IN_DOC
+arta"",
+        ""timestamp"": ""2026-03-10T11:30:00Z"",
+        ""text"": ""Please confirm how unsupported edge windows should appear in the user flow. There is a difference between a slot that is structurally outside delivery hours and one that is technically valid but already unavailable.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-803"",
+    ""summary"": ""Delivery Status Lifecycle"",
+    ""description"": ""Implement the delivery lifecycle flow and ensure the system can track operational delivery progress while keeping users informed when delivery state changes occur."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-03-11T09:20:00Z"",
+        ""text"": ""The operational status progression is implemented, but we should confirm whether all internal delivery transitions are meant to be exposed directly to users or whether some should remain back-office only.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-DEL-804"",
+    ""summary"": ""Delivery Fee Calculation"",
+    ""description"": ""Implement delivery fee calculation according to the configured logistics rules and ensure applicable delivery charges flow into billing in a consis
+
+[16] source=G41 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Availability-lifecycle synchronization gap
+
+[17] source=G42 type=Gap hops=2 rel=REFINES > AFFECTS
+Deleted vs unavailable state ambiguity
+
+[18] source=G43 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Maintenance-state representation ambiguity
+
+[19] source=G82b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery scheduling vs availability conflict
+
+[20] source=I34 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Item availability toggle",This document outlines Gherkin tests for the requirement of separating availability state semantics to ensure clarity in item availability status for users.,"Records that are no longer operationally valid are being surfaced through the same availability wording used for temporarily blocked items, which may mislead users about whether the item is recoverable or simply not rentable at the moment. || The system shall update availability in real time when rent records are created, modified, cancelled, or completed. || The system shall return availability status indicating whether the item is available or unavailable for the requested period. || The system shall allow users to query item availability for a specified date range. || The system shall ensure availability queries reflect the latest rent and item status information. || The system shall allow authorized users to define availability restrictions for items. || The system shall calculate item availability based on existing rent records.",,Ambiguity in query results after recent item-management changes may mislead users about item availability.,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10|E11|E12|E13|E14|E15,Filtered abstract or low-relevance operative statements: The system shall mark an item as unavailable for any period where an Active or Approved rent exists. | The system shall ensure that availability calculation prevents overlapping rent periods. | The system shall prevent rent creation during restricted periods.,1,0,0,0

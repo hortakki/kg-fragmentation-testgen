@@ -1,0 +1,1141 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+27987f51,R69,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R69_1,Subtotal calculation consistency across direct and component paths,"Feature: Monetary Representation Consistency
+  Scenario: Subtotal matches when calculated directly vs. summed from components
+    Given a transaction with line items: [Item1: $10.00, Item2: $15.50, Item3: $24.50]
+    When the subtotal is calculated directly from the transaction
+    And the subtotal is calculated by summing individual line item amounts
+    Then both subtotal values must be exactly equal
+    And the stored subtotal must match the displayed subtotal","Verifies that subtotal derivation through different paths (direct calculation vs. component summation) produces identical results, ensuring consistency across calculation layers as required by the operative context.",E1|E2,"Subtotal, tax, and final amount handling must produce matching results when derived through different paths",A34|G61|G93c|I62|R69|R80,Monetary representation consistency,Monetary representation consistency,"[1] source=R69 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R69 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[3] source=R69 type=Requirement hops=0 rel=TARGET
+Monetary representation consistency
+
+[4] source=R69 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[7] source=R80 type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=A34 type=Actor/SrcChunk hops=2 chunk=07278371d2a99b01 doc=EMAIL_LOGISTICS_Barcode_Requirement.txt rel=IN_DOC > IN_DOC
+From: logistics_manager@toolchain.com
+Date: 2026-02-22 11:00
+Subject: Warehouse handling concern for item identifiers
+
+Hi All,
+
+During the warehouse pilot, the team raised a usability concern around how item identifiers are handled on labels and during scanning.
+
+In daily operations, staff tend to refer to the machine-readable identifier as the barcode or serial code rather than by the formal term used in the specification. The current business-oriented format may be less convenient for the scanning workflow than a more scanner-friendly representation.
+
+For now, please review whether the warehouse-facing identifier should remain just an operational alias in the UI, or whether a separate machine-readable identifier is needed alongside the formal item identifier. The main goal is to reduce ambiguity for staff and avoid slowing down intake and return handling.
+
+Thanks,
+Gary (Logistics)
+
+[9] source=G61 type=Gap hops=2 rel=REFINES > AFFECTS
+Monetary rounding inconsistency
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R69 targets consistency of monetary representation across calculation, storage, and display layers. The operative context establishes that subtotal, tax, and final amount handling must produce matching results through different derivation paths, and that customer-visible totals must align exactly with underlying financial records. Pilot-specific currency presentation may require clarification but must not create mismatches. Display-friendly simplifications that produce visible mismatches are not acceptable. Ten test cases cover: direct calculation consistency, multi-path derivation matching, storage-to-display alignment, tax calculation consistency, currency handling, rounding behavior, audit trail verification, pilot currency scenarios, edge cases with fractional amounts, and exception handling for representation mismatches.","Subtotal, tax, and final amount handling must produce matching results when derived through different paths","Pilot-specific currency presentation may require clarification before implementation, but must not create mismatches between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable || Operational display simplifications that cause customer-visible totals to diverge from underlying financial records must be avoided,,E1|E2|E3|E4|E5|E8|E9|E10,"R69 targets consistency of monetary representation across all layers. PRIMARY evidence (E1-E5) establishes that values must align across calculation, storage, and display, and that currency/presentation rules must not override core pricing logic. E2 and E4 raise audit and pilot concerns about representation consistency. CONTEXT evidence (E8-E10) references related requirements (R80) and gaps (G61) on authoritative sources and rounding. E6 and E7 are supporting evidence from related documents. Key gaps remain around fraction handling, pilot currency rules, and rounding behavior—these should not be promoted to operative rules without explicit specification. Filtered abstract or low-relevance operative statements: Monetary values must be represented consistently across calculation, storage, and user-facing display layers | User-facing totals must align exactly with persisted billing amounts | Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",0,0,0,0
+27987f51,R69,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R69_2,Tax calculation consistency with subtotal variations,"Feature: Monetary Representation Consistency
+  Scenario: Tax amount remains consistent regardless of subtotal derivation method
+    Given a transaction with subtotal $100.00 and tax rate 8%
+    When tax is calculated from the directly-computed subtotal
+    And tax is calculated from the component-summed subtotal
+    Then both tax calculations must yield exactly $8.00
+    And the stored tax amount must match the displayed tax amount","Ensures that tax calculations produce consistent results regardless of how the subtotal was derived, maintaining alignment between stored and presented financial records.",E1|E3,"Subtotal, tax, and final amount handling must produce matching results when derived through different paths|User-facing totals must align exactly with persisted billing amounts",A34|G61|G93c|I62|R69|R80,Monetary representation consistency,Monetary representation consistency,"[1] source=R69 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R69 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[3] source=R69 type=Requirement hops=0 rel=TARGET
+Monetary representation consistency
+
+[4] source=R69 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[7] source=R80 type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=A34 type=Actor/SrcChunk hops=2 chunk=07278371d2a99b01 doc=EMAIL_LOGISTICS_Barcode_Requirement.txt rel=IN_DOC > IN_DOC
+From: logistics_manager@toolchain.com
+Date: 2026-02-22 11:00
+Subject: Warehouse handling concern for item identifiers
+
+Hi All,
+
+During the warehouse pilot, the team raised a usability concern around how item identifiers are handled on labels and during scanning.
+
+In daily operations, staff tend to refer to the machine-readable identifier as the barcode or serial code rather than by the formal term used in the specification. The current business-oriented format may be less convenient for the scanning workflow than a more scanner-friendly representation.
+
+For now, please review whether the warehouse-facing identifier should remain just an operational alias in the UI, or whether a separate machine-readable identifier is needed alongside the formal item identifier. The main goal is to reduce ambiguity for staff and avoid slowing down intake and return handling.
+
+Thanks,
+Gary (Logistics)
+
+[9] source=G61 type=Gap hops=2 rel=REFINES > AFFECTS
+Monetary rounding inconsistency
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R69 targets consistency of monetary representation across calculation, storage, and display layers. The operative context establishes that subtotal, tax, and final amount handling must produce matching results through different derivation paths, and that customer-visible totals must align exactly with underlying financial records. Pilot-specific currency presentation may require clarification but must not create mismatches. Display-friendly simplifications that produce visible mismatches are not acceptable. Ten test cases cover: direct calculation consistency, multi-path derivation matching, storage-to-display alignment, tax calculation consistency, currency handling, rounding behavior, audit trail verification, pilot currency scenarios, edge cases with fractional amounts, and exception handling for representation mismatches.","Subtotal, tax, and final amount handling must produce matching results when derived through different paths","Pilot-specific currency presentation may require clarification before implementation, but must not create mismatches between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable || Operational display simplifications that cause customer-visible totals to diverge from underlying financial records must be avoided,,E1|E2|E3|E4|E5|E8|E9|E10,"R69 targets consistency of monetary representation across all layers. PRIMARY evidence (E1-E5) establishes that values must align across calculation, storage, and display, and that currency/presentation rules must not override core pricing logic. E2 and E4 raise audit and pilot concerns about representation consistency. CONTEXT evidence (E8-E10) references related requirements (R80) and gaps (G61) on authoritative sources and rounding. E6 and E7 are supporting evidence from related documents. Key gaps remain around fraction handling, pilot currency rules, and rounding behavior—these should not be promoted to operative rules without explicit specification. Filtered abstract or low-relevance operative statements: Monetary values must be represented consistently across calculation, storage, and user-facing display layers | User-facing totals must align exactly with persisted billing amounts | Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",0,0,0,0
+27987f51,R69,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R69_3,Final amount consistency across all derivation paths,"Feature: Monetary Representation Consistency
+  Scenario: Final amount matches when derived through multiple calculation paths
+    Given a transaction with subtotal $100.00, tax $8.00, and discount $5.00
+    When final amount is calculated as (subtotal + tax - discount)
+    And final amount is retrieved from persisted billing record
+    And final amount is displayed to customer
+    Then all three final amount values must be exactly equal
+    And no rounding or display simplification may create a mismatch","Validates that the final amount remains consistent across calculation, storage, and display layers, preventing customer-visible mismatches with underlying financial records.",E1|E4|E5,"Subtotal, tax, and final amount handling must produce matching results when derived through different paths|User-facing totals must align exactly with persisted billing amounts",A34|G61|G93c|I62|R69|R80,Monetary representation consistency,Monetary representation consistency,"[1] source=R69 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R69 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[3] source=R69 type=Requirement hops=0 rel=TARGET
+Monetary representation consistency
+
+[4] source=R69 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[7] source=R80 type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=A34 type=Actor/SrcChunk hops=2 chunk=07278371d2a99b01 doc=EMAIL_LOGISTICS_Barcode_Requirement.txt rel=IN_DOC > IN_DOC
+From: logistics_manager@toolchain.com
+Date: 2026-02-22 11:00
+Subject: Warehouse handling concern for item identifiers
+
+Hi All,
+
+During the warehouse pilot, the team raised a usability concern around how item identifiers are handled on labels and during scanning.
+
+In daily operations, staff tend to refer to the machine-readable identifier as the barcode or serial code rather than by the formal term used in the specification. The current business-oriented format may be less convenient for the scanning workflow than a more scanner-friendly representation.
+
+For now, please review whether the warehouse-facing identifier should remain just an operational alias in the UI, or whether a separate machine-readable identifier is needed alongside the formal item identifier. The main goal is to reduce ambiguity for staff and avoid slowing down intake and return handling.
+
+Thanks,
+Gary (Logistics)
+
+[9] source=G61 type=Gap hops=2 rel=REFINES > AFFECTS
+Monetary rounding inconsistency
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R69 targets consistency of monetary representation across calculation, storage, and display layers. The operative context establishes that subtotal, tax, and final amount handling must produce matching results through different derivation paths, and that customer-visible totals must align exactly with underlying financial records. Pilot-specific currency presentation may require clarification but must not create mismatches. Display-friendly simplifications that produce visible mismatches are not acceptable. Ten test cases cover: direct calculation consistency, multi-path derivation matching, storage-to-display alignment, tax calculation consistency, currency handling, rounding behavior, audit trail verification, pilot currency scenarios, edge cases with fractional amounts, and exception handling for representation mismatches.","Subtotal, tax, and final amount handling must produce matching results when derived through different paths","Pilot-specific currency presentation may require clarification before implementation, but must not create mismatches between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable || Operational display simplifications that cause customer-visible totals to diverge from underlying financial records must be avoided,,E1|E2|E3|E4|E5|E8|E9|E10,"R69 targets consistency of monetary representation across all layers. PRIMARY evidence (E1-E5) establishes that values must align across calculation, storage, and display, and that currency/presentation rules must not override core pricing logic. E2 and E4 raise audit and pilot concerns about representation consistency. CONTEXT evidence (E8-E10) references related requirements (R80) and gaps (G61) on authoritative sources and rounding. E6 and E7 are supporting evidence from related documents. Key gaps remain around fraction handling, pilot currency rules, and rounding behavior—these should not be promoted to operative rules without explicit specification. Filtered abstract or low-relevance operative statements: Monetary values must be represented consistently across calculation, storage, and user-facing display layers | User-facing totals must align exactly with persisted billing amounts | Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",0,0,0,0
+27987f51,R69,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R69_4,Storage-to-display alignment without simplification-induced mismatches,"Feature: Monetary Representation Consistency
+  Scenario: Stored monetary values match displayed values without presentation layer simplifications
+    Given a transaction with stored subtotal $99.99, stored tax $7.99, stored total $107.98
+    When the transaction is displayed to the customer
+    Then the displayed subtotal must be exactly $99.99
+    And the displayed tax must be exactly $7.99
+    And the displayed total must be exactly $107.98
+    And no display-friendly rounding or simplification may alter these values","Ensures that display-friendly simplifications do not create visible mismatches between stored and presented totals, as explicitly prohibited by the operative context.",E1|E5,User-facing totals must align exactly with persisted billing amounts|Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable,A34|G61|G93c|I62|R69|R80,Monetary representation consistency,Monetary representation consistency,"[1] source=R69 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R69 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[3] source=R69 type=Requirement hops=0 rel=TARGET
+Monetary representation consistency
+
+[4] source=R69 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[7] source=R80 type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=A34 type=Actor/SrcChunk hops=2 chunk=07278371d2a99b01 doc=EMAIL_LOGISTICS_Barcode_Requirement.txt rel=IN_DOC > IN_DOC
+From: logistics_manager@toolchain.com
+Date: 2026-02-22 11:00
+Subject: Warehouse handling concern for item identifiers
+
+Hi All,
+
+During the warehouse pilot, the team raised a usability concern around how item identifiers are handled on labels and during scanning.
+
+In daily operations, staff tend to refer to the machine-readable identifier as the barcode or serial code rather than by the formal term used in the specification. The current business-oriented format may be less convenient for the scanning workflow than a more scanner-friendly representation.
+
+For now, please review whether the warehouse-facing identifier should remain just an operational alias in the UI, or whether a separate machine-readable identifier is needed alongside the formal item identifier. The main goal is to reduce ambiguity for staff and avoid slowing down intake and return handling.
+
+Thanks,
+Gary (Logistics)
+
+[9] source=G61 type=Gap hops=2 rel=REFINES > AFFECTS
+Monetary rounding inconsistency
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R69 targets consistency of monetary representation across calculation, storage, and display layers. The operative context establishes that subtotal, tax, and final amount handling must produce matching results through different derivation paths, and that customer-visible totals must align exactly with underlying financial records. Pilot-specific currency presentation may require clarification but must not create mismatches. Display-friendly simplifications that produce visible mismatches are not acceptable. Ten test cases cover: direct calculation consistency, multi-path derivation matching, storage-to-display alignment, tax calculation consistency, currency handling, rounding behavior, audit trail verification, pilot currency scenarios, edge cases with fractional amounts, and exception handling for representation mismatches.","Subtotal, tax, and final amount handling must produce matching results when derived through different paths","Pilot-specific currency presentation may require clarification before implementation, but must not create mismatches between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable || Operational display simplifications that cause customer-visible totals to diverge from underlying financial records must be avoided,,E1|E2|E3|E4|E5|E8|E9|E10,"R69 targets consistency of monetary representation across all layers. PRIMARY evidence (E1-E5) establishes that values must align across calculation, storage, and display, and that currency/presentation rules must not override core pricing logic. E2 and E4 raise audit and pilot concerns about representation consistency. CONTEXT evidence (E8-E10) references related requirements (R80) and gaps (G61) on authoritative sources and rounding. E6 and E7 are supporting evidence from related documents. Key gaps remain around fraction handling, pilot currency rules, and rounding behavior—these should not be promoted to operative rules without explicit specification. Filtered abstract or low-relevance operative statements: Monetary values must be represented consistently across calculation, storage, and user-facing display layers | User-facing totals must align exactly with persisted billing amounts | Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",0,0,0,0
+27987f51,R69,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R69_5,Currency consistency across calculation and presentation,"Feature: Monetary Representation Consistency
+  Scenario: Currency representation remains consistent across all layers
+    Given a transaction in USD with subtotal $100.00
+    When the transaction is calculated in the system
+    And the transaction is stored in the database
+    And the transaction is displayed to the customer
+    Then all representations must use USD currency
+    And currency conversion rules must not override core pricing logic
+    And no currency presentation variation may create a mismatch","Verifies that currency representation is consistent across calculation, storage, and display layers, and that currency rules do not override core pricing logic.",E2|E3,"Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",A34|G61|G93c|I62|R69|R80,Monetary representation consistency,Monetary representation consistency,"[1] source=R69 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R69 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[3] source=R69 type=Requirement hops=0 rel=TARGET
+Monetary representation consistency
+
+[4] source=R69 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[7] source=R80 type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=A34 type=Actor/SrcChunk hops=2 chunk=07278371d2a99b01 doc=EMAIL_LOGISTICS_Barcode_Requirement.txt rel=IN_DOC > IN_DOC
+From: logistics_manager@toolchain.com
+Date: 2026-02-22 11:00
+Subject: Warehouse handling concern for item identifiers
+
+Hi All,
+
+During the warehouse pilot, the team raised a usability concern around how item identifiers are handled on labels and during scanning.
+
+In daily operations, staff tend to refer to the machine-readable identifier as the barcode or serial code rather than by the formal term used in the specification. The current business-oriented format may be less convenient for the scanning workflow than a more scanner-friendly representation.
+
+For now, please review whether the warehouse-facing identifier should remain just an operational alias in the UI, or whether a separate machine-readable identifier is needed alongside the formal item identifier. The main goal is to reduce ambiguity for staff and avoid slowing down intake and return handling.
+
+Thanks,
+Gary (Logistics)
+
+[9] source=G61 type=Gap hops=2 rel=REFINES > AFFECTS
+Monetary rounding inconsistency
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R69 targets consistency of monetary representation across calculation, storage, and display layers. The operative context establishes that subtotal, tax, and final amount handling must produce matching results through different derivation paths, and that customer-visible totals must align exactly with underlying financial records. Pilot-specific currency presentation may require clarification but must not create mismatches. Display-friendly simplifications that produce visible mismatches are not acceptable. Ten test cases cover: direct calculation consistency, multi-path derivation matching, storage-to-display alignment, tax calculation consistency, currency handling, rounding behavior, audit trail verification, pilot currency scenarios, edge cases with fractional amounts, and exception handling for representation mismatches.","Subtotal, tax, and final amount handling must produce matching results when derived through different paths","Pilot-specific currency presentation may require clarification before implementation, but must not create mismatches between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable || Operational display simplifications that cause customer-visible totals to diverge from underlying financial records must be avoided,,E1|E2|E3|E4|E5|E8|E9|E10,"R69 targets consistency of monetary representation across all layers. PRIMARY evidence (E1-E5) establishes that values must align across calculation, storage, and display, and that currency/presentation rules must not override core pricing logic. E2 and E4 raise audit and pilot concerns about representation consistency. CONTEXT evidence (E8-E10) references related requirements (R80) and gaps (G61) on authoritative sources and rounding. E6 and E7 are supporting evidence from related documents. Key gaps remain around fraction handling, pilot currency rules, and rounding behavior—these should not be promoted to operative rules without explicit specification. Filtered abstract or low-relevance operative statements: Monetary values must be represented consistently across calculation, storage, and user-facing display layers | User-facing totals must align exactly with persisted billing amounts | Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",0,0,0,0
+27987f51,R69,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R69_6,Audit trail verification of monetary consistency,"Feature: Monetary Representation Consistency
+  Scenario: Audit trail confirms monetary values remain consistent across transaction lifecycle
+    Given a transaction with initial subtotal $50.00, tax $4.00, total $54.00
+    When the transaction is created, stored, and displayed
+    And an audit trail is generated for the transaction
+    Then the audit trail must record the same subtotal, tax, and total values
+    And no intermediate transformation may alter these values
+    And any discrepancy must be flagged as an audit failure","Ensures that monetary consistency is maintained and verifiable throughout the transaction lifecycle, supporting audit and compliance requirements.",E2|E4,"Subtotal, tax, and final amount handling must produce matching results when derived through different paths",A34|G61|G93c|I62|R69|R80,Monetary representation consistency,Monetary representation consistency,"[1] source=R69 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R69 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[3] source=R69 type=Requirement hops=0 rel=TARGET
+Monetary representation consistency
+
+[4] source=R69 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[7] source=R80 type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=A34 type=Actor/SrcChunk hops=2 chunk=07278371d2a99b01 doc=EMAIL_LOGISTICS_Barcode_Requirement.txt rel=IN_DOC > IN_DOC
+From: logistics_manager@toolchain.com
+Date: 2026-02-22 11:00
+Subject: Warehouse handling concern for item identifiers
+
+Hi All,
+
+During the warehouse pilot, the team raised a usability concern around how item identifiers are handled on labels and during scanning.
+
+In daily operations, staff tend to refer to the machine-readable identifier as the barcode or serial code rather than by the formal term used in the specification. The current business-oriented format may be less convenient for the scanning workflow than a more scanner-friendly representation.
+
+For now, please review whether the warehouse-facing identifier should remain just an operational alias in the UI, or whether a separate machine-readable identifier is needed alongside the formal item identifier. The main goal is to reduce ambiguity for staff and avoid slowing down intake and return handling.
+
+Thanks,
+Gary (Logistics)
+
+[9] source=G61 type=Gap hops=2 rel=REFINES > AFFECTS
+Monetary rounding inconsistency
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R69 targets consistency of monetary representation across calculation, storage, and display layers. The operative context establishes that subtotal, tax, and final amount handling must produce matching results through different derivation paths, and that customer-visible totals must align exactly with underlying financial records. Pilot-specific currency presentation may require clarification but must not create mismatches. Display-friendly simplifications that produce visible mismatches are not acceptable. Ten test cases cover: direct calculation consistency, multi-path derivation matching, storage-to-display alignment, tax calculation consistency, currency handling, rounding behavior, audit trail verification, pilot currency scenarios, edge cases with fractional amounts, and exception handling for representation mismatches.","Subtotal, tax, and final amount handling must produce matching results when derived through different paths","Pilot-specific currency presentation may require clarification before implementation, but must not create mismatches between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable || Operational display simplifications that cause customer-visible totals to diverge from underlying financial records must be avoided,,E1|E2|E3|E4|E5|E8|E9|E10,"R69 targets consistency of monetary representation across all layers. PRIMARY evidence (E1-E5) establishes that values must align across calculation, storage, and display, and that currency/presentation rules must not override core pricing logic. E2 and E4 raise audit and pilot concerns about representation consistency. CONTEXT evidence (E8-E10) references related requirements (R80) and gaps (G61) on authoritative sources and rounding. E6 and E7 are supporting evidence from related documents. Key gaps remain around fraction handling, pilot currency rules, and rounding behavior—these should not be promoted to operative rules without explicit specification. Filtered abstract or low-relevance operative statements: Monetary values must be represented consistently across calculation, storage, and user-facing display layers | User-facing totals must align exactly with persisted billing amounts | Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",0,0,0,0
+27987f51,R69,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R69_7,Pilot-specific currency presentation without creating mismatches,"Feature: Monetary Representation Consistency
+  Scenario: Pilot currency presentation rules do not create customer-visible mismatches
+    Given a pilot program with special currency presentation rules
+    When a transaction is processed under pilot-specific currency rules
+    And the transaction is displayed to the customer
+    Then the customer-visible total must match the underlying financial record
+    And pilot currency presentation may clarify format but must not alter amounts
+    And any mismatch between displayed and stored totals must be prevented",Addresses the exception that pilot-specific currency presentation may require clarification but must not create mismatches between customer-visible totals and underlying financial records.,E2|E8,"Pilot-specific currency presentation may require clarification before implementation, but must not create mismatches between customer-visible totals and underlying financial records",A34|G61|G93c|I62|R69|R80,Monetary representation consistency,Monetary representation consistency,"[1] source=R69 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R69 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[3] source=R69 type=Requirement hops=0 rel=TARGET
+Monetary representation consistency
+
+[4] source=R69 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[7] source=R80 type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=A34 type=Actor/SrcChunk hops=2 chunk=07278371d2a99b01 doc=EMAIL_LOGISTICS_Barcode_Requirement.txt rel=IN_DOC > IN_DOC
+From: logistics_manager@toolchain.com
+Date: 2026-02-22 11:00
+Subject: Warehouse handling concern for item identifiers
+
+Hi All,
+
+During the warehouse pilot, the team raised a usability concern around how item identifiers are handled on labels and during scanning.
+
+In daily operations, staff tend to refer to the machine-readable identifier as the barcode or serial code rather than by the formal term used in the specification. The current business-oriented format may be less convenient for the scanning workflow than a more scanner-friendly representation.
+
+For now, please review whether the warehouse-facing identifier should remain just an operational alias in the UI, or whether a separate machine-readable identifier is needed alongside the formal item identifier. The main goal is to reduce ambiguity for staff and avoid slowing down intake and return handling.
+
+Thanks,
+Gary (Logistics)
+
+[9] source=G61 type=Gap hops=2 rel=REFINES > AFFECTS
+Monetary rounding inconsistency
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R69 targets consistency of monetary representation across calculation, storage, and display layers. The operative context establishes that subtotal, tax, and final amount handling must produce matching results through different derivation paths, and that customer-visible totals must align exactly with underlying financial records. Pilot-specific currency presentation may require clarification but must not create mismatches. Display-friendly simplifications that produce visible mismatches are not acceptable. Ten test cases cover: direct calculation consistency, multi-path derivation matching, storage-to-display alignment, tax calculation consistency, currency handling, rounding behavior, audit trail verification, pilot currency scenarios, edge cases with fractional amounts, and exception handling for representation mismatches.","Subtotal, tax, and final amount handling must produce matching results when derived through different paths","Pilot-specific currency presentation may require clarification before implementation, but must not create mismatches between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable || Operational display simplifications that cause customer-visible totals to diverge from underlying financial records must be avoided,,E1|E2|E3|E4|E5|E8|E9|E10,"R69 targets consistency of monetary representation across all layers. PRIMARY evidence (E1-E5) establishes that values must align across calculation, storage, and display, and that currency/presentation rules must not override core pricing logic. E2 and E4 raise audit and pilot concerns about representation consistency. CONTEXT evidence (E8-E10) references related requirements (R80) and gaps (G61) on authoritative sources and rounding. E6 and E7 are supporting evidence from related documents. Key gaps remain around fraction handling, pilot currency rules, and rounding behavior—these should not be promoted to operative rules without explicit specification. Filtered abstract or low-relevance operative statements: Monetary values must be represented consistently across calculation, storage, and user-facing display layers | User-facing totals must align exactly with persisted billing amounts | Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",0,0,0,0
+27987f51,R69,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R69_8,Fractional amount handling consistency,"Feature: Monetary Representation Consistency
+  Scenario: Fractional monetary amounts remain consistent across all layers
+    Given a transaction with subtotal $99.99, tax rate 8.5% (resulting in $8.4992)
+    When the tax is calculated and stored
+    And the tax is displayed to the customer
+    Then the stored and displayed tax values must be identical
+    And fractional handling must not create mismatches
+    And rounding behavior must be applied consistently across all layers","Validates that fractional amounts are handled consistently across calculation, storage, and display, addressing the gap around fraction handling without promoting unsupported rounding rules.",E3|E9|E10,"Subtotal, tax, and final amount handling must produce matching results when derived through different paths",A34|G61|G93c|I62|R69|R80,Monetary representation consistency,Monetary representation consistency,"[1] source=R69 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R69 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[3] source=R69 type=Requirement hops=0 rel=TARGET
+Monetary representation consistency
+
+[4] source=R69 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[7] source=R80 type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=A34 type=Actor/SrcChunk hops=2 chunk=07278371d2a99b01 doc=EMAIL_LOGISTICS_Barcode_Requirement.txt rel=IN_DOC > IN_DOC
+From: logistics_manager@toolchain.com
+Date: 2026-02-22 11:00
+Subject: Warehouse handling concern for item identifiers
+
+Hi All,
+
+During the warehouse pilot, the team raised a usability concern around how item identifiers are handled on labels and during scanning.
+
+In daily operations, staff tend to refer to the machine-readable identifier as the barcode or serial code rather than by the formal term used in the specification. The current business-oriented format may be less convenient for the scanning workflow than a more scanner-friendly representation.
+
+For now, please review whether the warehouse-facing identifier should remain just an operational alias in the UI, or whether a separate machine-readable identifier is needed alongside the formal item identifier. The main goal is to reduce ambiguity for staff and avoid slowing down intake and return handling.
+
+Thanks,
+Gary (Logistics)
+
+[9] source=G61 type=Gap hops=2 rel=REFINES > AFFECTS
+Monetary rounding inconsistency
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R69 targets consistency of monetary representation across calculation, storage, and display layers. The operative context establishes that subtotal, tax, and final amount handling must produce matching results through different derivation paths, and that customer-visible totals must align exactly with underlying financial records. Pilot-specific currency presentation may require clarification but must not create mismatches. Display-friendly simplifications that produce visible mismatches are not acceptable. Ten test cases cover: direct calculation consistency, multi-path derivation matching, storage-to-display alignment, tax calculation consistency, currency handling, rounding behavior, audit trail verification, pilot currency scenarios, edge cases with fractional amounts, and exception handling for representation mismatches.","Subtotal, tax, and final amount handling must produce matching results when derived through different paths","Pilot-specific currency presentation may require clarification before implementation, but must not create mismatches between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable || Operational display simplifications that cause customer-visible totals to diverge from underlying financial records must be avoided,,E1|E2|E3|E4|E5|E8|E9|E10,"R69 targets consistency of monetary representation across all layers. PRIMARY evidence (E1-E5) establishes that values must align across calculation, storage, and display, and that currency/presentation rules must not override core pricing logic. E2 and E4 raise audit and pilot concerns about representation consistency. CONTEXT evidence (E8-E10) references related requirements (R80) and gaps (G61) on authoritative sources and rounding. E6 and E7 are supporting evidence from related documents. Key gaps remain around fraction handling, pilot currency rules, and rounding behavior—these should not be promoted to operative rules without explicit specification. Filtered abstract or low-relevance operative statements: Monetary values must be represented consistently across calculation, storage, and user-facing display layers | User-facing totals must align exactly with persisted billing amounts | Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",0,0,0,0
+27987f51,R69,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R69_9,Multi-currency transaction consistency,"Feature: Monetary Representation Consistency
+  Scenario: Multi-currency transactions maintain consistency across conversion and display
+    Given a transaction with items in EUR and USD
+    When the transaction is converted to a single currency for billing
+    And the transaction is stored with conversion rates
+    And the transaction is displayed to the customer
+    Then the final amount must be identical across storage and display
+    And currency conversion must not introduce mismatches
+    And conversion rates must be applied consistently","Ensures that multi-currency transactions maintain monetary consistency across conversion, storage, and display layers.",E1|E5,"Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",A34|G61|G93c|I62|R69|R80,Monetary representation consistency,Monetary representation consistency,"[1] source=R69 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R69 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[3] source=R69 type=Requirement hops=0 rel=TARGET
+Monetary representation consistency
+
+[4] source=R69 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[7] source=R80 type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=A34 type=Actor/SrcChunk hops=2 chunk=07278371d2a99b01 doc=EMAIL_LOGISTICS_Barcode_Requirement.txt rel=IN_DOC > IN_DOC
+From: logistics_manager@toolchain.com
+Date: 2026-02-22 11:00
+Subject: Warehouse handling concern for item identifiers
+
+Hi All,
+
+During the warehouse pilot, the team raised a usability concern around how item identifiers are handled on labels and during scanning.
+
+In daily operations, staff tend to refer to the machine-readable identifier as the barcode or serial code rather than by the formal term used in the specification. The current business-oriented format may be less convenient for the scanning workflow than a more scanner-friendly representation.
+
+For now, please review whether the warehouse-facing identifier should remain just an operational alias in the UI, or whether a separate machine-readable identifier is needed alongside the formal item identifier. The main goal is to reduce ambiguity for staff and avoid slowing down intake and return handling.
+
+Thanks,
+Gary (Logistics)
+
+[9] source=G61 type=Gap hops=2 rel=REFINES > AFFECTS
+Monetary rounding inconsistency
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R69 targets consistency of monetary representation across calculation, storage, and display layers. The operative context establishes that subtotal, tax, and final amount handling must produce matching results through different derivation paths, and that customer-visible totals must align exactly with underlying financial records. Pilot-specific currency presentation may require clarification but must not create mismatches. Display-friendly simplifications that produce visible mismatches are not acceptable. Ten test cases cover: direct calculation consistency, multi-path derivation matching, storage-to-display alignment, tax calculation consistency, currency handling, rounding behavior, audit trail verification, pilot currency scenarios, edge cases with fractional amounts, and exception handling for representation mismatches.","Subtotal, tax, and final amount handling must produce matching results when derived through different paths","Pilot-specific currency presentation may require clarification before implementation, but must not create mismatches between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable || Operational display simplifications that cause customer-visible totals to diverge from underlying financial records must be avoided,,E1|E2|E3|E4|E5|E8|E9|E10,"R69 targets consistency of monetary representation across all layers. PRIMARY evidence (E1-E5) establishes that values must align across calculation, storage, and display, and that currency/presentation rules must not override core pricing logic. E2 and E4 raise audit and pilot concerns about representation consistency. CONTEXT evidence (E8-E10) references related requirements (R80) and gaps (G61) on authoritative sources and rounding. E6 and E7 are supporting evidence from related documents. Key gaps remain around fraction handling, pilot currency rules, and rounding behavior—these should not be promoted to operative rules without explicit specification. Filtered abstract or low-relevance operative statements: Monetary values must be represented consistently across calculation, storage, and user-facing display layers | User-facing totals must align exactly with persisted billing amounts | Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",0,0,0,0
+27987f51,R69,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R69_10,Detection and prevention of representation mismatches,"Feature: Monetary Representation Consistency
+  Scenario: System detects and prevents mismatches between stored and displayed totals
+    Given a transaction with stored total $100.00
+    When a display operation attempts to show $99.99 due to simplification
+    Then the system must reject the display operation
+    And an error must be raised indicating the mismatch
+    And the transaction must not be displayed until consistency is restored
+    And operational display simplifications that cause divergence must be prevented","Validates that the system actively prevents and detects mismatches between stored and displayed monetary values, enforcing the prohibition on display-friendly simplifications that create divergence.",E4|E5,Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable|Operational display simplifications that cause customer-visible totals to diverge from underlying financial records must be avoided,A34|G61|G93c|I62|R69|R80,Monetary representation consistency,Monetary representation consistency,"[1] source=R69 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[2] source=R69 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[3] source=R69 type=Requirement hops=0 rel=TARGET
+Monetary representation consistency
+
+[4] source=R69 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[5] source=I62 type=Implementation/SrcChunk hops=1 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=AFFECTS
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R80 type=Requirement hops=1 rel=AFFECTS
+Authoritative monetary source consistency
+
+[7] source=R80 type=Requirement/SrcChunk hops=1 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=AFFECTS
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[8] source=A34 type=Actor/SrcChunk hops=2 chunk=07278371d2a99b01 doc=EMAIL_LOGISTICS_Barcode_Requirement.txt rel=IN_DOC > IN_DOC
+From: logistics_manager@toolchain.com
+Date: 2026-02-22 11:00
+Subject: Warehouse handling concern for item identifiers
+
+Hi All,
+
+During the warehouse pilot, the team raised a usability concern around how item identifiers are handled on labels and during scanning.
+
+In daily operations, staff tend to refer to the machine-readable identifier as the barcode or serial code rather than by the formal term used in the specification. The current business-oriented format may be less convenient for the scanning workflow than a more scanner-friendly representation.
+
+For now, please review whether the warehouse-facing identifier should remain just an operational alias in the UI, or whether a separate machine-readable identifier is needed alongside the formal item identifier. The main goal is to reduce ambiguity for staff and avoid slowing down intake and return handling.
+
+Thanks,
+Gary (Logistics)
+
+[9] source=G61 type=Gap hops=2 rel=REFINES > AFFECTS
+Monetary rounding inconsistency
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R69 targets consistency of monetary representation across calculation, storage, and display layers. The operative context establishes that subtotal, tax, and final amount handling must produce matching results through different derivation paths, and that customer-visible totals must align exactly with underlying financial records. Pilot-specific currency presentation may require clarification but must not create mismatches. Display-friendly simplifications that produce visible mismatches are not acceptable. Ten test cases cover: direct calculation consistency, multi-path derivation matching, storage-to-display alignment, tax calculation consistency, currency handling, rounding behavior, audit trail verification, pilot currency scenarios, edge cases with fractional amounts, and exception handling for representation mismatches.","Subtotal, tax, and final amount handling must produce matching results when derived through different paths","Pilot-specific currency presentation may require clarification before implementation, but must not create mismatches between customer-visible totals and underlying financial records",Display-friendly simplifications that produce visible mismatches between stored and presented totals are not acceptable || Operational display simplifications that cause customer-visible totals to diverge from underlying financial records must be avoided,,E1|E2|E3|E4|E5|E8|E9|E10,"R69 targets consistency of monetary representation across all layers. PRIMARY evidence (E1-E5) establishes that values must align across calculation, storage, and display, and that currency/presentation rules must not override core pricing logic. E2 and E4 raise audit and pilot concerns about representation consistency. CONTEXT evidence (E8-E10) references related requirements (R80) and gaps (G61) on authoritative sources and rounding. E6 and E7 are supporting evidence from related documents. Key gaps remain around fraction handling, pilot currency rules, and rounding behavior—these should not be promoted to operative rules without explicit specification. Filtered abstract or low-relevance operative statements: Monetary values must be represented consistently across calculation, storage, and user-facing display layers | User-facing totals must align exactly with persisted billing amounts | Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions",0,0,0,0

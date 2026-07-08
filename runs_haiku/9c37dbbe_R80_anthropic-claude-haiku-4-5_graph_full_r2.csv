@@ -1,0 +1,866 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+9c37dbbe,R80,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R80_1,Verify billing report totals match persisted billing amounts,"Feature: Authoritative monetary source consistency
+  Scenario: Billing report totals must match persisted amounts
+    Given a billing record with a persisted total of 150.00 USD
+    When a billing report is generated for that record
+    Then the report total must equal 150.00 USD
+    And no rounding or display simplification shall alter the reported amount","Ensures that financial outputs in billing reports align with persisted billing amounts, preventing display-friendly simplifications from creating visible mismatches with stored totals.",E1|E3|E4,"Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records)|User-facing monetary totals must match persisted billing amounts exactly",G61|G63|G72|G93c|R69|R70|R80,Authoritative monetary source consistency,Authoritative monetary source consistency,"[1] source=R80 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[2] source=R80 type=Requirement hops=0 rel=TARGET
+Authoritative monetary source consistency
+
+[3] source=R80 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[4] source=R80 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement hops=1 rel=AFFECTS
+Monetary representation consistency
+
+[7] source=R70 type=Requirement hops=1 rel=AFFECTS
+Rounding rule consistency
+
+[8] source=G61 type=Gap hops=2 rel=AFFECTS > AFFECTS
+Monetary rounding inconsistency
+
+[9] source=G72 type=Gap hops=2 rel=REFINES > AFFECTS
+Financial source-of-truth ambiguity
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R80 targets consistency of monetary values across all system layers and contexts. The requirement establishes that financial outputs must align across billing contexts (reports, exported files, billing records), user-facing monetary totals must match persisted billing amounts exactly, and monetary values must be derived consistently across calculation, storage, and user-facing display. Key exceptions address currency presentation and privacy-preserving identifiers without overriding core pricing logic. Conflicts around display-friendly simplifications that produce visible mismatches with stored totals are excluded from test generation. The test suite validates authoritative monetary source consistency across multiple system layers and operational contexts.",,"Currency presentation and international billing are related operational concerns but must not silently override core pricing logic || Privacy-preserving identifier styles may be used in activity and audit views, but authorized reviewers should have access to controlled identity-resolution paths for audit purposes",Display-friendly simplifications in one layer that produce visible mismatches with stored totals derived differently,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R80 targets consistency of monetary values across all system layers and contexts. PRIMARY evidence (E1, E3, E4, E5) establishes that financial outputs must align across billing contexts and that user-facing totals must match persisted amounts. E5 explicitly states that currency presentation must not override core pricing logic. CONTEXT evidence (E7, E8, E9, E10) reinforces related consistency concerns (monetary representation, rounding, source-of-truth ambiguity) but does not override the primary target. Key gaps include fraction handling specifications, rounding rules, and the complete audit visibility model. The requirement is primarily about establishing a single authoritative source for monetary data across all system representations. Filtered abstract or low-relevance operative statements: Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records) | User-facing monetary totals must match persisted billing amounts exactly | Monetary values must be derived consistently across calculation, storage, and user-facing display",0,0,0,0
+9c37dbbe,R80,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R80_2,Verify exported billing file totals match system source of truth,"Feature: Authoritative monetary source consistency
+  Scenario: Exported billing files must reflect authoritative monetary source
+    Given a billing transaction with an authoritative stored amount of 275.50 EUR
+    When the transaction is exported to a billing file
+    Then the exported file must contain the amount 275.50 EUR
+    And the exported amount must be byte-for-byte consistent with the persisted value","Validates that exported files maintain consistency with the authoritative monetary source, preventing discrepancies between different export formats or contexts.",E1|E4|E5,"Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records)",G61|G63|G72|G93c|R69|R70|R80,Authoritative monetary source consistency,Authoritative monetary source consistency,"[1] source=R80 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[2] source=R80 type=Requirement hops=0 rel=TARGET
+Authoritative monetary source consistency
+
+[3] source=R80 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[4] source=R80 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement hops=1 rel=AFFECTS
+Monetary representation consistency
+
+[7] source=R70 type=Requirement hops=1 rel=AFFECTS
+Rounding rule consistency
+
+[8] source=G61 type=Gap hops=2 rel=AFFECTS > AFFECTS
+Monetary rounding inconsistency
+
+[9] source=G72 type=Gap hops=2 rel=REFINES > AFFECTS
+Financial source-of-truth ambiguity
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R80 targets consistency of monetary values across all system layers and contexts. The requirement establishes that financial outputs must align across billing contexts (reports, exported files, billing records), user-facing monetary totals must match persisted billing amounts exactly, and monetary values must be derived consistently across calculation, storage, and user-facing display. Key exceptions address currency presentation and privacy-preserving identifiers without overriding core pricing logic. Conflicts around display-friendly simplifications that produce visible mismatches with stored totals are excluded from test generation. The test suite validates authoritative monetary source consistency across multiple system layers and operational contexts.",,"Currency presentation and international billing are related operational concerns but must not silently override core pricing logic || Privacy-preserving identifier styles may be used in activity and audit views, but authorized reviewers should have access to controlled identity-resolution paths for audit purposes",Display-friendly simplifications in one layer that produce visible mismatches with stored totals derived differently,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R80 targets consistency of monetary values across all system layers and contexts. PRIMARY evidence (E1, E3, E4, E5) establishes that financial outputs must align across billing contexts and that user-facing totals must match persisted amounts. E5 explicitly states that currency presentation must not override core pricing logic. CONTEXT evidence (E7, E8, E9, E10) reinforces related consistency concerns (monetary representation, rounding, source-of-truth ambiguity) but does not override the primary target. Key gaps include fraction handling specifications, rounding rules, and the complete audit visibility model. The requirement is primarily about establishing a single authoritative source for monetary data across all system representations. Filtered abstract or low-relevance operative statements: Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records) | User-facing monetary totals must match persisted billing amounts exactly | Monetary values must be derived consistently across calculation, storage, and user-facing display",0,0,0,0
+9c37dbbe,R80,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R80_3,Verify user-facing totals match persisted amounts exactly,"Feature: Authoritative monetary source consistency
+  Scenario: User-facing monetary totals must match persisted billing amounts
+    Given a persisted billing amount of 99.99 GBP
+    When a user views their billing summary
+    Then the displayed total must be 99.99 GBP
+    And the displayed amount must match the persisted amount without rounding variance","Ensures that monetary values presented to users are derived from and match the authoritative persisted source, maintaining consistency across all user-facing contexts.",E3|E5,"User-facing monetary totals must match persisted billing amounts exactly|Monetary values must be derived consistently across calculation, storage, and user-facing display",G61|G63|G72|G93c|R69|R70|R80,Authoritative monetary source consistency,Authoritative monetary source consistency,"[1] source=R80 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[2] source=R80 type=Requirement hops=0 rel=TARGET
+Authoritative monetary source consistency
+
+[3] source=R80 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[4] source=R80 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement hops=1 rel=AFFECTS
+Monetary representation consistency
+
+[7] source=R70 type=Requirement hops=1 rel=AFFECTS
+Rounding rule consistency
+
+[8] source=G61 type=Gap hops=2 rel=AFFECTS > AFFECTS
+Monetary rounding inconsistency
+
+[9] source=G72 type=Gap hops=2 rel=REFINES > AFFECTS
+Financial source-of-truth ambiguity
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R80 targets consistency of monetary values across all system layers and contexts. The requirement establishes that financial outputs must align across billing contexts (reports, exported files, billing records), user-facing monetary totals must match persisted billing amounts exactly, and monetary values must be derived consistently across calculation, storage, and user-facing display. Key exceptions address currency presentation and privacy-preserving identifiers without overriding core pricing logic. Conflicts around display-friendly simplifications that produce visible mismatches with stored totals are excluded from test generation. The test suite validates authoritative monetary source consistency across multiple system layers and operational contexts.",,"Currency presentation and international billing are related operational concerns but must not silently override core pricing logic || Privacy-preserving identifier styles may be used in activity and audit views, but authorized reviewers should have access to controlled identity-resolution paths for audit purposes",Display-friendly simplifications in one layer that produce visible mismatches with stored totals derived differently,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R80 targets consistency of monetary values across all system layers and contexts. PRIMARY evidence (E1, E3, E4, E5) establishes that financial outputs must align across billing contexts and that user-facing totals must match persisted amounts. E5 explicitly states that currency presentation must not override core pricing logic. CONTEXT evidence (E7, E8, E9, E10) reinforces related consistency concerns (monetary representation, rounding, source-of-truth ambiguity) but does not override the primary target. Key gaps include fraction handling specifications, rounding rules, and the complete audit visibility model. The requirement is primarily about establishing a single authoritative source for monetary data across all system representations. Filtered abstract or low-relevance operative statements: Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records) | User-facing monetary totals must match persisted billing amounts exactly | Monetary values must be derived consistently across calculation, storage, and user-facing display",0,0,0,0
+9c37dbbe,R80,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R80_4,Verify currency presentation does not override core pricing logic,"Feature: Authoritative monetary source consistency
+  Scenario: Currency presentation must not alter core pricing calculations
+    Given a transaction with a core price of 100.00 in the system currency
+    When the transaction is presented in an alternative currency format
+    Then the underlying pricing logic must remain unchanged
+    And the core monetary value must not be silently modified by currency presentation","Addresses the exception that currency presentation and international billing are related concerns but must not silently override core pricing logic, ensuring authoritative monetary values are preserved.",E5,Currency presentation and international billing are related operational concerns but must not silently override core pricing logic,G61|G63|G72|G93c|R69|R70|R80,Authoritative monetary source consistency,Authoritative monetary source consistency,"[1] source=R80 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[2] source=R80 type=Requirement hops=0 rel=TARGET
+Authoritative monetary source consistency
+
+[3] source=R80 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[4] source=R80 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement hops=1 rel=AFFECTS
+Monetary representation consistency
+
+[7] source=R70 type=Requirement hops=1 rel=AFFECTS
+Rounding rule consistency
+
+[8] source=G61 type=Gap hops=2 rel=AFFECTS > AFFECTS
+Monetary rounding inconsistency
+
+[9] source=G72 type=Gap hops=2 rel=REFINES > AFFECTS
+Financial source-of-truth ambiguity
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R80 targets consistency of monetary values across all system layers and contexts. The requirement establishes that financial outputs must align across billing contexts (reports, exported files, billing records), user-facing monetary totals must match persisted billing amounts exactly, and monetary values must be derived consistently across calculation, storage, and user-facing display. Key exceptions address currency presentation and privacy-preserving identifiers without overriding core pricing logic. Conflicts around display-friendly simplifications that produce visible mismatches with stored totals are excluded from test generation. The test suite validates authoritative monetary source consistency across multiple system layers and operational contexts.",,"Currency presentation and international billing are related operational concerns but must not silently override core pricing logic || Privacy-preserving identifier styles may be used in activity and audit views, but authorized reviewers should have access to controlled identity-resolution paths for audit purposes",Display-friendly simplifications in one layer that produce visible mismatches with stored totals derived differently,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R80 targets consistency of monetary values across all system layers and contexts. PRIMARY evidence (E1, E3, E4, E5) establishes that financial outputs must align across billing contexts and that user-facing totals must match persisted amounts. E5 explicitly states that currency presentation must not override core pricing logic. CONTEXT evidence (E7, E8, E9, E10) reinforces related consistency concerns (monetary representation, rounding, source-of-truth ambiguity) but does not override the primary target. Key gaps include fraction handling specifications, rounding rules, and the complete audit visibility model. The requirement is primarily about establishing a single authoritative source for monetary data across all system representations. Filtered abstract or low-relevance operative statements: Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records) | User-facing monetary totals must match persisted billing amounts exactly | Monetary values must be derived consistently across calculation, storage, and user-facing display",0,0,0,0
+9c37dbbe,R80,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R80_5,"Verify monetary consistency across calculation, storage, and display layers","Feature: Authoritative monetary source consistency
+  Scenario: Monetary values must be consistent across all system layers
+    Given a transaction calculated with amount 250.75 USD
+    When the amount is stored in the billing database
+    And subsequently displayed in the user interface
+    Then the calculated, stored, and displayed amounts must all be 250.75 USD
+    And no layer shall derive or transform the amount independently","Validates the core requirement that monetary values are derived consistently across calculation, storage, and user-facing display, establishing a single authoritative source.",E1|E3|E4|E5,"Monetary values must be derived consistently across calculation, storage, and user-facing display",G61|G63|G72|G93c|R69|R70|R80,Authoritative monetary source consistency,Authoritative monetary source consistency,"[1] source=R80 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[2] source=R80 type=Requirement hops=0 rel=TARGET
+Authoritative monetary source consistency
+
+[3] source=R80 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[4] source=R80 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement hops=1 rel=AFFECTS
+Monetary representation consistency
+
+[7] source=R70 type=Requirement hops=1 rel=AFFECTS
+Rounding rule consistency
+
+[8] source=G61 type=Gap hops=2 rel=AFFECTS > AFFECTS
+Monetary rounding inconsistency
+
+[9] source=G72 type=Gap hops=2 rel=REFINES > AFFECTS
+Financial source-of-truth ambiguity
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R80 targets consistency of monetary values across all system layers and contexts. The requirement establishes that financial outputs must align across billing contexts (reports, exported files, billing records), user-facing monetary totals must match persisted billing amounts exactly, and monetary values must be derived consistently across calculation, storage, and user-facing display. Key exceptions address currency presentation and privacy-preserving identifiers without overriding core pricing logic. Conflicts around display-friendly simplifications that produce visible mismatches with stored totals are excluded from test generation. The test suite validates authoritative monetary source consistency across multiple system layers and operational contexts.",,"Currency presentation and international billing are related operational concerns but must not silently override core pricing logic || Privacy-preserving identifier styles may be used in activity and audit views, but authorized reviewers should have access to controlled identity-resolution paths for audit purposes",Display-friendly simplifications in one layer that produce visible mismatches with stored totals derived differently,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R80 targets consistency of monetary values across all system layers and contexts. PRIMARY evidence (E1, E3, E4, E5) establishes that financial outputs must align across billing contexts and that user-facing totals must match persisted amounts. E5 explicitly states that currency presentation must not override core pricing logic. CONTEXT evidence (E7, E8, E9, E10) reinforces related consistency concerns (monetary representation, rounding, source-of-truth ambiguity) but does not override the primary target. Key gaps include fraction handling specifications, rounding rules, and the complete audit visibility model. The requirement is primarily about establishing a single authoritative source for monetary data across all system representations. Filtered abstract or low-relevance operative statements: Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records) | User-facing monetary totals must match persisted billing amounts exactly | Monetary values must be derived consistently across calculation, storage, and user-facing display",0,0,0,0
+9c37dbbe,R80,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R80_6,Verify billing records maintain consistent monetary values across contexts,"Feature: Authoritative monetary source consistency
+  Scenario: Billing records must maintain consistent monetary values
+    Given a billing record with amount 500.00 JPY
+    When the record is accessed from billing reports, exported files, and user dashboards
+    Then all contexts must report the same amount 500.00 JPY
+    And no context-specific transformation shall alter the monetary value","Ensures that a single billing record maintains consistent monetary representation across all operational contexts (reports, exports, dashboards), preventing context-specific divergence.",E1|E4,"Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records)",G61|G63|G72|G93c|R69|R70|R80,Authoritative monetary source consistency,Authoritative monetary source consistency,"[1] source=R80 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[2] source=R80 type=Requirement hops=0 rel=TARGET
+Authoritative monetary source consistency
+
+[3] source=R80 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[4] source=R80 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement hops=1 rel=AFFECTS
+Monetary representation consistency
+
+[7] source=R70 type=Requirement hops=1 rel=AFFECTS
+Rounding rule consistency
+
+[8] source=G61 type=Gap hops=2 rel=AFFECTS > AFFECTS
+Monetary rounding inconsistency
+
+[9] source=G72 type=Gap hops=2 rel=REFINES > AFFECTS
+Financial source-of-truth ambiguity
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R80 targets consistency of monetary values across all system layers and contexts. The requirement establishes that financial outputs must align across billing contexts (reports, exported files, billing records), user-facing monetary totals must match persisted billing amounts exactly, and monetary values must be derived consistently across calculation, storage, and user-facing display. Key exceptions address currency presentation and privacy-preserving identifiers without overriding core pricing logic. Conflicts around display-friendly simplifications that produce visible mismatches with stored totals are excluded from test generation. The test suite validates authoritative monetary source consistency across multiple system layers and operational contexts.",,"Currency presentation and international billing are related operational concerns but must not silently override core pricing logic || Privacy-preserving identifier styles may be used in activity and audit views, but authorized reviewers should have access to controlled identity-resolution paths for audit purposes",Display-friendly simplifications in one layer that produce visible mismatches with stored totals derived differently,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R80 targets consistency of monetary values across all system layers and contexts. PRIMARY evidence (E1, E3, E4, E5) establishes that financial outputs must align across billing contexts and that user-facing totals must match persisted amounts. E5 explicitly states that currency presentation must not override core pricing logic. CONTEXT evidence (E7, E8, E9, E10) reinforces related consistency concerns (monetary representation, rounding, source-of-truth ambiguity) but does not override the primary target. Key gaps include fraction handling specifications, rounding rules, and the complete audit visibility model. The requirement is primarily about establishing a single authoritative source for monetary data across all system representations. Filtered abstract or low-relevance operative statements: Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records) | User-facing monetary totals must match persisted billing amounts exactly | Monetary values must be derived consistently across calculation, storage, and user-facing display",0,0,0,0
+9c37dbbe,R80,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R80_7,Verify audit views preserve monetary consistency with authorized identity resolution,"Feature: Authoritative monetary source consistency
+  Scenario: Audit views must maintain monetary consistency with controlled identity access
+    Given a transaction with amount 175.25 USD in audit logs
+    When an authorized reviewer accesses the audit trail
+    Then the monetary amount must be 175.25 USD
+    And privacy-preserving identifier styles may be used, but authorized reviewers must have access to controlled identity-resolution paths
+    And the monetary value itself must not be obscured or altered for privacy purposes","Addresses the exception that privacy-preserving identifiers may be used in audit views, but ensures that monetary values remain consistent and that authorized reviewers have access to complete audit information.",E7|E8,"Privacy-preserving identifier styles may be used in activity and audit views, but authorized reviewers should have access to controlled identity-resolution paths for audit purposes",G61|G63|G72|G93c|R69|R70|R80,Authoritative monetary source consistency,Authoritative monetary source consistency,"[1] source=R80 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[2] source=R80 type=Requirement hops=0 rel=TARGET
+Authoritative monetary source consistency
+
+[3] source=R80 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[4] source=R80 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement hops=1 rel=AFFECTS
+Monetary representation consistency
+
+[7] source=R70 type=Requirement hops=1 rel=AFFECTS
+Rounding rule consistency
+
+[8] source=G61 type=Gap hops=2 rel=AFFECTS > AFFECTS
+Monetary rounding inconsistency
+
+[9] source=G72 type=Gap hops=2 rel=REFINES > AFFECTS
+Financial source-of-truth ambiguity
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R80 targets consistency of monetary values across all system layers and contexts. The requirement establishes that financial outputs must align across billing contexts (reports, exported files, billing records), user-facing monetary totals must match persisted billing amounts exactly, and monetary values must be derived consistently across calculation, storage, and user-facing display. Key exceptions address currency presentation and privacy-preserving identifiers without overriding core pricing logic. Conflicts around display-friendly simplifications that produce visible mismatches with stored totals are excluded from test generation. The test suite validates authoritative monetary source consistency across multiple system layers and operational contexts.",,"Currency presentation and international billing are related operational concerns but must not silently override core pricing logic || Privacy-preserving identifier styles may be used in activity and audit views, but authorized reviewers should have access to controlled identity-resolution paths for audit purposes",Display-friendly simplifications in one layer that produce visible mismatches with stored totals derived differently,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R80 targets consistency of monetary values across all system layers and contexts. PRIMARY evidence (E1, E3, E4, E5) establishes that financial outputs must align across billing contexts and that user-facing totals must match persisted amounts. E5 explicitly states that currency presentation must not override core pricing logic. CONTEXT evidence (E7, E8, E9, E10) reinforces related consistency concerns (monetary representation, rounding, source-of-truth ambiguity) but does not override the primary target. Key gaps include fraction handling specifications, rounding rules, and the complete audit visibility model. The requirement is primarily about establishing a single authoritative source for monetary data across all system representations. Filtered abstract or low-relevance operative statements: Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records) | User-facing monetary totals must match persisted billing amounts exactly | Monetary values must be derived consistently across calculation, storage, and user-facing display",0,0,0,0
+9c37dbbe,R80,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R80_8,Verify no silent monetary value overrides in multi-currency contexts,"Feature: Authoritative monetary source consistency
+  Scenario: Multi-currency contexts must not silently override monetary values
+    Given a transaction with authoritative amount 1000.00 USD
+    When the transaction is presented in a multi-currency billing context
+    Then the authoritative amount must remain 1000.00 USD
+    And any currency conversion must be explicit and traceable
+    And the core pricing logic must not be silently modified by currency handling","Validates that currency presentation in international billing contexts does not silently override the authoritative monetary source, maintaining transparency and consistency.",E5|E9,Currency presentation and international billing are related operational concerns but must not silently override core pricing logic,G61|G63|G72|G93c|R69|R70|R80,Authoritative monetary source consistency,Authoritative monetary source consistency,"[1] source=R80 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[2] source=R80 type=Requirement hops=0 rel=TARGET
+Authoritative monetary source consistency
+
+[3] source=R80 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[4] source=R80 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement hops=1 rel=AFFECTS
+Monetary representation consistency
+
+[7] source=R70 type=Requirement hops=1 rel=AFFECTS
+Rounding rule consistency
+
+[8] source=G61 type=Gap hops=2 rel=AFFECTS > AFFECTS
+Monetary rounding inconsistency
+
+[9] source=G72 type=Gap hops=2 rel=REFINES > AFFECTS
+Financial source-of-truth ambiguity
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R80 targets consistency of monetary values across all system layers and contexts. The requirement establishes that financial outputs must align across billing contexts (reports, exported files, billing records), user-facing monetary totals must match persisted billing amounts exactly, and monetary values must be derived consistently across calculation, storage, and user-facing display. Key exceptions address currency presentation and privacy-preserving identifiers without overriding core pricing logic. Conflicts around display-friendly simplifications that produce visible mismatches with stored totals are excluded from test generation. The test suite validates authoritative monetary source consistency across multiple system layers and operational contexts.",,"Currency presentation and international billing are related operational concerns but must not silently override core pricing logic || Privacy-preserving identifier styles may be used in activity and audit views, but authorized reviewers should have access to controlled identity-resolution paths for audit purposes",Display-friendly simplifications in one layer that produce visible mismatches with stored totals derived differently,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R80 targets consistency of monetary values across all system layers and contexts. PRIMARY evidence (E1, E3, E4, E5) establishes that financial outputs must align across billing contexts and that user-facing totals must match persisted amounts. E5 explicitly states that currency presentation must not override core pricing logic. CONTEXT evidence (E7, E8, E9, E10) reinforces related consistency concerns (monetary representation, rounding, source-of-truth ambiguity) but does not override the primary target. Key gaps include fraction handling specifications, rounding rules, and the complete audit visibility model. The requirement is primarily about establishing a single authoritative source for monetary data across all system representations. Filtered abstract or low-relevance operative statements: Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records) | User-facing monetary totals must match persisted billing amounts exactly | Monetary values must be derived consistently across calculation, storage, and user-facing display",0,0,0,0
+9c37dbbe,R80,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R80_9,Verify monetary source of truth is single and authoritative across all layers,"Feature: Authoritative monetary source consistency
+  Scenario: Establish single authoritative monetary source across system layers
+    Given a transaction with an authoritative monetary amount stored in the billing database
+    When the amount is accessed from calculation engines, storage systems, and user interfaces
+    Then all layers must derive from the same authoritative source
+    And no layer shall maintain an independent or conflicting monetary value
+    And any derived representations must be traceable back to the authoritative source",Directly addresses the primary requirement that R80 targets consistency of monetary values across all system layers by establishing a single authoritative source for monetary data.,E1|E3|E4|E5,"Monetary values must be derived consistently across calculation, storage, and user-facing display|Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records)",G61|G63|G72|G93c|R69|R70|R80,Authoritative monetary source consistency,Authoritative monetary source consistency,"[1] source=R80 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[2] source=R80 type=Requirement hops=0 rel=TARGET
+Authoritative monetary source consistency
+
+[3] source=R80 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[4] source=R80 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement hops=1 rel=AFFECTS
+Monetary representation consistency
+
+[7] source=R70 type=Requirement hops=1 rel=AFFECTS
+Rounding rule consistency
+
+[8] source=G61 type=Gap hops=2 rel=AFFECTS > AFFECTS
+Monetary rounding inconsistency
+
+[9] source=G72 type=Gap hops=2 rel=REFINES > AFFECTS
+Financial source-of-truth ambiguity
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R80 targets consistency of monetary values across all system layers and contexts. The requirement establishes that financial outputs must align across billing contexts (reports, exported files, billing records), user-facing monetary totals must match persisted billing amounts exactly, and monetary values must be derived consistently across calculation, storage, and user-facing display. Key exceptions address currency presentation and privacy-preserving identifiers without overriding core pricing logic. Conflicts around display-friendly simplifications that produce visible mismatches with stored totals are excluded from test generation. The test suite validates authoritative monetary source consistency across multiple system layers and operational contexts.",,"Currency presentation and international billing are related operational concerns but must not silently override core pricing logic || Privacy-preserving identifier styles may be used in activity and audit views, but authorized reviewers should have access to controlled identity-resolution paths for audit purposes",Display-friendly simplifications in one layer that produce visible mismatches with stored totals derived differently,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R80 targets consistency of monetary values across all system layers and contexts. PRIMARY evidence (E1, E3, E4, E5) establishes that financial outputs must align across billing contexts and that user-facing totals must match persisted amounts. E5 explicitly states that currency presentation must not override core pricing logic. CONTEXT evidence (E7, E8, E9, E10) reinforces related consistency concerns (monetary representation, rounding, source-of-truth ambiguity) but does not override the primary target. Key gaps include fraction handling specifications, rounding rules, and the complete audit visibility model. The requirement is primarily about establishing a single authoritative source for monetary data across all system representations. Filtered abstract or low-relevance operative statements: Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records) | User-facing monetary totals must match persisted billing amounts exactly | Monetary values must be derived consistently across calculation, storage, and user-facing display",0,0,0,0
+9c37dbbe,R80,graph,full,anthropic,claude-haiku-4-5-20251001,2,2026-07-03.v3,R80_10,Verify monetary representation consistency prevents source-of-truth ambiguity,"Feature: Authoritative monetary source consistency
+  Scenario: Monetary representation must eliminate source-of-truth ambiguity
+    Given multiple system components that handle monetary values
+    When a monetary amount is queried from different components
+    Then all components must return the same authoritative value
+    And there must be no ambiguity about which component holds the source of truth
+    And any discrepancies must be detected and flagged as data integrity issues","Addresses the context evidence (E10) regarding source-of-truth ambiguity in monetary representation, ensuring that the authoritative monetary source is unambiguous across all system components.",E1|E10,"Monetary values must be derived consistently across calculation, storage, and user-facing display",G61|G63|G72|G93c|R69|R70|R80,Authoritative monetary source consistency,Authoritative monetary source consistency,"[1] source=R80 type=Requirement/SrcChunk hops=0 chunk=c9549ababe52be5f doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+From: internal_audit@toolchain.com
+Date: 2026-03-08 14:00
+Subject: Review findings on reporting consistency
+
+Hi Dev Team,
+
+During our recent reporting review, we found several consistency issues that need clarification before the reporting package can be considered reliable for audit use.
+
+First, the financial outputs do not appear to align cleanly across all billing contexts. In some cases, the figures shown in reports, exported files, and billing records seem to reflect different presentation or calculation assumptions.
+
+Second, the activity and audit views currently favor a privacy-preserving identifier style that makes operational review harder for non-technical auditors. We need to confirm whether this is the intended audit model, or whether authorized reviewers should have access to a controlled identity-resolution path.
+
+Third, exported reporting artifacts do not always appear to match the same underlying interpretation used elsewhere in the platform, which raises a broader question about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visib
+
+[2] source=R80 type=Requirement hops=0 rel=TARGET
+Authoritative monetary source consistency
+
+[3] source=R80 type=Requirement/SrcChunk hops=0 chunk=ebea956274025791 doc=JIRA-Payment.md rel=TARGET
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[4] source=R80 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=2 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[6] source=R69 type=Requirement hops=1 rel=AFFECTS
+Monetary representation consistency
+
+[7] source=R70 type=Requirement hops=1 rel=AFFECTS
+Rounding rule consistency
+
+[8] source=G61 type=Gap hops=2 rel=AFFECTS > AFFECTS
+Monetary rounding inconsistency
+
+[9] source=G72 type=Gap hops=2 rel=REFINES > AFFECTS
+Financial source-of-truth ambiguity
+
+[10] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","R80 targets consistency of monetary values across all system layers and contexts. The requirement establishes that financial outputs must align across billing contexts (reports, exported files, billing records), user-facing monetary totals must match persisted billing amounts exactly, and monetary values must be derived consistently across calculation, storage, and user-facing display. Key exceptions address currency presentation and privacy-preserving identifiers without overriding core pricing logic. Conflicts around display-friendly simplifications that produce visible mismatches with stored totals are excluded from test generation. The test suite validates authoritative monetary source consistency across multiple system layers and operational contexts.",,"Currency presentation and international billing are related operational concerns but must not silently override core pricing logic || Privacy-preserving identifier styles may be used in activity and audit views, but authorized reviewers should have access to controlled identity-resolution paths for audit purposes",Display-friendly simplifications in one layer that produce visible mismatches with stored totals derived differently,,E1|E2|E3|E4|E5|E6|E7|E8|E9|E10,"R80 targets consistency of monetary values across all system layers and contexts. PRIMARY evidence (E1, E3, E4, E5) establishes that financial outputs must align across billing contexts and that user-facing totals must match persisted amounts. E5 explicitly states that currency presentation must not override core pricing logic. CONTEXT evidence (E7, E8, E9, E10) reinforces related consistency concerns (monetary representation, rounding, source-of-truth ambiguity) but does not override the primary target. Key gaps include fraction handling specifications, rounding rules, and the complete audit visibility model. The requirement is primarily about establishing a single authoritative source for monetary data across all system representations. Filtered abstract or low-relevance operative statements: Financial outputs must align consistently across all billing contexts (reports, exported files, and billing records) | User-facing monetary totals must match persisted billing amounts exactly | Monetary values must be derived consistently across calculation, storage, and user-facing display",0,0,0,0

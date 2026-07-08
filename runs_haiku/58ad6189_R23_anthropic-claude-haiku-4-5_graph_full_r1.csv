@@ -1,0 +1,2408 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+58ad6189,R23,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R23_1,Authorized OPERATOR user approves rent request,"Feature: Rent Approval Workflow
+  Scenario: OPERATOR user successfully approves a rent request
+    Given a rent request exists in Pending status
+    And the current user has OPERATOR role
+    When the user approves the rent request
+    Then the rent status is updated to Approved
+    And the approval action is recorded",Validates that users with OPERATOR role can approve rent requests and that the system correctly updates the rent status to Approved as specified in the operative context.,E1|E2|E4,Authorized users (OPERATOR or ADMIN roles) can approve rent requests|Rent status is updated to Approved when a rent request is approved,3453478160ad1947|7b0e51a20f72afa4|9dd628a82a09c2ba|A7|G22|G44|G81b|I21|I23|I24|I71|R21|R22|R23|R24|R25|R26|R29|R49|R51,Rent approval workflow,Rent approval workflow,"[1] source=R23 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R23 type=Requirement hops=0 rel=TARGET
+Rent approval workflow
+
+[3] source=R23 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[5] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[6] source=R26 type=Requirement/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=A7 type=Actor/SrcChunk hops=2 chunk=4e2c8b7096351d77 doc=JIRA-Notifications.md rel=IN_DOC > IN_DOC
+ ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configurable timing so deployment teams can adjust reminder lead times without code changes."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-504"",
+    ""summary"": ""Administrative Notification Flow"",
+    ""description"": ""Notify authorized operational users about new requests, approval-related workload, and system-side issues that affect rental processing."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-505"",
+    ""summary"": ""Notification Content Templates"",
+    ""description"": ""Implement the notification templates so they include the key rental details required by the current specification, while keeping field naming consistent across the product and warehouse-facing terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-25T14:00:00Z"",
+        ""text"": ""Please confirm which identifier wording should appear in outbound messages. The specification and the warehouse-facing screens do not use exactly th
+
+[9] source=I23 type=Implementation hops=1 rel=IMPLEMENTS
+Approval RBAC
+
+[10] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[11] source=7b0e51a20f72afa4 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01.md
+
+[12] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[13] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[14] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[15] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[16] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[17] source=I71 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent report generation logic
+
+[18] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[19] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[20] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[21] source=R25 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+End-of-rent lifecycle transition
+
+[22] source=R26 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent cancellation rules
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R49 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Requested-rent reservation semantics
+
+[25] source=R51 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Category-specific post-rent buffer
+
+[26] source=I71 type=Implementation/SrcChunk hops=2 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega","Gherkin test suite for R23 (Rent approval workflow) covering authorization, status updates, and role-based access control for rent request approvals. Tests validate that authorized OPERATOR and ADMIN users can approve rent requests with proper status transitions, while unauthorized users are prevented from performing approvals.",## 2.3.3 The system shall update the rent status to Approved when a rent request is approved. || Authorized users (OPERATOR or ADMIN roles) can approve rent requests || Rent status is updated to Approved when a rent request is approved,"Early operator cancellation may have had a tolerance window exemption in earlier lifecycle guidance, but current status is unclear","v1.2 specifies Maintenance status upon rental end date, while earlier version (v1.0/v1.1) specified Completed status",,E1|E2|E3|E4|E5|E6|E7|E8|E9,"R23 targets the rent approval workflow specifically. Primary evidence establishes that authorized users with OPERATOR or ADMIN roles can approve/reject requests, with status updates and unauthorized user prevention. E4 confirms RBAC integration. E6 and E7 reveal a lifecycle version conflict (v1.2 Maintenance vs. earlier Completed status) and an unresolved penalty exemption question. E9 signals an implementation (I23: Approval RBAC) that directly supports the approval authorization mechanism. Filtered abstract or low-relevance operative statements: Unauthorized users are prevented from approving or rejecting rent requests | Rent approval workflow is part of the rent lifecycle management process",1,0,0,0
+58ad6189,R23,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R23_2,Authorized ADMIN user approves rent request,"Feature: Rent Approval Workflow
+  Scenario: ADMIN user successfully approves a rent request
+    Given a rent request exists in Pending status
+    And the current user has ADMIN role
+    When the user approves the rent request
+    Then the rent status is updated to Approved
+    And the approval action is recorded","Validates that users with ADMIN role can approve rent requests and that the system correctly updates the rent status to Approved, ensuring both authorized roles have approval capability.",E1|E2|E4,Authorized users (OPERATOR or ADMIN roles) can approve rent requests|Rent status is updated to Approved when a rent request is approved,3453478160ad1947|7b0e51a20f72afa4|9dd628a82a09c2ba|A7|G22|G44|G81b|I21|I23|I24|I71|R21|R22|R23|R24|R25|R26|R29|R49|R51,Rent approval workflow,Rent approval workflow,"[1] source=R23 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R23 type=Requirement hops=0 rel=TARGET
+Rent approval workflow
+
+[3] source=R23 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[5] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[6] source=R26 type=Requirement/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=A7 type=Actor/SrcChunk hops=2 chunk=4e2c8b7096351d77 doc=JIRA-Notifications.md rel=IN_DOC > IN_DOC
+ ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configurable timing so deployment teams can adjust reminder lead times without code changes."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-504"",
+    ""summary"": ""Administrative Notification Flow"",
+    ""description"": ""Notify authorized operational users about new requests, approval-related workload, and system-side issues that affect rental processing."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-505"",
+    ""summary"": ""Notification Content Templates"",
+    ""description"": ""Implement the notification templates so they include the key rental details required by the current specification, while keeping field naming consistent across the product and warehouse-facing terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-25T14:00:00Z"",
+        ""text"": ""Please confirm which identifier wording should appear in outbound messages. The specification and the warehouse-facing screens do not use exactly th
+
+[9] source=I23 type=Implementation hops=1 rel=IMPLEMENTS
+Approval RBAC
+
+[10] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[11] source=7b0e51a20f72afa4 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01.md
+
+[12] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[13] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[14] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[15] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[16] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[17] source=I71 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent report generation logic
+
+[18] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[19] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[20] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[21] source=R25 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+End-of-rent lifecycle transition
+
+[22] source=R26 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent cancellation rules
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R49 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Requested-rent reservation semantics
+
+[25] source=R51 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Category-specific post-rent buffer
+
+[26] source=I71 type=Implementation/SrcChunk hops=2 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega","Gherkin test suite for R23 (Rent approval workflow) covering authorization, status updates, and role-based access control for rent request approvals. Tests validate that authorized OPERATOR and ADMIN users can approve rent requests with proper status transitions, while unauthorized users are prevented from performing approvals.",## 2.3.3 The system shall update the rent status to Approved when a rent request is approved. || Authorized users (OPERATOR or ADMIN roles) can approve rent requests || Rent status is updated to Approved when a rent request is approved,"Early operator cancellation may have had a tolerance window exemption in earlier lifecycle guidance, but current status is unclear","v1.2 specifies Maintenance status upon rental end date, while earlier version (v1.0/v1.1) specified Completed status",,E1|E2|E3|E4|E5|E6|E7|E8|E9,"R23 targets the rent approval workflow specifically. Primary evidence establishes that authorized users with OPERATOR or ADMIN roles can approve/reject requests, with status updates and unauthorized user prevention. E4 confirms RBAC integration. E6 and E7 reveal a lifecycle version conflict (v1.2 Maintenance vs. earlier Completed status) and an unresolved penalty exemption question. E9 signals an implementation (I23: Approval RBAC) that directly supports the approval authorization mechanism. Filtered abstract or low-relevance operative statements: Unauthorized users are prevented from approving or rejecting rent requests | Rent approval workflow is part of the rent lifecycle management process",1,0,0,0
+58ad6189,R23,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R23_3,Unauthorized user cannot approve rent request,"Feature: Rent Approval Workflow
+  Scenario: User without authorization cannot approve rent request
+    Given a rent request exists in Pending status
+    And the current user has USER role (not OPERATOR or ADMIN)
+    When the user attempts to approve the rent request
+    Then the approval action is denied
+    And the rent status remains Pending
+    And an authorization error is returned","Validates that the system prevents unauthorized users from approving rent requests, enforcing role-based access control as specified in the operative context.",E4|E9,Authorized users (OPERATOR or ADMIN roles) can approve rent requests|Unauthorized users are prevented from approving or rejecting rent requests,3453478160ad1947|7b0e51a20f72afa4|9dd628a82a09c2ba|A7|G22|G44|G81b|I21|I23|I24|I71|R21|R22|R23|R24|R25|R26|R29|R49|R51,Rent approval workflow,Rent approval workflow,"[1] source=R23 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R23 type=Requirement hops=0 rel=TARGET
+Rent approval workflow
+
+[3] source=R23 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[5] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[6] source=R26 type=Requirement/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=A7 type=Actor/SrcChunk hops=2 chunk=4e2c8b7096351d77 doc=JIRA-Notifications.md rel=IN_DOC > IN_DOC
+ ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configurable timing so deployment teams can adjust reminder lead times without code changes."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-504"",
+    ""summary"": ""Administrative Notification Flow"",
+    ""description"": ""Notify authorized operational users about new requests, approval-related workload, and system-side issues that affect rental processing."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-505"",
+    ""summary"": ""Notification Content Templates"",
+    ""description"": ""Implement the notification templates so they include the key rental details required by the current specification, while keeping field naming consistent across the product and warehouse-facing terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-25T14:00:00Z"",
+        ""text"": ""Please confirm which identifier wording should appear in outbound messages. The specification and the warehouse-facing screens do not use exactly th
+
+[9] source=I23 type=Implementation hops=1 rel=IMPLEMENTS
+Approval RBAC
+
+[10] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[11] source=7b0e51a20f72afa4 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01.md
+
+[12] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[13] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[14] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[15] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[16] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[17] source=I71 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent report generation logic
+
+[18] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[19] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[20] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[21] source=R25 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+End-of-rent lifecycle transition
+
+[22] source=R26 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent cancellation rules
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R49 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Requested-rent reservation semantics
+
+[25] source=R51 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Category-specific post-rent buffer
+
+[26] source=I71 type=Implementation/SrcChunk hops=2 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega","Gherkin test suite for R23 (Rent approval workflow) covering authorization, status updates, and role-based access control for rent request approvals. Tests validate that authorized OPERATOR and ADMIN users can approve rent requests with proper status transitions, while unauthorized users are prevented from performing approvals.",## 2.3.3 The system shall update the rent status to Approved when a rent request is approved. || Authorized users (OPERATOR or ADMIN roles) can approve rent requests || Rent status is updated to Approved when a rent request is approved,"Early operator cancellation may have had a tolerance window exemption in earlier lifecycle guidance, but current status is unclear","v1.2 specifies Maintenance status upon rental end date, while earlier version (v1.0/v1.1) specified Completed status",,E1|E2|E3|E4|E5|E6|E7|E8|E9,"R23 targets the rent approval workflow specifically. Primary evidence establishes that authorized users with OPERATOR or ADMIN roles can approve/reject requests, with status updates and unauthorized user prevention. E4 confirms RBAC integration. E6 and E7 reveal a lifecycle version conflict (v1.2 Maintenance vs. earlier Completed status) and an unresolved penalty exemption question. E9 signals an implementation (I23: Approval RBAC) that directly supports the approval authorization mechanism. Filtered abstract or low-relevance operative statements: Unauthorized users are prevented from approving or rejecting rent requests | Rent approval workflow is part of the rent lifecycle management process",1,0,0,0
+58ad6189,R23,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R23_4,Rent status transitions from Pending to Approved,"Feature: Rent Approval Workflow
+  Scenario: Rent status correctly transitions to Approved
+    Given a rent request with status Pending
+    And an authorized OPERATOR user
+    When the user approves the rent request
+    Then the rent status changes from Pending to Approved
+    And the status change is persisted in the system","Directly validates the core requirement that the system updates rent status to Approved when a rent request is approved, ensuring proper state management.",E1|E2|E3,The system shall update the rent status to Approved when a rent request is approved|Rent status is updated to Approved when a rent request is approved,3453478160ad1947|7b0e51a20f72afa4|9dd628a82a09c2ba|A7|G22|G44|G81b|I21|I23|I24|I71|R21|R22|R23|R24|R25|R26|R29|R49|R51,Rent approval workflow,Rent approval workflow,"[1] source=R23 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R23 type=Requirement hops=0 rel=TARGET
+Rent approval workflow
+
+[3] source=R23 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[5] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[6] source=R26 type=Requirement/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=A7 type=Actor/SrcChunk hops=2 chunk=4e2c8b7096351d77 doc=JIRA-Notifications.md rel=IN_DOC > IN_DOC
+ ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configurable timing so deployment teams can adjust reminder lead times without code changes."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-504"",
+    ""summary"": ""Administrative Notification Flow"",
+    ""description"": ""Notify authorized operational users about new requests, approval-related workload, and system-side issues that affect rental processing."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-505"",
+    ""summary"": ""Notification Content Templates"",
+    ""description"": ""Implement the notification templates so they include the key rental details required by the current specification, while keeping field naming consistent across the product and warehouse-facing terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-25T14:00:00Z"",
+        ""text"": ""Please confirm which identifier wording should appear in outbound messages. The specification and the warehouse-facing screens do not use exactly th
+
+[9] source=I23 type=Implementation hops=1 rel=IMPLEMENTS
+Approval RBAC
+
+[10] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[11] source=7b0e51a20f72afa4 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01.md
+
+[12] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[13] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[14] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[15] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[16] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[17] source=I71 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent report generation logic
+
+[18] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[19] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[20] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[21] source=R25 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+End-of-rent lifecycle transition
+
+[22] source=R26 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent cancellation rules
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R49 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Requested-rent reservation semantics
+
+[25] source=R51 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Category-specific post-rent buffer
+
+[26] source=I71 type=Implementation/SrcChunk hops=2 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega","Gherkin test suite for R23 (Rent approval workflow) covering authorization, status updates, and role-based access control for rent request approvals. Tests validate that authorized OPERATOR and ADMIN users can approve rent requests with proper status transitions, while unauthorized users are prevented from performing approvals.",## 2.3.3 The system shall update the rent status to Approved when a rent request is approved. || Authorized users (OPERATOR or ADMIN roles) can approve rent requests || Rent status is updated to Approved when a rent request is approved,"Early operator cancellation may have had a tolerance window exemption in earlier lifecycle guidance, but current status is unclear","v1.2 specifies Maintenance status upon rental end date, while earlier version (v1.0/v1.1) specified Completed status",,E1|E2|E3|E4|E5|E6|E7|E8|E9,"R23 targets the rent approval workflow specifically. Primary evidence establishes that authorized users with OPERATOR or ADMIN roles can approve/reject requests, with status updates and unauthorized user prevention. E4 confirms RBAC integration. E6 and E7 reveal a lifecycle version conflict (v1.2 Maintenance vs. earlier Completed status) and an unresolved penalty exemption question. E9 signals an implementation (I23: Approval RBAC) that directly supports the approval authorization mechanism. Filtered abstract or low-relevance operative statements: Unauthorized users are prevented from approving or rejecting rent requests | Rent approval workflow is part of the rent lifecycle management process",1,0,0,0
+58ad6189,R23,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R23_5,Multiple authorized users can approve different rent requests,"Feature: Rent Approval Workflow
+  Scenario: Multiple authorized users approve different rent requests
+    Given two rent requests in Pending status
+    And an OPERATOR user and an ADMIN user
+    When the OPERATOR user approves the first rent request
+    And the ADMIN user approves the second rent request
+    Then both rent requests have status Approved
+    And each approval is independently recorded","Validates that the approval workflow supports multiple authorized users with different roles approving different requests concurrently, ensuring the system scales appropriately.",E1|E2|E4,Authorized users (OPERATOR or ADMIN roles) can approve rent requests|Rent status is updated to Approved when a rent request is approved,3453478160ad1947|7b0e51a20f72afa4|9dd628a82a09c2ba|A7|G22|G44|G81b|I21|I23|I24|I71|R21|R22|R23|R24|R25|R26|R29|R49|R51,Rent approval workflow,Rent approval workflow,"[1] source=R23 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R23 type=Requirement hops=0 rel=TARGET
+Rent approval workflow
+
+[3] source=R23 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[5] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[6] source=R26 type=Requirement/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=A7 type=Actor/SrcChunk hops=2 chunk=4e2c8b7096351d77 doc=JIRA-Notifications.md rel=IN_DOC > IN_DOC
+ ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configurable timing so deployment teams can adjust reminder lead times without code changes."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-504"",
+    ""summary"": ""Administrative Notification Flow"",
+    ""description"": ""Notify authorized operational users about new requests, approval-related workload, and system-side issues that affect rental processing."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-505"",
+    ""summary"": ""Notification Content Templates"",
+    ""description"": ""Implement the notification templates so they include the key rental details required by the current specification, while keeping field naming consistent across the product and warehouse-facing terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-25T14:00:00Z"",
+        ""text"": ""Please confirm which identifier wording should appear in outbound messages. The specification and the warehouse-facing screens do not use exactly th
+
+[9] source=I23 type=Implementation hops=1 rel=IMPLEMENTS
+Approval RBAC
+
+[10] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[11] source=7b0e51a20f72afa4 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01.md
+
+[12] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[13] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[14] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[15] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[16] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[17] source=I71 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent report generation logic
+
+[18] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[19] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[20] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[21] source=R25 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+End-of-rent lifecycle transition
+
+[22] source=R26 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent cancellation rules
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R49 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Requested-rent reservation semantics
+
+[25] source=R51 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Category-specific post-rent buffer
+
+[26] source=I71 type=Implementation/SrcChunk hops=2 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega","Gherkin test suite for R23 (Rent approval workflow) covering authorization, status updates, and role-based access control for rent request approvals. Tests validate that authorized OPERATOR and ADMIN users can approve rent requests with proper status transitions, while unauthorized users are prevented from performing approvals.",## 2.3.3 The system shall update the rent status to Approved when a rent request is approved. || Authorized users (OPERATOR or ADMIN roles) can approve rent requests || Rent status is updated to Approved when a rent request is approved,"Early operator cancellation may have had a tolerance window exemption in earlier lifecycle guidance, but current status is unclear","v1.2 specifies Maintenance status upon rental end date, while earlier version (v1.0/v1.1) specified Completed status",,E1|E2|E3|E4|E5|E6|E7|E8|E9,"R23 targets the rent approval workflow specifically. Primary evidence establishes that authorized users with OPERATOR or ADMIN roles can approve/reject requests, with status updates and unauthorized user prevention. E4 confirms RBAC integration. E6 and E7 reveal a lifecycle version conflict (v1.2 Maintenance vs. earlier Completed status) and an unresolved penalty exemption question. E9 signals an implementation (I23: Approval RBAC) that directly supports the approval authorization mechanism. Filtered abstract or low-relevance operative statements: Unauthorized users are prevented from approving or rejecting rent requests | Rent approval workflow is part of the rent lifecycle management process",1,0,0,0
+58ad6189,R23,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R23_6,RBAC integration prevents role escalation in approval,"Feature: Rent Approval Workflow
+  Scenario: Role-based access control prevents unauthorized approval
+    Given a rent request in Pending status
+    And a user with limited permissions (not OPERATOR or ADMIN)
+    When the user attempts to approve the rent request
+    Then the system denies the approval based on RBAC rules
+    And the rent status remains unchanged
+    And an audit log entry is created for the denied attempt","Validates that RBAC integration (E4) properly enforces role-based restrictions on approval actions, preventing unauthorized users from escalating privileges.",E4|E9,Authorized users (OPERATOR or ADMIN roles) can approve rent requests|Unauthorized users are prevented from approving or rejecting rent requests,3453478160ad1947|7b0e51a20f72afa4|9dd628a82a09c2ba|A7|G22|G44|G81b|I21|I23|I24|I71|R21|R22|R23|R24|R25|R26|R29|R49|R51,Rent approval workflow,Rent approval workflow,"[1] source=R23 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R23 type=Requirement hops=0 rel=TARGET
+Rent approval workflow
+
+[3] source=R23 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[5] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[6] source=R26 type=Requirement/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=A7 type=Actor/SrcChunk hops=2 chunk=4e2c8b7096351d77 doc=JIRA-Notifications.md rel=IN_DOC > IN_DOC
+ ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configurable timing so deployment teams can adjust reminder lead times without code changes."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-504"",
+    ""summary"": ""Administrative Notification Flow"",
+    ""description"": ""Notify authorized operational users about new requests, approval-related workload, and system-side issues that affect rental processing."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-505"",
+    ""summary"": ""Notification Content Templates"",
+    ""description"": ""Implement the notification templates so they include the key rental details required by the current specification, while keeping field naming consistent across the product and warehouse-facing terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-25T14:00:00Z"",
+        ""text"": ""Please confirm which identifier wording should appear in outbound messages. The specification and the warehouse-facing screens do not use exactly th
+
+[9] source=I23 type=Implementation hops=1 rel=IMPLEMENTS
+Approval RBAC
+
+[10] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[11] source=7b0e51a20f72afa4 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01.md
+
+[12] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[13] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[14] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[15] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[16] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[17] source=I71 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent report generation logic
+
+[18] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[19] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[20] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[21] source=R25 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+End-of-rent lifecycle transition
+
+[22] source=R26 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent cancellation rules
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R49 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Requested-rent reservation semantics
+
+[25] source=R51 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Category-specific post-rent buffer
+
+[26] source=I71 type=Implementation/SrcChunk hops=2 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega","Gherkin test suite for R23 (Rent approval workflow) covering authorization, status updates, and role-based access control for rent request approvals. Tests validate that authorized OPERATOR and ADMIN users can approve rent requests with proper status transitions, while unauthorized users are prevented from performing approvals.",## 2.3.3 The system shall update the rent status to Approved when a rent request is approved. || Authorized users (OPERATOR or ADMIN roles) can approve rent requests || Rent status is updated to Approved when a rent request is approved,"Early operator cancellation may have had a tolerance window exemption in earlier lifecycle guidance, but current status is unclear","v1.2 specifies Maintenance status upon rental end date, while earlier version (v1.0/v1.1) specified Completed status",,E1|E2|E3|E4|E5|E6|E7|E8|E9,"R23 targets the rent approval workflow specifically. Primary evidence establishes that authorized users with OPERATOR or ADMIN roles can approve/reject requests, with status updates and unauthorized user prevention. E4 confirms RBAC integration. E6 and E7 reveal a lifecycle version conflict (v1.2 Maintenance vs. earlier Completed status) and an unresolved penalty exemption question. E9 signals an implementation (I23: Approval RBAC) that directly supports the approval authorization mechanism. Filtered abstract or low-relevance operative statements: Unauthorized users are prevented from approving or rejecting rent requests | Rent approval workflow is part of the rent lifecycle management process",1,0,0,0
+58ad6189,R23,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R23_7,Approval action is idempotent,"Feature: Rent Approval Workflow
+  Scenario: Approving an already approved rent request
+    Given a rent request with status Approved
+    And an authorized OPERATOR user
+    When the user approves the rent request again
+    Then the rent status remains Approved
+    And no duplicate approval records are created","Validates that the approval workflow handles idempotent operations correctly, preventing duplicate approvals and maintaining data integrity.",E1|E2,Rent status is updated to Approved when a rent request is approved,3453478160ad1947|7b0e51a20f72afa4|9dd628a82a09c2ba|A7|G22|G44|G81b|I21|I23|I24|I71|R21|R22|R23|R24|R25|R26|R29|R49|R51,Rent approval workflow,Rent approval workflow,"[1] source=R23 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R23 type=Requirement hops=0 rel=TARGET
+Rent approval workflow
+
+[3] source=R23 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[5] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[6] source=R26 type=Requirement/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=A7 type=Actor/SrcChunk hops=2 chunk=4e2c8b7096351d77 doc=JIRA-Notifications.md rel=IN_DOC > IN_DOC
+ ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configurable timing so deployment teams can adjust reminder lead times without code changes."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-504"",
+    ""summary"": ""Administrative Notification Flow"",
+    ""description"": ""Notify authorized operational users about new requests, approval-related workload, and system-side issues that affect rental processing."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-505"",
+    ""summary"": ""Notification Content Templates"",
+    ""description"": ""Implement the notification templates so they include the key rental details required by the current specification, while keeping field naming consistent across the product and warehouse-facing terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-25T14:00:00Z"",
+        ""text"": ""Please confirm which identifier wording should appear in outbound messages. The specification and the warehouse-facing screens do not use exactly th
+
+[9] source=I23 type=Implementation hops=1 rel=IMPLEMENTS
+Approval RBAC
+
+[10] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[11] source=7b0e51a20f72afa4 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01.md
+
+[12] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[13] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[14] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[15] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[16] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[17] source=I71 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent report generation logic
+
+[18] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[19] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[20] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[21] source=R25 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+End-of-rent lifecycle transition
+
+[22] source=R26 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent cancellation rules
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R49 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Requested-rent reservation semantics
+
+[25] source=R51 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Category-specific post-rent buffer
+
+[26] source=I71 type=Implementation/SrcChunk hops=2 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega","Gherkin test suite for R23 (Rent approval workflow) covering authorization, status updates, and role-based access control for rent request approvals. Tests validate that authorized OPERATOR and ADMIN users can approve rent requests with proper status transitions, while unauthorized users are prevented from performing approvals.",## 2.3.3 The system shall update the rent status to Approved when a rent request is approved. || Authorized users (OPERATOR or ADMIN roles) can approve rent requests || Rent status is updated to Approved when a rent request is approved,"Early operator cancellation may have had a tolerance window exemption in earlier lifecycle guidance, but current status is unclear","v1.2 specifies Maintenance status upon rental end date, while earlier version (v1.0/v1.1) specified Completed status",,E1|E2|E3|E4|E5|E6|E7|E8|E9,"R23 targets the rent approval workflow specifically. Primary evidence establishes that authorized users with OPERATOR or ADMIN roles can approve/reject requests, with status updates and unauthorized user prevention. E4 confirms RBAC integration. E6 and E7 reveal a lifecycle version conflict (v1.2 Maintenance vs. earlier Completed status) and an unresolved penalty exemption question. E9 signals an implementation (I23: Approval RBAC) that directly supports the approval authorization mechanism. Filtered abstract or low-relevance operative statements: Unauthorized users are prevented from approving or rejecting rent requests | Rent approval workflow is part of the rent lifecycle management process",1,0,0,0
+58ad6189,R23,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R23_8,Approval workflow integrates with implementation I23,"Feature: Rent Approval Workflow
+  Scenario: Approval RBAC implementation is active
+    Given the Approval RBAC implementation (I23) is deployed
+    And a rent request in Pending status
+    And an authorized OPERATOR user
+    When the user approves the rent request
+    Then the approval is processed through the RBAC mechanism
+    And the rent status is updated to Approved
+    And the action is logged with role information",Validates that the approval workflow correctly integrates with the Approval RBAC implementation (I23) that directly supports the approval authorization mechanism.,E9|E4,Authorized users (OPERATOR or ADMIN roles) can approve rent requests|Rent status is updated to Approved when a rent request is approved,3453478160ad1947|7b0e51a20f72afa4|9dd628a82a09c2ba|A7|G22|G44|G81b|I21|I23|I24|I71|R21|R22|R23|R24|R25|R26|R29|R49|R51,Rent approval workflow,Rent approval workflow,"[1] source=R23 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R23 type=Requirement hops=0 rel=TARGET
+Rent approval workflow
+
+[3] source=R23 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[5] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[6] source=R26 type=Requirement/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=A7 type=Actor/SrcChunk hops=2 chunk=4e2c8b7096351d77 doc=JIRA-Notifications.md rel=IN_DOC > IN_DOC
+ ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configurable timing so deployment teams can adjust reminder lead times without code changes."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-504"",
+    ""summary"": ""Administrative Notification Flow"",
+    ""description"": ""Notify authorized operational users about new requests, approval-related workload, and system-side issues that affect rental processing."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-505"",
+    ""summary"": ""Notification Content Templates"",
+    ""description"": ""Implement the notification templates so they include the key rental details required by the current specification, while keeping field naming consistent across the product and warehouse-facing terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-25T14:00:00Z"",
+        ""text"": ""Please confirm which identifier wording should appear in outbound messages. The specification and the warehouse-facing screens do not use exactly th
+
+[9] source=I23 type=Implementation hops=1 rel=IMPLEMENTS
+Approval RBAC
+
+[10] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[11] source=7b0e51a20f72afa4 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01.md
+
+[12] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[13] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[14] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[15] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[16] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[17] source=I71 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent report generation logic
+
+[18] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[19] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[20] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[21] source=R25 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+End-of-rent lifecycle transition
+
+[22] source=R26 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent cancellation rules
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R49 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Requested-rent reservation semantics
+
+[25] source=R51 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Category-specific post-rent buffer
+
+[26] source=I71 type=Implementation/SrcChunk hops=2 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega","Gherkin test suite for R23 (Rent approval workflow) covering authorization, status updates, and role-based access control for rent request approvals. Tests validate that authorized OPERATOR and ADMIN users can approve rent requests with proper status transitions, while unauthorized users are prevented from performing approvals.",## 2.3.3 The system shall update the rent status to Approved when a rent request is approved. || Authorized users (OPERATOR or ADMIN roles) can approve rent requests || Rent status is updated to Approved when a rent request is approved,"Early operator cancellation may have had a tolerance window exemption in earlier lifecycle guidance, but current status is unclear","v1.2 specifies Maintenance status upon rental end date, while earlier version (v1.0/v1.1) specified Completed status",,E1|E2|E3|E4|E5|E6|E7|E8|E9,"R23 targets the rent approval workflow specifically. Primary evidence establishes that authorized users with OPERATOR or ADMIN roles can approve/reject requests, with status updates and unauthorized user prevention. E4 confirms RBAC integration. E6 and E7 reveal a lifecycle version conflict (v1.2 Maintenance vs. earlier Completed status) and an unresolved penalty exemption question. E9 signals an implementation (I23: Approval RBAC) that directly supports the approval authorization mechanism. Filtered abstract or low-relevance operative statements: Unauthorized users are prevented from approving or rejecting rent requests | Rent approval workflow is part of the rent lifecycle management process",1,0,0,0
+58ad6189,R23,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R23_9,Approval workflow is part of rent lifecycle management,"Feature: Rent Approval Workflow
+  Scenario: Approval workflow integrates with rent lifecycle
+    Given a rent request in Pending status
+    And an authorized ADMIN user
+    When the user approves the rent request
+    Then the rent status is updated to Approved
+    And the rent enters the next phase of the lifecycle
+    And the rent lifecycle state is consistent","Validates that the approval workflow functions as part of the broader rent lifecycle management process, ensuring proper integration with other lifecycle phases.",E1|E2|E3,Rent approval workflow is part of the rent lifecycle management process|Rent status is updated to Approved when a rent request is approved,3453478160ad1947|7b0e51a20f72afa4|9dd628a82a09c2ba|A7|G22|G44|G81b|I21|I23|I24|I71|R21|R22|R23|R24|R25|R26|R29|R49|R51,Rent approval workflow,Rent approval workflow,"[1] source=R23 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R23 type=Requirement hops=0 rel=TARGET
+Rent approval workflow
+
+[3] source=R23 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[5] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[6] source=R26 type=Requirement/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=A7 type=Actor/SrcChunk hops=2 chunk=4e2c8b7096351d77 doc=JIRA-Notifications.md rel=IN_DOC > IN_DOC
+ ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configurable timing so deployment teams can adjust reminder lead times without code changes."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-504"",
+    ""summary"": ""Administrative Notification Flow"",
+    ""description"": ""Notify authorized operational users about new requests, approval-related workload, and system-side issues that affect rental processing."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-505"",
+    ""summary"": ""Notification Content Templates"",
+    ""description"": ""Implement the notification templates so they include the key rental details required by the current specification, while keeping field naming consistent across the product and warehouse-facing terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-25T14:00:00Z"",
+        ""text"": ""Please confirm which identifier wording should appear in outbound messages. The specification and the warehouse-facing screens do not use exactly th
+
+[9] source=I23 type=Implementation hops=1 rel=IMPLEMENTS
+Approval RBAC
+
+[10] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[11] source=7b0e51a20f72afa4 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01.md
+
+[12] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[13] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[14] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[15] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[16] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[17] source=I71 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent report generation logic
+
+[18] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[19] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[20] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[21] source=R25 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+End-of-rent lifecycle transition
+
+[22] source=R26 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent cancellation rules
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R49 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Requested-rent reservation semantics
+
+[25] source=R51 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Category-specific post-rent buffer
+
+[26] source=I71 type=Implementation/SrcChunk hops=2 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega","Gherkin test suite for R23 (Rent approval workflow) covering authorization, status updates, and role-based access control for rent request approvals. Tests validate that authorized OPERATOR and ADMIN users can approve rent requests with proper status transitions, while unauthorized users are prevented from performing approvals.",## 2.3.3 The system shall update the rent status to Approved when a rent request is approved. || Authorized users (OPERATOR or ADMIN roles) can approve rent requests || Rent status is updated to Approved when a rent request is approved,"Early operator cancellation may have had a tolerance window exemption in earlier lifecycle guidance, but current status is unclear","v1.2 specifies Maintenance status upon rental end date, while earlier version (v1.0/v1.1) specified Completed status",,E1|E2|E3|E4|E5|E6|E7|E8|E9,"R23 targets the rent approval workflow specifically. Primary evidence establishes that authorized users with OPERATOR or ADMIN roles can approve/reject requests, with status updates and unauthorized user prevention. E4 confirms RBAC integration. E6 and E7 reveal a lifecycle version conflict (v1.2 Maintenance vs. earlier Completed status) and an unresolved penalty exemption question. E9 signals an implementation (I23: Approval RBAC) that directly supports the approval authorization mechanism. Filtered abstract or low-relevance operative statements: Unauthorized users are prevented from approving or rejecting rent requests | Rent approval workflow is part of the rent lifecycle management process",1,0,0,0
+58ad6189,R23,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R23_10,Approval workflow handles concurrent approval attempts,"Feature: Rent Approval Workflow
+  Scenario: Concurrent approval attempts on same rent request
+    Given a rent request in Pending status
+    And two authorized OPERATOR users
+    When both users attempt to approve the rent request simultaneously
+    Then only one approval is processed successfully
+    And the rent status is updated to Approved
+    And the second approval attempt is rejected or queued appropriately","Validates that the approval workflow handles concurrent operations correctly, preventing race conditions and ensuring data consistency when multiple authorized users attempt simultaneous approvals.",E1|E2|E4,Authorized users (OPERATOR or ADMIN roles) can approve rent requests|Rent status is updated to Approved when a rent request is approved,3453478160ad1947|7b0e51a20f72afa4|9dd628a82a09c2ba|A7|G22|G44|G81b|I21|I23|I24|I71|R21|R22|R23|R24|R25|R26|R29|R49|R51,Rent approval workflow,Rent approval workflow,"[1] source=R23 type=Requirement/SrcChunk hops=0 chunk=4ccbb686e5ec37c3 doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=TARGET
+lapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion and Maintenance
+## 2.5.1 (REVISED) Upon reaching the rental end date, the system shall update the status to 'Maintenance'.
+## 2.5.2 (REVISED) Maintenance dura
+
+[2] source=R23 type=Requirement hops=0 rel=TARGET
+Rent approval workflow
+
+[3] source=R23 type=Requirement/SrcChunk hops=0 chunk=128cf22dddc1b4d2 doc=JIRA-Lifecycle.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-LIFE-201"",
+    ""summary"": ""Implement Rent Creation Flow"",
+    ""description"": ""Develop the initial rent request screen based on TOOLCHAIN-CONF-RENT-01 Section 2.1. The system must capture item selection, start date, and end date. Ensure a unique Rent ID is generated for every record."",
+    ""status"": ""Closed"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-02-10T08:00:00Z"",
+        ""text"": ""Base flow implemented. Status is set to 'Requested' by default as per 2.1.6.""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-202"",
+  ""summary"": ""Implement Automated Post-Rental Availability Logic"",
+  ""description"": ""Develop the backend logic that returns equipment to its normal rentable state after the post-rental handling window has elapsed. The implementation must follow the current lifecycle definition and support category-dependent handling durations rather than relying on a single fixed timer."",
+  ""status"": ""In Progress"",
+  ""attachments"": [""EMAIL_OPS_MixerSpecialRule.txt""],
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-20T10:00:00Z"",
+      ""text"": ""Based on the older lifecycle notes,
+
+[4] source=G22 type=Gap/SrcChunk hops=2 chunk=6c5380267c218234 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+ [
+      {
+        ""author"": ""Backend Engineer Tomas"",
+        ""timestamp"": ""2026-02-12T14:20:00Z"",
+        ""text"": ""RBAC (Role-Based Access Control) integrated. Only users with 'OPERATOR' or 'ADMIN' roles can trigger approval.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-LIFE-204"",
+    ""summary"": ""Manual Rent Completion for Operators"",
+    ""description"": ""Allow authorized users to manually trigger rent completion. This is required for early returns."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Engineer Marta"",
+        ""timestamp"": ""2026-02-21T10:15:00Z"",
+        ""text"": ""Clarification needed: If an operator completes a rent early, does the 'Maintenance' (v1.2) period start immediately, or only at the original end date?""
+      }
+    ]
+  },
+  {
+  ""ticket_id"": ""JIRA-LIFE-205"",
+  ""summary"": ""Bug: Penalty applied during early operator cancellation"",
+  ""description"": ""An operator reported that a rent was stopped shortly after it became active, but the system still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""s
+
+[5] source=R25 type=Requirement/SrcChunk hops=2 chunk=ad0eaadb4d4f0c5d doc=TOOLCHAIN-CONF-RENT-01-v1.2.md rel=IN_DOC > IN_DOC
+# Documentum ID: TOOLCHAIN-CONF-RENT-01
+# Description: Rent lifecycle management
+# Status: Effective (v1.2)
+
+## 2. Rent Lifecycle Management
+
+## 2.1 Rent Creation
+## 2.1.1 The system shall allow authenticated users to create a rent request for an available rentable item.
+## 2.1.2 The system shall require the user to select the rentable item when creating a rent request.
+## 2.1.3 The system shall require the user to provide a rental start date and rental end date.
+## 2.1.4 The system shall validate that all required fields are provided before creating the rent request.
+## 2.1.5 The system shall assign a unique identifier to each rent record.
+## 2.1.6 The system shall store the rent record with status set to Requested upon creation.
+
+## 2.2 Rent Validation Rules
+## 2.2.1 The system shall validate that the selected rentable item exists.
+## 2.2.2 The system shall validate that the rentable item is available for the requested rental period.
+## 2.2.3 The system shall prevent creation of overlapping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent r
+
+[6] source=R26 type=Requirement/SrcChunk hops=2 chunk=44723706e3ff4356 doc=JIRA-Lifecycle.md rel=IN_DOC > IN_DOC
+tem still applied a penalty fee. Based on earlier lifecycle guidance, there may have been a short tolerance window in which this kind of early cancellation should not have triggered the charge."",
+  ""status"": ""New"",
+  ""comments"": [
+    {
+      ""author"": ""Developer Dave"",
+      ""timestamp"": ""2026-02-21T09:00:00Z"",
+      ""text"": ""I checked the current cancellation rules and they still allow stopping an active rent, but I cannot find the earlier exemption language that would have waived the penalty in the initial operator tolerance window. It may have been removed, or it may simply be missing from the latest write-up.""
+    },
+    {
+      ""author"": ""PM Peter"",
+      ""timestamp"": ""2026-02-21T11:00:00Z"",
+      ""text"": ""This needs confirmation. If the newer lifecycle material dropped that exception without an explicit decision, we need to determine whether that was intentional or a documentation gap.""
+    }
+  ]
+}
+]
+
+[7] source=R24 type=Requirement/SrcChunk hops=2 chunk=d61744a41d7ad3e7 doc=TOOLCHAIN-CONF-RENT-01.md rel=IN_DOC > IN_DOC
+apping rent records for the same rentable item.
+## 2.2.4 The system shall validate that the rental start date is earlier than the rental end date.
+## 2.2.5 The system shall prevent creation of rent records with rental periods in the past, unless explicitly permitted.
+
+## 2.3 Rent Approval
+## 2.3.1 The system shall allow authorized users to approve rent requests.
+## 2.3.2 The system shall allow authorized users to reject rent requests.
+## 2.3.3 The system shall update the rent status to Approved when a rent request is approved.
+## 2.3.4 The system shall update the rent status to Rejected when a rent request is rejected.
+## 2.3.5 The system shall prevent unauthorized users from approving or rejecting rent requests.
+
+## 2.4 Rent Activation
+## 2.4.1 The system shall update the rent status to Active when the rental start date is reached.
+## 2.4.2 The system shall allow authorized users to manually activate a rent.
+## 2.4.3 The system shall prevent activation of rent records that are not in Approved status.
+
+## 2.5 Rent Completion
+## 2.5.1 The system shall update the rent status to Completed when the rental end date is reached.
+## 2.5.2 The system shall allow authorized users to manually
+
+[8] source=A7 type=Actor/SrcChunk hops=2 chunk=4e2c8b7096351d77 doc=JIRA-Notifications.md rel=IN_DOC > IN_DOC
+ ]
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-503"",
+    ""summary"": ""Reminder Notification Scheduling"",
+    ""description"": ""Implement reminder messages around rental start and end milestones, with configurable timing so deployment teams can adjust reminder lead times without code changes."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-504"",
+    ""summary"": ""Administrative Notification Flow"",
+    ""description"": ""Notify authorized operational users about new requests, approval-related workload, and system-side issues that affect rental processing."",
+    ""status"": ""To Do""
+  },
+  {
+    ""ticket_id"": ""JIRA-NOTIF-505"",
+    ""summary"": ""Notification Content Templates"",
+    ""description"": ""Implement the notification templates so they include the key rental details required by the current specification, while keeping field naming consistent across the product and warehouse-facing terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-02-25T14:00:00Z"",
+        ""text"": ""Please confirm which identifier wording should appear in outbound messages. The specification and the warehouse-facing screens do not use exactly th
+
+[9] source=I23 type=Implementation hops=1 rel=IMPLEMENTS
+Approval RBAC
+
+[10] source=3453478160ad1947 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.2.md
+
+[11] source=7b0e51a20f72afa4 type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01.md
+
+[12] source=9dd628a82a09c2ba type=SrcDoc hops=2 rel=IN_DOC > IN_DOC
+TOOLCHAIN-CONF-RENT-01-v1.1.md
+
+[13] source=G44 type=Gap hops=2 rel=IN_DOC > IN_DOC
+Requested-rent override ambiguity
+
+[14] source=G81b type=Gap hops=2 rel=IN_DOC > IN_DOC
+Delivery and rent lifecycle synchronization ambiguity
+
+[15] source=I21 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent creation flow
+
+[16] source=I24 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Manual rent completion
+
+[17] source=I71 type=Implementation hops=2 rel=IN_DOC > IN_DOC
+Rent report generation logic
+
+[18] source=R21 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent creation rule
+
+[19] source=R22 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent validation rules
+
+[20] source=R24 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent activation rule
+
+[21] source=R25 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+End-of-rent lifecycle transition
+
+[22] source=R26 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Rent cancellation rules
+
+[23] source=R29 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Post-rent maintenance handling
+
+[24] source=R49 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Requested-rent reservation semantics
+
+[25] source=R51 type=Requirement hops=2 rel=IN_DOC > IN_DOC
+Category-specific post-rent buffer
+
+[26] source=I71 type=Implementation/SrcChunk hops=2 chunk=5ddf05c7e16a328a doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+[
+  {
+    ""ticket_id"": ""JIRA-REP-701"",
+    ""summary"": ""Rent Report Generation Logic"",
+    ""description"": ""Implement rent reporting so authorized users can review rental records together with the core identifying and timing information required by the reporting specification. The implementation should remain consistent with the currently supported identifier model, while also accounting for historical data representations that may differ from present-day operational terminology."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-05T09:00:00Z"",
+        ""text"": ""Implementation note: the reporting UI is currently leaning toward the warehouse-facing identifier wording rather than the formal term used in the specification. Please confirm whether the report output should mirror the business-facing identifier, the operational alias, or both.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-05T11:00:00Z"",
+        ""text"": ""Compatibility concern: some historical rental records appear to use an earlier identifier representation, so report output may become inconsistent unless we define how lega","Gherkin test suite for R23 (Rent approval workflow) covering authorization, status updates, and role-based access control for rent request approvals. Tests validate that authorized OPERATOR and ADMIN users can approve rent requests with proper status transitions, while unauthorized users are prevented from performing approvals.",## 2.3.3 The system shall update the rent status to Approved when a rent request is approved. || Authorized users (OPERATOR or ADMIN roles) can approve rent requests || Rent status is updated to Approved when a rent request is approved,"Early operator cancellation may have had a tolerance window exemption in earlier lifecycle guidance, but current status is unclear","v1.2 specifies Maintenance status upon rental end date, while earlier version (v1.0/v1.1) specified Completed status",,E1|E2|E3|E4|E5|E6|E7|E8|E9,"R23 targets the rent approval workflow specifically. Primary evidence establishes that authorized users with OPERATOR or ADMIN roles can approve/reject requests, with status updates and unauthorized user prevention. E4 confirms RBAC integration. E6 and E7 reveal a lifecycle version conflict (v1.2 Maintenance vs. earlier Completed status) and an unresolved penalty exemption question. E9 signals an implementation (I23: Approval RBAC) that directly supports the approval authorization mechanism. Filtered abstract or low-relevance operative statements: Unauthorized users are prevented from approving or rejecting rent requests | Rent approval workflow is part of the rent lifecycle management process",1,0,0,0

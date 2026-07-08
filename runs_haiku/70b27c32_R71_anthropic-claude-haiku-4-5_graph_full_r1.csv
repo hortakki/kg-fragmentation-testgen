@@ -1,0 +1,1043 @@
+runId,reqId,mode,pipeline,provider,model,repeatIndex,promptVersion,testId,title,gherkin,rationale,usedSourceIds,usedContextItems,evidenceSources,targetTitle,targetBody,evidenceText,generationSummary,resolvedOperativeContext,resolvedExceptions,resolvedConflictsOrObsolete,resolvedGapsOrUncertainties,resolvedEvidenceIds,resolutionNotes,injectedOperativeCount,injectedExceptionsCount,injectedConflictsCount,injectedGapsCount
+70b27c32,R71,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71_1,Stored and displayed totals match exactly in multi-currency transaction,"Feature: Multi-currency conversion integrity
+  Scenario: Verify stored total matches displayed total in multi-currency transaction
+    Given a transaction with amount 100.00 USD
+    And the customer's display currency is EUR
+    And the conversion rate is 0.92 EUR per USD
+    When the transaction is stored in the financial system
+    And the customer views the transaction in their display currency
+    Then the stored amount in USD is 100.00
+    And the displayed amount in EUR is 92.00
+    And the conversion calculation is 100.00 * 0.92 = 92.00
+    And no rounding discrepancies exist between stored and displayed values",This test validates the core requirement that user-facing totals must always match persisted billing amounts exactly. It ensures that currency conversion does not introduce hidden discrepancies between what is stored in the financial system and what the customer sees.,E1|E2|E3,Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals|User-facing totals must always match persisted billing amounts exactly,G63|G73|G93c|R71,Multi-currency conversion integrity,Multi-currency conversion integrity,"[1] source=R71 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R71 type=Requirement hops=0 rel=TARGET
+Multi-currency conversion integrity
+
+[3] source=R71 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R71 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G63 type=Gap hops=1 rel=AFFECTS
+Multi-currency conversion rule conflict
+
+[7] source=G73 type=Gap/SrcChunk hops=2 chunk=22d80e39745d1186 doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+ truth to avoid mismatches between invoices and exported summaries.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-703"",
+    ""summary"": ""User Activity and Audit Logging"",
+    ""description"": ""Implement user activity reporting and audit logging for critical system events, while preserving traceability and staying aligned with privacy constraints around what user-related data may appear in logs and operational views."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-07T08:30:00Z"",
+        ""text"": ""Privacy note: the specification expects user-linked auditability, but the current compliance direction discourages exposing directly identifiable personal details in raw logs. I need confirmation on whether administrators should read these records through a controlled lookup layer rather than from the stored log entries alone.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-704"",
+    ""summary"": ""Audit Log Integrity"",
+    ""description"": ""Ensure audit entries remain protected against unauthorized change or removal, and that the storage approach supports the integrity guarantees defined in the reporting and audit sp
+
+[8] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Multi-currency conversion integrity tests ensure that financial records and customer-facing display totals remain synchronized across all currency scenarios. These tests validate that currency conversion maintains strict accounting rules, prevents display-friendly simplifications from creating audit discrepancies, and enforces exact matching between stored and displayed amounts. Special handling for pilot-specific currency presentation and high-value inventory billing is tested separately to clarify scope and exception boundaries.",Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,Pilot-specific currency presentation may require clarification on whether conversion rules apply as strict accounting or temporary behavior || High-value inventory billing may require special handling for multi-currency contexts,Display-friendly simplification in one currency scenario that produces visible mismatches between stored and presented totals || Cleaner presentation format in pilot currency scenarios that diverges from underlying precise values,,E1|E2|E3|E4|E5|E6|E7|E8,"R71 targets multi-currency conversion integrity. PRIMARY evidence (E1-E6) establishes that currency conversion must maintain alignment between financial records and customer-facing outputs, and that presentation simplifications must not create audit or billing discrepancies. CONTEXT evidence (E7-E8) reinforces the conflict between display-friendly formatting and precise value preservation. Key gaps remain around fraction handling, source-of-truth designation, and pilot-specific rule scope. The requirement emphasizes that international billing must not override core pricing logic and that stored totals must match displayed amounts exactly. Filtered abstract or low-relevance operative statements: Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior | User-facing totals must always match persisted billing amounts exactly | Pricing logic must not be silently overridden by international billing or currency presentation concerns",0,0,0,0
+70b27c32,R71,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71_2,Presentation simplification does not create audit discrepancies,"Feature: Multi-currency conversion integrity
+  Scenario: Prevent display-friendly simplification from creating audit mismatches
+    Given a transaction with precise amount 100.456 USD
+    And the customer's display currency is EUR
+    And the conversion rate is 0.92 EUR per USD
+    When the transaction is stored with full precision as 92.41952 EUR
+    And the customer-facing display rounds to 92.42 EUR
+    Then the audit trail records the precise stored value 92.41952 EUR
+    And the displayed value 92.42 EUR is marked as a presentation format only
+    And the billing system uses the precise stored value 92.41952 EUR, not the rounded 92.42 EUR
+    And no financial discrepancy occurs between audit records and billing calculations","This test addresses the conflict between display-friendly simplification and precise value preservation. It ensures that while customer-facing displays may show rounded values for readability, the underlying stored values remain precise and are used for all billing and audit purposes, preventing silent overrides of pricing logic.",E4|E5|E6,Display-friendly simplification in one currency scenario that produces visible mismatches between stored and presented totals|Cleaner presentation format in pilot currency scenarios that diverges from underlying precise values|Pricing logic must not be silently overridden by international billing or currency presentation concerns,G63|G73|G93c|R71,Multi-currency conversion integrity,Multi-currency conversion integrity,"[1] source=R71 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R71 type=Requirement hops=0 rel=TARGET
+Multi-currency conversion integrity
+
+[3] source=R71 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R71 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G63 type=Gap hops=1 rel=AFFECTS
+Multi-currency conversion rule conflict
+
+[7] source=G73 type=Gap/SrcChunk hops=2 chunk=22d80e39745d1186 doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+ truth to avoid mismatches between invoices and exported summaries.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-703"",
+    ""summary"": ""User Activity and Audit Logging"",
+    ""description"": ""Implement user activity reporting and audit logging for critical system events, while preserving traceability and staying aligned with privacy constraints around what user-related data may appear in logs and operational views."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-07T08:30:00Z"",
+        ""text"": ""Privacy note: the specification expects user-linked auditability, but the current compliance direction discourages exposing directly identifiable personal details in raw logs. I need confirmation on whether administrators should read these records through a controlled lookup layer rather than from the stored log entries alone.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-704"",
+    ""summary"": ""Audit Log Integrity"",
+    ""description"": ""Ensure audit entries remain protected against unauthorized change or removal, and that the storage approach supports the integrity guarantees defined in the reporting and audit sp
+
+[8] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Multi-currency conversion integrity tests ensure that financial records and customer-facing display totals remain synchronized across all currency scenarios. These tests validate that currency conversion maintains strict accounting rules, prevents display-friendly simplifications from creating audit discrepancies, and enforces exact matching between stored and displayed amounts. Special handling for pilot-specific currency presentation and high-value inventory billing is tested separately to clarify scope and exception boundaries.",Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,Pilot-specific currency presentation may require clarification on whether conversion rules apply as strict accounting or temporary behavior || High-value inventory billing may require special handling for multi-currency contexts,Display-friendly simplification in one currency scenario that produces visible mismatches between stored and presented totals || Cleaner presentation format in pilot currency scenarios that diverges from underlying precise values,,E1|E2|E3|E4|E5|E6|E7|E8,"R71 targets multi-currency conversion integrity. PRIMARY evidence (E1-E6) establishes that currency conversion must maintain alignment between financial records and customer-facing outputs, and that presentation simplifications must not create audit or billing discrepancies. CONTEXT evidence (E7-E8) reinforces the conflict between display-friendly formatting and precise value preservation. Key gaps remain around fraction handling, source-of-truth designation, and pilot-specific rule scope. The requirement emphasizes that international billing must not override core pricing logic and that stored totals must match displayed amounts exactly. Filtered abstract or low-relevance operative statements: Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior | User-facing totals must always match persisted billing amounts exactly | Pricing logic must not be silently overridden by international billing or currency presentation concerns",0,0,0,0
+70b27c32,R71,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71_3,"Currency conversion rules apply as strict accounting, not temporary behavior","Feature: Multi-currency conversion integrity
+  Scenario: Enforce currency conversion as strict accounting rule
+    Given a multi-currency transaction in a pilot environment
+    And the transaction involves conversion from USD to GBP
+    And the conversion rate is 0.79 GBP per USD
+    When the transaction is processed
+    Then the conversion is applied as a strict accounting rule
+    And the conversion is not treated as temporary pilot behavior
+    And the stored financial record reflects the precise converted amount
+    And the conversion cannot be bypassed or overridden by pilot-specific flags
+    And the same conversion rules apply to all currency scenarios, pilot or production","This test clarifies the exception regarding pilot-specific currency presentation. It ensures that currency conversion rules are enforced consistently as strict accounting rules, not as temporary or optional pilot behavior, maintaining integrity across all environments.",E1|E2,"Pilot-specific currency presentation may require clarification on whether conversion rules apply as strict accounting or temporary behavior|Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior",G63|G73|G93c|R71,Multi-currency conversion integrity,Multi-currency conversion integrity,"[1] source=R71 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R71 type=Requirement hops=0 rel=TARGET
+Multi-currency conversion integrity
+
+[3] source=R71 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R71 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G63 type=Gap hops=1 rel=AFFECTS
+Multi-currency conversion rule conflict
+
+[7] source=G73 type=Gap/SrcChunk hops=2 chunk=22d80e39745d1186 doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+ truth to avoid mismatches between invoices and exported summaries.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-703"",
+    ""summary"": ""User Activity and Audit Logging"",
+    ""description"": ""Implement user activity reporting and audit logging for critical system events, while preserving traceability and staying aligned with privacy constraints around what user-related data may appear in logs and operational views."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-07T08:30:00Z"",
+        ""text"": ""Privacy note: the specification expects user-linked auditability, but the current compliance direction discourages exposing directly identifiable personal details in raw logs. I need confirmation on whether administrators should read these records through a controlled lookup layer rather than from the stored log entries alone.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-704"",
+    ""summary"": ""Audit Log Integrity"",
+    ""description"": ""Ensure audit entries remain protected against unauthorized change or removal, and that the storage approach supports the integrity guarantees defined in the reporting and audit sp
+
+[8] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Multi-currency conversion integrity tests ensure that financial records and customer-facing display totals remain synchronized across all currency scenarios. These tests validate that currency conversion maintains strict accounting rules, prevents display-friendly simplifications from creating audit discrepancies, and enforces exact matching between stored and displayed amounts. Special handling for pilot-specific currency presentation and high-value inventory billing is tested separately to clarify scope and exception boundaries.",Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,Pilot-specific currency presentation may require clarification on whether conversion rules apply as strict accounting or temporary behavior || High-value inventory billing may require special handling for multi-currency contexts,Display-friendly simplification in one currency scenario that produces visible mismatches between stored and presented totals || Cleaner presentation format in pilot currency scenarios that diverges from underlying precise values,,E1|E2|E3|E4|E5|E6|E7|E8,"R71 targets multi-currency conversion integrity. PRIMARY evidence (E1-E6) establishes that currency conversion must maintain alignment between financial records and customer-facing outputs, and that presentation simplifications must not create audit or billing discrepancies. CONTEXT evidence (E7-E8) reinforces the conflict between display-friendly formatting and precise value preservation. Key gaps remain around fraction handling, source-of-truth designation, and pilot-specific rule scope. The requirement emphasizes that international billing must not override core pricing logic and that stored totals must match displayed amounts exactly. Filtered abstract or low-relevance operative statements: Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior | User-facing totals must always match persisted billing amounts exactly | Pricing logic must not be silently overridden by international billing or currency presentation concerns",0,0,0,0
+70b27c32,R71,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71_4,High-value inventory billing maintains multi-currency integrity,"Feature: Multi-currency conversion integrity
+  Scenario: Ensure high-value inventory billing respects multi-currency conversion rules
+    Given a high-value inventory item with base price 50000.00 USD
+    And the customer's billing currency is JPY
+    And the conversion rate is 110.50 JPY per USD
+    When the inventory item is billed in JPY
+    Then the stored billing amount is 5525000.00 JPY (50000 * 110.50)
+    And the customer-facing invoice displays 5525000.00 JPY
+    And no special handling exempts this transaction from standard conversion rules
+    And the conversion maintains full precision without truncation
+    And the stored and displayed amounts match exactly","This test addresses the exception for high-value inventory billing in multi-currency contexts. It ensures that even for high-value transactions, the standard multi-currency conversion integrity rules apply without special exemptions that could create discrepancies.",E3|E4,High-value inventory billing may require special handling for multi-currency contexts|Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,G63|G73|G93c|R71,Multi-currency conversion integrity,Multi-currency conversion integrity,"[1] source=R71 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R71 type=Requirement hops=0 rel=TARGET
+Multi-currency conversion integrity
+
+[3] source=R71 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R71 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G63 type=Gap hops=1 rel=AFFECTS
+Multi-currency conversion rule conflict
+
+[7] source=G73 type=Gap/SrcChunk hops=2 chunk=22d80e39745d1186 doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+ truth to avoid mismatches between invoices and exported summaries.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-703"",
+    ""summary"": ""User Activity and Audit Logging"",
+    ""description"": ""Implement user activity reporting and audit logging for critical system events, while preserving traceability and staying aligned with privacy constraints around what user-related data may appear in logs and operational views."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-07T08:30:00Z"",
+        ""text"": ""Privacy note: the specification expects user-linked auditability, but the current compliance direction discourages exposing directly identifiable personal details in raw logs. I need confirmation on whether administrators should read these records through a controlled lookup layer rather than from the stored log entries alone.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-704"",
+    ""summary"": ""Audit Log Integrity"",
+    ""description"": ""Ensure audit entries remain protected against unauthorized change or removal, and that the storage approach supports the integrity guarantees defined in the reporting and audit sp
+
+[8] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Multi-currency conversion integrity tests ensure that financial records and customer-facing display totals remain synchronized across all currency scenarios. These tests validate that currency conversion maintains strict accounting rules, prevents display-friendly simplifications from creating audit discrepancies, and enforces exact matching between stored and displayed amounts. Special handling for pilot-specific currency presentation and high-value inventory billing is tested separately to clarify scope and exception boundaries.",Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,Pilot-specific currency presentation may require clarification on whether conversion rules apply as strict accounting or temporary behavior || High-value inventory billing may require special handling for multi-currency contexts,Display-friendly simplification in one currency scenario that produces visible mismatches between stored and presented totals || Cleaner presentation format in pilot currency scenarios that diverges from underlying precise values,,E1|E2|E3|E4|E5|E6|E7|E8,"R71 targets multi-currency conversion integrity. PRIMARY evidence (E1-E6) establishes that currency conversion must maintain alignment between financial records and customer-facing outputs, and that presentation simplifications must not create audit or billing discrepancies. CONTEXT evidence (E7-E8) reinforces the conflict between display-friendly formatting and precise value preservation. Key gaps remain around fraction handling, source-of-truth designation, and pilot-specific rule scope. The requirement emphasizes that international billing must not override core pricing logic and that stored totals must match displayed amounts exactly. Filtered abstract or low-relevance operative statements: Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior | User-facing totals must always match persisted billing amounts exactly | Pricing logic must not be silently overridden by international billing or currency presentation concerns",0,0,0,0
+70b27c32,R71,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71_5,Conversion rate changes are applied consistently across all stored records,"Feature: Multi-currency conversion integrity
+  Scenario: Apply conversion rate changes consistently to all records
+    Given multiple transactions stored with conversion rate 0.92 EUR per USD
+    And the conversion rate changes to 0.95 EUR per USD
+    When the new rate is applied to future transactions
+    Then historical transactions retain their original conversion rate 0.92
+    And new transactions use the updated rate 0.95
+    And the stored amounts for historical transactions are not retroactively recalculated
+    And the displayed amounts for historical transactions remain consistent with their stored values
+    And no audit discrepancies occur between stored and displayed historical amounts",This test ensures that currency conversion integrity is maintained when conversion rates change. It validates that rate changes do not create retroactive discrepancies and that stored and displayed amounts remain synchronized across rate transitions.,E1|E2|E5,Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals|User-facing totals must always match persisted billing amounts exactly,G63|G73|G93c|R71,Multi-currency conversion integrity,Multi-currency conversion integrity,"[1] source=R71 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R71 type=Requirement hops=0 rel=TARGET
+Multi-currency conversion integrity
+
+[3] source=R71 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R71 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G63 type=Gap hops=1 rel=AFFECTS
+Multi-currency conversion rule conflict
+
+[7] source=G73 type=Gap/SrcChunk hops=2 chunk=22d80e39745d1186 doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+ truth to avoid mismatches between invoices and exported summaries.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-703"",
+    ""summary"": ""User Activity and Audit Logging"",
+    ""description"": ""Implement user activity reporting and audit logging for critical system events, while preserving traceability and staying aligned with privacy constraints around what user-related data may appear in logs and operational views."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-07T08:30:00Z"",
+        ""text"": ""Privacy note: the specification expects user-linked auditability, but the current compliance direction discourages exposing directly identifiable personal details in raw logs. I need confirmation on whether administrators should read these records through a controlled lookup layer rather than from the stored log entries alone.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-704"",
+    ""summary"": ""Audit Log Integrity"",
+    ""description"": ""Ensure audit entries remain protected against unauthorized change or removal, and that the storage approach supports the integrity guarantees defined in the reporting and audit sp
+
+[8] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Multi-currency conversion integrity tests ensure that financial records and customer-facing display totals remain synchronized across all currency scenarios. These tests validate that currency conversion maintains strict accounting rules, prevents display-friendly simplifications from creating audit discrepancies, and enforces exact matching between stored and displayed amounts. Special handling for pilot-specific currency presentation and high-value inventory billing is tested separately to clarify scope and exception boundaries.",Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,Pilot-specific currency presentation may require clarification on whether conversion rules apply as strict accounting or temporary behavior || High-value inventory billing may require special handling for multi-currency contexts,Display-friendly simplification in one currency scenario that produces visible mismatches between stored and presented totals || Cleaner presentation format in pilot currency scenarios that diverges from underlying precise values,,E1|E2|E3|E4|E5|E6|E7|E8,"R71 targets multi-currency conversion integrity. PRIMARY evidence (E1-E6) establishes that currency conversion must maintain alignment between financial records and customer-facing outputs, and that presentation simplifications must not create audit or billing discrepancies. CONTEXT evidence (E7-E8) reinforces the conflict between display-friendly formatting and precise value preservation. Key gaps remain around fraction handling, source-of-truth designation, and pilot-specific rule scope. The requirement emphasizes that international billing must not override core pricing logic and that stored totals must match displayed amounts exactly. Filtered abstract or low-relevance operative statements: Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior | User-facing totals must always match persisted billing amounts exactly | Pricing logic must not be silently overridden by international billing or currency presentation concerns",0,0,0,0
+70b27c32,R71,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71_6,Multi-currency invoice currency matches stored transaction currency,"Feature: Multi-currency conversion integrity
+  Scenario: Verify invoice currency matches stored transaction currency
+    Given a transaction stored in GBP with amount 1000.00
+    And the invoice is generated in GBP
+    When the customer views the invoice
+    Then the invoice displays the amount in GBP
+    And the displayed invoice amount is 1000.00 GBP
+    And the stored transaction amount is 1000.00 GBP
+    And the invoice currency matches the stored transaction currency
+    And no conversion is applied between storage and invoice display","This test validates that invoice currency is treated as a strict accounting rule and must match the stored transaction currency. It ensures that the invoice currency cannot diverge from the stored currency, maintaining integrity in billing documentation.",E2|E6,"Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior|User-facing totals must always match persisted billing amounts exactly",G63|G73|G93c|R71,Multi-currency conversion integrity,Multi-currency conversion integrity,"[1] source=R71 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R71 type=Requirement hops=0 rel=TARGET
+Multi-currency conversion integrity
+
+[3] source=R71 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R71 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G63 type=Gap hops=1 rel=AFFECTS
+Multi-currency conversion rule conflict
+
+[7] source=G73 type=Gap/SrcChunk hops=2 chunk=22d80e39745d1186 doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+ truth to avoid mismatches between invoices and exported summaries.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-703"",
+    ""summary"": ""User Activity and Audit Logging"",
+    ""description"": ""Implement user activity reporting and audit logging for critical system events, while preserving traceability and staying aligned with privacy constraints around what user-related data may appear in logs and operational views."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-07T08:30:00Z"",
+        ""text"": ""Privacy note: the specification expects user-linked auditability, but the current compliance direction discourages exposing directly identifiable personal details in raw logs. I need confirmation on whether administrators should read these records through a controlled lookup layer rather than from the stored log entries alone.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-704"",
+    ""summary"": ""Audit Log Integrity"",
+    ""description"": ""Ensure audit entries remain protected against unauthorized change or removal, and that the storage approach supports the integrity guarantees defined in the reporting and audit sp
+
+[8] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Multi-currency conversion integrity tests ensure that financial records and customer-facing display totals remain synchronized across all currency scenarios. These tests validate that currency conversion maintains strict accounting rules, prevents display-friendly simplifications from creating audit discrepancies, and enforces exact matching between stored and displayed amounts. Special handling for pilot-specific currency presentation and high-value inventory billing is tested separately to clarify scope and exception boundaries.",Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,Pilot-specific currency presentation may require clarification on whether conversion rules apply as strict accounting or temporary behavior || High-value inventory billing may require special handling for multi-currency contexts,Display-friendly simplification in one currency scenario that produces visible mismatches between stored and presented totals || Cleaner presentation format in pilot currency scenarios that diverges from underlying precise values,,E1|E2|E3|E4|E5|E6|E7|E8,"R71 targets multi-currency conversion integrity. PRIMARY evidence (E1-E6) establishes that currency conversion must maintain alignment between financial records and customer-facing outputs, and that presentation simplifications must not create audit or billing discrepancies. CONTEXT evidence (E7-E8) reinforces the conflict between display-friendly formatting and precise value preservation. Key gaps remain around fraction handling, source-of-truth designation, and pilot-specific rule scope. The requirement emphasizes that international billing must not override core pricing logic and that stored totals must match displayed amounts exactly. Filtered abstract or low-relevance operative statements: Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior | User-facing totals must always match persisted billing amounts exactly | Pricing logic must not be silently overridden by international billing or currency presentation concerns",0,0,0,0
+70b27c32,R71,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71_7,Fractional currency amounts are preserved in storage and billing,"Feature: Multi-currency conversion integrity
+  Scenario: Preserve fractional currency amounts in storage and billing
+    Given a transaction with amount 99.99 USD
+    And the customer's billing currency is CHF
+    And the conversion rate is 0.88 CHF per USD
+    When the transaction is converted to CHF
+    Then the stored amount is 87.9912 CHF (99.99 * 0.88)
+    And the billing system uses the full precision 87.9912 CHF for calculations
+    And the fractional amount is not truncated or rounded in storage
+    And the customer-facing display may round to 87.99 CHF for presentation
+    But the stored and billing amounts remain 87.9912 CHF","This test addresses the gap regarding fraction handling in multi-currency conversion. It ensures that fractional amounts are preserved with full precision in storage and billing, even if customer-facing displays show rounded values.",E1|E3|E7,Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals|Pricing logic must not be silently overridden by international billing or currency presentation concerns,G63|G73|G93c|R71,Multi-currency conversion integrity,Multi-currency conversion integrity,"[1] source=R71 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R71 type=Requirement hops=0 rel=TARGET
+Multi-currency conversion integrity
+
+[3] source=R71 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R71 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G63 type=Gap hops=1 rel=AFFECTS
+Multi-currency conversion rule conflict
+
+[7] source=G73 type=Gap/SrcChunk hops=2 chunk=22d80e39745d1186 doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+ truth to avoid mismatches between invoices and exported summaries.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-703"",
+    ""summary"": ""User Activity and Audit Logging"",
+    ""description"": ""Implement user activity reporting and audit logging for critical system events, while preserving traceability and staying aligned with privacy constraints around what user-related data may appear in logs and operational views."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-07T08:30:00Z"",
+        ""text"": ""Privacy note: the specification expects user-linked auditability, but the current compliance direction discourages exposing directly identifiable personal details in raw logs. I need confirmation on whether administrators should read these records through a controlled lookup layer rather than from the stored log entries alone.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-704"",
+    ""summary"": ""Audit Log Integrity"",
+    ""description"": ""Ensure audit entries remain protected against unauthorized change or removal, and that the storage approach supports the integrity guarantees defined in the reporting and audit sp
+
+[8] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Multi-currency conversion integrity tests ensure that financial records and customer-facing display totals remain synchronized across all currency scenarios. These tests validate that currency conversion maintains strict accounting rules, prevents display-friendly simplifications from creating audit discrepancies, and enforces exact matching between stored and displayed amounts. Special handling for pilot-specific currency presentation and high-value inventory billing is tested separately to clarify scope and exception boundaries.",Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,Pilot-specific currency presentation may require clarification on whether conversion rules apply as strict accounting or temporary behavior || High-value inventory billing may require special handling for multi-currency contexts,Display-friendly simplification in one currency scenario that produces visible mismatches between stored and presented totals || Cleaner presentation format in pilot currency scenarios that diverges from underlying precise values,,E1|E2|E3|E4|E5|E6|E7|E8,"R71 targets multi-currency conversion integrity. PRIMARY evidence (E1-E6) establishes that currency conversion must maintain alignment between financial records and customer-facing outputs, and that presentation simplifications must not create audit or billing discrepancies. CONTEXT evidence (E7-E8) reinforces the conflict between display-friendly formatting and precise value preservation. Key gaps remain around fraction handling, source-of-truth designation, and pilot-specific rule scope. The requirement emphasizes that international billing must not override core pricing logic and that stored totals must match displayed amounts exactly. Filtered abstract or low-relevance operative statements: Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior | User-facing totals must always match persisted billing amounts exactly | Pricing logic must not be silently overridden by international billing or currency presentation concerns",0,0,0,0
+70b27c32,R71,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71_8,Source-of-truth designation prevents conversion discrepancies,"Feature: Multi-currency conversion integrity
+  Scenario: Establish source-of-truth currency for conversion calculations
+    Given a transaction with source-of-truth currency USD
+    And the base amount in USD is 500.00
+    And the customer's display currency is AUD
+    And the conversion rate is 1.35 AUD per USD
+    When the transaction is displayed in AUD
+    Then the displayed amount is calculated from the USD source-of-truth: 500.00 * 1.35 = 675.00 AUD
+    And the stored source-of-truth amount remains 500.00 USD
+    And all conversions to other currencies are calculated from the USD source-of-truth
+    And no conversion-of-conversion calculations occur
+    And the integrity is maintained across all currency displays","This test addresses the gap regarding source-of-truth designation. It ensures that a single source-of-truth currency is established and used for all conversions, preventing cascading conversion errors and maintaining integrity across multiple currency displays.",E1|E2|E8,Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals|User-facing totals must always match persisted billing amounts exactly,G63|G73|G93c|R71,Multi-currency conversion integrity,Multi-currency conversion integrity,"[1] source=R71 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R71 type=Requirement hops=0 rel=TARGET
+Multi-currency conversion integrity
+
+[3] source=R71 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R71 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G63 type=Gap hops=1 rel=AFFECTS
+Multi-currency conversion rule conflict
+
+[7] source=G73 type=Gap/SrcChunk hops=2 chunk=22d80e39745d1186 doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+ truth to avoid mismatches between invoices and exported summaries.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-703"",
+    ""summary"": ""User Activity and Audit Logging"",
+    ""description"": ""Implement user activity reporting and audit logging for critical system events, while preserving traceability and staying aligned with privacy constraints around what user-related data may appear in logs and operational views."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-07T08:30:00Z"",
+        ""text"": ""Privacy note: the specification expects user-linked auditability, but the current compliance direction discourages exposing directly identifiable personal details in raw logs. I need confirmation on whether administrators should read these records through a controlled lookup layer rather than from the stored log entries alone.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-704"",
+    ""summary"": ""Audit Log Integrity"",
+    ""description"": ""Ensure audit entries remain protected against unauthorized change or removal, and that the storage approach supports the integrity guarantees defined in the reporting and audit sp
+
+[8] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Multi-currency conversion integrity tests ensure that financial records and customer-facing display totals remain synchronized across all currency scenarios. These tests validate that currency conversion maintains strict accounting rules, prevents display-friendly simplifications from creating audit discrepancies, and enforces exact matching between stored and displayed amounts. Special handling for pilot-specific currency presentation and high-value inventory billing is tested separately to clarify scope and exception boundaries.",Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,Pilot-specific currency presentation may require clarification on whether conversion rules apply as strict accounting or temporary behavior || High-value inventory billing may require special handling for multi-currency contexts,Display-friendly simplification in one currency scenario that produces visible mismatches between stored and presented totals || Cleaner presentation format in pilot currency scenarios that diverges from underlying precise values,,E1|E2|E3|E4|E5|E6|E7|E8,"R71 targets multi-currency conversion integrity. PRIMARY evidence (E1-E6) establishes that currency conversion must maintain alignment between financial records and customer-facing outputs, and that presentation simplifications must not create audit or billing discrepancies. CONTEXT evidence (E7-E8) reinforces the conflict between display-friendly formatting and precise value preservation. Key gaps remain around fraction handling, source-of-truth designation, and pilot-specific rule scope. The requirement emphasizes that international billing must not override core pricing logic and that stored totals must match displayed amounts exactly. Filtered abstract or low-relevance operative statements: Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior | User-facing totals must always match persisted billing amounts exactly | Pricing logic must not be silently overridden by international billing or currency presentation concerns",0,0,0,0
+70b27c32,R71,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71_9,International billing does not override core pricing logic,"Feature: Multi-currency conversion integrity
+  Scenario: Prevent international billing from overriding pricing logic
+    Given a product with base price 100.00 USD
+    And a discount of 10% applies to the base price
+    And the customer's billing currency is INR
+    And the conversion rate is 82.50 INR per USD
+    When the transaction is processed with international billing in INR
+    Then the discount is applied to the base price first: 100.00 * 0.90 = 90.00 USD
+    And the discounted amount is then converted: 90.00 * 82.50 = 7425.00 INR
+    And the pricing logic is not overridden by international billing
+    And the stored amount is 7425.00 INR
+    And the displayed amount is 7425.00 INR
+    And no alternative calculation (e.g., 100 * 82.50 * 0.90) produces a different result","This test ensures that international billing and currency conversion do not bypass or override core pricing logic. It validates that discounts and other pricing rules are applied before currency conversion, maintaining the integrity of the pricing system.",E4|E5|E6,Pricing logic must not be silently overridden by international billing or currency presentation concerns|Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,G63|G73|G93c|R71,Multi-currency conversion integrity,Multi-currency conversion integrity,"[1] source=R71 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R71 type=Requirement hops=0 rel=TARGET
+Multi-currency conversion integrity
+
+[3] source=R71 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R71 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G63 type=Gap hops=1 rel=AFFECTS
+Multi-currency conversion rule conflict
+
+[7] source=G73 type=Gap/SrcChunk hops=2 chunk=22d80e39745d1186 doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+ truth to avoid mismatches between invoices and exported summaries.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-703"",
+    ""summary"": ""User Activity and Audit Logging"",
+    ""description"": ""Implement user activity reporting and audit logging for critical system events, while preserving traceability and staying aligned with privacy constraints around what user-related data may appear in logs and operational views."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-07T08:30:00Z"",
+        ""text"": ""Privacy note: the specification expects user-linked auditability, but the current compliance direction discourages exposing directly identifiable personal details in raw logs. I need confirmation on whether administrators should read these records through a controlled lookup layer rather than from the stored log entries alone.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-704"",
+    ""summary"": ""Audit Log Integrity"",
+    ""description"": ""Ensure audit entries remain protected against unauthorized change or removal, and that the storage approach supports the integrity guarantees defined in the reporting and audit sp
+
+[8] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Multi-currency conversion integrity tests ensure that financial records and customer-facing display totals remain synchronized across all currency scenarios. These tests validate that currency conversion maintains strict accounting rules, prevents display-friendly simplifications from creating audit discrepancies, and enforces exact matching between stored and displayed amounts. Special handling for pilot-specific currency presentation and high-value inventory billing is tested separately to clarify scope and exception boundaries.",Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,Pilot-specific currency presentation may require clarification on whether conversion rules apply as strict accounting or temporary behavior || High-value inventory billing may require special handling for multi-currency contexts,Display-friendly simplification in one currency scenario that produces visible mismatches between stored and presented totals || Cleaner presentation format in pilot currency scenarios that diverges from underlying precise values,,E1|E2|E3|E4|E5|E6|E7|E8,"R71 targets multi-currency conversion integrity. PRIMARY evidence (E1-E6) establishes that currency conversion must maintain alignment between financial records and customer-facing outputs, and that presentation simplifications must not create audit or billing discrepancies. CONTEXT evidence (E7-E8) reinforces the conflict between display-friendly formatting and precise value preservation. Key gaps remain around fraction handling, source-of-truth designation, and pilot-specific rule scope. The requirement emphasizes that international billing must not override core pricing logic and that stored totals must match displayed amounts exactly. Filtered abstract or low-relevance operative statements: Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior | User-facing totals must always match persisted billing amounts exactly | Pricing logic must not be silently overridden by international billing or currency presentation concerns",0,0,0,0
+70b27c32,R71,graph,full,anthropic,claude-haiku-4-5-20251001,1,2026-07-03.v3,R71_10,Audit trail records precise conversion values for compliance,"Feature: Multi-currency conversion integrity
+  Scenario: Maintain audit trail with precise conversion values
+    Given a transaction with amount 250.75 USD
+    And the customer's billing currency is SEK
+    And the conversion rate is 9.85 SEK per USD
+    When the transaction is processed and stored
+    Then the audit trail records the original amount 250.75 USD
+    And the audit trail records the conversion rate 9.85 SEK per USD
+    And the audit trail records the converted amount 2469.8875 SEK (250.75 * 9.85)
+    And the audit trail records the timestamp of the conversion
+    And the audit trail is immutable and cannot be altered
+    And compliance reviews can verify the conversion integrity from the audit trail","This test ensures that the audit trail maintains precise conversion values and metadata, enabling compliance verification and preventing undetected discrepancies. It supports the requirement that stored and displayed amounts must match exactly by providing a complete record of conversion calculations.",E1|E2|E3|E7,Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals|User-facing totals must always match persisted billing amounts exactly,G63|G73|G93c|R71,Multi-currency conversion integrity,Multi-currency conversion integrity,"[1] source=R71 type=Requirement/SrcChunk hops=0 chunk=cc00a9173697dc7d doc=JIRA-Payment.md rel=TARGET
+[
+  {
+    ""ticket_id"": ""JIRA-PAY-601"",
+    ""summary"": ""Pricing Configuration Service"",
+    ""description"": ""Implement the pricing configuration layer so authorized users can define rental pricing structures and apply them consistently to rentable items without retroactively changing already established rental records."",
+    ""status"": ""Closed""
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-602"",
+    ""summary"": ""Price Calculation and Precision"",
+    ""description"": ""Implement rental cost calculation based on duration and pricing rules, and make sure the resulting amount is derived consistently across calculation, storage, and user-facing display. International billing and currency presentation should be treated as a related operational concern, but must not silently override the core pricing logic."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-01T10:00:00Z"",
+        ""text"": ""The current specification defines correctness expectations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this ne
+
+[2] source=R71 type=Requirement hops=0 rel=TARGET
+Multi-currency conversion integrity
+
+[3] source=R71 type=Requirement/SrcChunk hops=0 chunk=ba9aac1af7d4e225 doc=EMAIL_FINANCE_MultiCurrency_HACK.txt rel=TARGET
+From: finance_director@toolchain.com
+Date: 2026-03-03 11:00
+Subject: Pilot concern about international billing presentation
+
+Hi Team,
+
+Finance has a concern related to the pilot rollout for internationally billed equipment.
+
+For a subset of high-value inventory, we may need a billing presentation approach that works more cleanly across more than one currency context. The current specification covers general pricing and billing expectations, but it does not go into much detail about how pilot-specific currency presentation or conversion rules should be handled in customer-facing outputs.
+
+Before any implementation shortcut is taken, please clarify whether currency conversion, display format, and invoice currency are supposed to be handled as strict accounting rules, temporary pilot behavior, or only a presentation-layer convention. We want to avoid a situation where the operational display becomes simpler, but the customer-visible totals no longer align cleanly with the underlying financial records.
+
+Best,
+Finance Dept.
+
+[4] source=R71 type=Requirement/SrcChunk hops=0 chunk=90c335507fa9d909 doc=EMAIL_DATA_Internal_Audit_Discrepancy.txt rel=TARGET
+tion about which data representation should be treated as authoritative for audit purposes.
+
+Please review and confirm the intended source-of-truth model for report generation, export, and audit visibility.
+
+Regards,
+Internal Audit Team
+
+[5] source=G63 type=Gap/SrcChunk hops=1 chunk=ebea956274025791 doc=JIRA-Payment.md rel=AFFECTS
+ctations for the total, but it does not fully spell out how edge-case fractions should be handled at each calculation stage. I started with a simplified approach for partial-unit handling, but this needs confirmation before we freeze the behavior.""
+      },
+      {
+        ""author"": ""QA Marta"",
+        ""timestamp"": ""2026-03-01T14:00:00Z"",
+        ""text"": ""Please verify the consistency of subtotal, tax, and final amount handling. A display-friendly simplification in one layer can still produce visible mismatches later if the stored and presented totals are derived differently.""
+      },
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-04T15:00:00Z"",
+        ""text"": ""UI note: finance asked for cleaner presentation in one of the pilot currency scenarios, so I explored a more compact display format there while keeping more precise values in the underlying records. We need confirmation that the user-facing total must always match the persisted billing amount exactly.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-PAY-603"",
+    ""summary"": ""Invoice Generation Engine"",
+    ""description"": ""Generate invoices for billable rental outcomes, assign stable invoice identif
+
+[6] source=G63 type=Gap hops=1 rel=AFFECTS
+Multi-currency conversion rule conflict
+
+[7] source=G73 type=Gap/SrcChunk hops=2 chunk=22d80e39745d1186 doc=JIRA-Reporting.md rel=IN_DOC > IN_DOC
+ truth to avoid mismatches between invoices and exported summaries.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-703"",
+    ""summary"": ""User Activity and Audit Logging"",
+    ""description"": ""Implement user activity reporting and audit logging for critical system events, while preserving traceability and staying aligned with privacy constraints around what user-related data may appear in logs and operational views."",
+    ""status"": ""In Progress"",
+    ""comments"": [
+      {
+        ""author"": ""Developer Dave"",
+        ""timestamp"": ""2026-03-07T08:30:00Z"",
+        ""text"": ""Privacy note: the specification expects user-linked auditability, but the current compliance direction discourages exposing directly identifiable personal details in raw logs. I need confirmation on whether administrators should read these records through a controlled lookup layer rather than from the stored log entries alone.""
+      }
+    ]
+  },
+  {
+    ""ticket_id"": ""JIRA-REP-704"",
+    ""summary"": ""Audit Log Integrity"",
+    ""description"": ""Ensure audit entries remain protected against unauthorized change or removal, and that the storage approach supports the integrity guarantees defined in the reporting and audit sp
+
+[8] source=G93c type=Gap hops=2 rel=IN_DOC > IN_DOC
+Currency consistency gap","Multi-currency conversion integrity tests ensure that financial records and customer-facing display totals remain synchronized across all currency scenarios. These tests validate that currency conversion maintains strict accounting rules, prevents display-friendly simplifications from creating audit discrepancies, and enforces exact matching between stored and displayed amounts. Special handling for pilot-specific currency presentation and high-value inventory billing is tested separately to clarify scope and exception boundaries.",Multi-currency conversion must maintain integrity between stored financial records and customer-facing display totals,Pilot-specific currency presentation may require clarification on whether conversion rules apply as strict accounting or temporary behavior || High-value inventory billing may require special handling for multi-currency contexts,Display-friendly simplification in one currency scenario that produces visible mismatches between stored and presented totals || Cleaner presentation format in pilot currency scenarios that diverges from underlying precise values,,E1|E2|E3|E4|E5|E6|E7|E8,"R71 targets multi-currency conversion integrity. PRIMARY evidence (E1-E6) establishes that currency conversion must maintain alignment between financial records and customer-facing outputs, and that presentation simplifications must not create audit or billing discrepancies. CONTEXT evidence (E7-E8) reinforces the conflict between display-friendly formatting and precise value preservation. Key gaps remain around fraction handling, source-of-truth designation, and pilot-specific rule scope. The requirement emphasizes that international billing must not override core pricing logic and that stored totals must match displayed amounts exactly. Filtered abstract or low-relevance operative statements: Currency conversion, display format, and invoice currency must be treated as strict accounting rules, not presentation-layer conventions or temporary pilot behavior | User-facing totals must always match persisted billing amounts exactly | Pricing logic must not be silently overridden by international billing or currency presentation concerns",0,0,0,0
