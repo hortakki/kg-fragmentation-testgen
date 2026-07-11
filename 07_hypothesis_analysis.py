@@ -244,7 +244,10 @@ def join_check(judge_glob: str, objective_glob: str) -> dict[str, Any]:
     only_j = set(jkeys) - set(okeys)
     only_o = set(okeys) - set(jkeys)
 
-    ok = not dup_j and not dup_o and not only_j and not only_o
+    # Design: judge rows are a SUBSET of objective rows (repeats 1-2 run on a
+    # preregistered 10-req subsample). Invariant: no dups, no orphan judgements.
+    ok = not dup_j and not dup_o and not only_j
+
     report = {
         "judge_rows_ok": len(judge_ok),
         "objective_rows": len(obj),
@@ -252,6 +255,7 @@ def join_check(judge_glob: str, objective_glob: str) -> dict[str, Any]:
         "objective_duplicate_keys": len(dup_o),
         "judge_only_keys": len(only_j),
         "objective_only_keys": len(only_o),
+        "note": "objective_only_keys = rows never scheduled for judging (subsample design)",
         "is_1to1": ok,
     }
     print(json.dumps(report, indent=2))

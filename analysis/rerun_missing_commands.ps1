@@ -1,0 +1,40 @@
+# Auto-generated rerun commands for missing/underfilled cells
+# Review before running. Full rerun commands regenerate 10 tests for the cell.
+
+python .\03c_run_experiment_claude.py --target-id R81c --mode vector --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs_haiku
+python .\03_run_experiment.py --target-id R2 --mode graph --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R22 --mode graph --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R41 --mode graph --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R49 --mode graph --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R61 --mode graph --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R103d --mode graph --pipeline full --repeat-index 1 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R21 --mode graph --pipeline full --repeat-index 1 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R38 --mode graph --pipeline full --repeat-index 1 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R49 --mode graph --pipeline full --repeat-index 1 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R103d --mode graph --pipeline full --repeat-index 2 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R21 --mode graph --pipeline full --repeat-index 2 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R22 --mode graph --pipeline full --repeat-index 2 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R5 --mode graph --pipeline full --repeat-index 2 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R93c --mode graph --pipeline full --repeat-index 2 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R43 --mode hybrid --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R33 --mode hybrid --pipeline full --repeat-index 1 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R93c --mode hybrid --pipeline full --repeat-index 1 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R39 --mode hybrid --pipeline full --repeat-index 2 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R22 --mode hybrid --pipeline no_resolution --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R91d --mode hybrid --pipeline no_resolution --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R21 --mode vector --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R22 --mode vector --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R25 --mode vector --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R41 --mode vector --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R49 --mode vector --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R71 --mode vector --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R71b --mode vector --pipeline full --repeat-index 0 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R21 --mode vector --pipeline full --repeat-index 1 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R25 --mode vector --pipeline full --repeat-index 1 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R49 --mode vector --pipeline full --repeat-index 1 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R71b --mode vector --pipeline full --repeat-index 1 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R21 --mode vector --pipeline full --repeat-index 2 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R22 --mode vector --pipeline full --repeat-index 2 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R25 --mode vector --pipeline full --repeat-index 2 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R49 --mode vector --pipeline full --repeat-index 2 --num-tests 10 --out-dir runs
+python .\03_run_experiment.py --target-id R71b --mode vector --pipeline full --repeat-index 2 --num-tests 10 --out-dir runs
