@@ -489,7 +489,7 @@ def run_h4(judge_glob: str, reference_json: str, graph_csv: str, out_dir: Path,
     gt: dict[str, list[dict]] = {}
     for req, prof in ref.items():
         if isinstance(prof, dict):
-            gt[req] = prof.get("canonical_points_typed") or []
+            gt[req] = prof.get("canonical_points_typed") or prof.get("elements") or []
 
     rows = [r for r in _load_csv(judge_glob) if r.get("evalStatus") == "ok"]
     if filter_repeat is not None:
