@@ -1,0 +1,630 @@
+sample_id;reqId;model;mode;testId;element_type;element_text;gherkin_test;matcher_verdict;human_verdict;notes
+1;R1;gpt-4o-mini;graph;R1_7;local;Registration mandatory fields;"Given I am on the registration page
+When I fill in the first name, last name, phone number, email address, password
+And I check the legal consent checkbox
+Then the 'Submit' button should be enabled";integration_miss;PARTIAL;Lists all mandatory fields but only the positive path (submit enabled) — the mandatory constraint (omission blocks submit) is not verified
+2;R39;gpt-4o-mini;hybrid;R39_5;local;Identifier immutability rule;"Given an account with email 'conflict@example.com' and phone number '8889990000' exists
+When a new account is created with email 'conflict@example.com' and phone number '8889990000'
+Then the account creation should fail with a conflict error";integration_miss;TRUE_MISS;Tests duplicate/uniqueness conflict on creation, not immutability — no attempt to modify an existing identifier
+3;R5;claude-haiku-4-5-20251001;graph;R5_10;refine;Activation token hashing and expiry;"Feature: Activation Link Security
+  Scenario: Active account can authenticate after successful activation
+    Given a user has registered with email ""user@example.com""
+    And the user has successfully activated their account
+    And the account status is Active
+    When the user authenticates with valid credentials
+    Then authentication should succeed
+    And the user should be granted platform access";integration_miss;TRUE_MISS;Tests post-activation login — token hashing and expiry are absent
+4;R37;gpt-4o-mini;hybrid;R37_2;cross_module;Deletion status mismatch;"Given an item is not referenced by any active rental activity
+When a request to soft delete the item is made
+Then the item should be marked as deleted in the technical status model";integration_miss;TRUE_MISS;Marks item deleted in the technical status model but does not exercise the status mismatch across representations
+5;R60c;gpt-4o-mini;vector;R60c_7;conflict;EMAIL_MARKETING_Newsletter_Force.txt;"Feature: Notification Preference Enforcement
+  Scenario: Admin user prefers email notifications
+    Given the admin user has set their notification preference to 'Email'
+    When a notification event occurs
+    Then the admin user should receive an email notification";integration_miss;TRUE_MISS;Honors the user's email preference — the forced-newsletter/marketing override rule is not present
+6;R70;claude-haiku-4-5-20251001;vector;R70_4;conflict;Price calculation logic;"Feature: Rounding Rule Consistency
+  Scenario: Pricing calculations must not be silently overridden by presentation conventions
+    Given a pricing calculation with a defined rounding rule
+    When the amount is calculated
+    Then the calculated value must not be modified by presentation-layer conventions
+    And the same rounding rule applies across all layers";integration_miss;TRUE_MISS;Asserts price calc must not be overridden by presentation and cross-layer rounding, but no actual calculation logic is exercised
+7;R51;claude-haiku-4-5-20251001;vector;R51_10;conflict;Availability calculation logic;"Given an equipment item that has just completed a rental
+And the equipment is in Maintenance status with a category-specific duration
+When a new rental request is received before the maintenance period completes
+Then the rental request shall be rejected or queued
+And the equipment shall not transition to Rented status until Maintenance is complete";integration_miss;TRUE_MISS;Covers availability during maintenance blocking, not a general availability calculation
+8;R69;claude-haiku-4-5-20251001;graph;R69_1;refine;Billing display vs storage separation;"Feature: Monetary Representation Consistency
+  Scenario: Subtotal matches when calculated directly versus derived from line items
+    Given a transaction with multiple line items
+    When the subtotal is calculated directly from the transaction
+    And the subtotal is derived by summing individual line item amounts
+    Then both subtotal values must be identical
+    And the persisted subtotal must match the displayed subtotal";integration_miss;PARAPHRASE;Directly checks that the persisted subtotal matches the displayed subtotal = display/storage separation, reworded
+9;R34;claude-haiku-4-5-20251001;vector;R34_6;local;Identifier consistency rule;"Given multiple rent records in the system
+When rent records are compared
+Then each rent record shall have a distinct identifier
+And no two rent records shall share the same identifier";integration_miss;PARTIAL;Enforces distinct identifiers (uniqueness) — the broader same-identifier-everywhere consistency is not covered
+10;R26;claude-haiku-4-5-20251001;hybrid;R26_10;cross_module;Lifecycle event notification coverage;"Feature: Rent Cancellation Rules
+  Scenario: Rent status updates to Active when rental start date is reached
+    Given a rent record exists in Approved status
+    And the rental start date is today
+    When the system processes the date transition
+    Then the rent status should be updated to Active
+    And the rent becomes eligible for cancellation by authorized users";integration_miss;TRUE_MISS;Tests status transition and cancellation eligibility — no notifications at all
+11;R103d;claude-haiku-4-5-20251001;hybrid;R103d_4;cross_module;Currency consistency gap;"Feature: Loyalty Balance Update
+  Scenario: User loyalty balance is updated immediately after points are awarded
+    Given a user has completed a rent transaction
+    And the payment status for the rent is Paid
+    And loyalty points have been calculated and assigned
+    When the system awards the loyalty points
+    Then the user's loyalty balance shall be updated immediately
+    And the updated balance shall reflect the newly awarded points";integration_miss;TRUE_MISS;Immediate balance update is touched — stored-vs-displayed currency consistency is not verified
+12;R102d;gpt-4o-mini;hybrid;R102d_7;conflict;Late return penalty calculation;"Feature: Penalty Record Security
+  Scenario: Prevent unauthorized modification of penalty records
+    Given a penalty record exists
+    When an unauthorized user attempts to modify the penalty record
+    Then the modification should be denied";integration_miss;TRUE_MISS;Access control on penalty records, not penalty calculation
+13;R63;claude-haiku-4-5-20251001;graph;R63_8;refine;Multi-currency conversion integrity;"Feature: Fractional Cent Precision
+  Scenario: Verify precise handling of fractional cents in billing
+    Given a line item cost of 10.001
+    And a billing system that requires cent-level precision
+    When the system processes the billing
+    Then the fractional cent is explicitly handled per the precision rule
+    And the handling method is documented
+    And no silent truncation or rounding occurs";integration_miss;TRUE_MISS;Fractional-cent precision only — no multi-currency conversion
+14;R80;claude-haiku-4-5-20251001;vector;R80_3;refine;Financial report accuracy rule;"Feature: Authoritative Monetary Source Consistency
+  Scenario: Currency presentation matches financial records
+    Given a transaction with authoritative currency USD
+    When the transaction is displayed to the customer
+    Then the displayed currency is USD
+    And the financial records show USD
+    And no currency conversion is applied without explicit authorization
+    And the invoice currency matches the financial record currency";integration_miss;TRUE_MISS;Currency source consistency (display=records=invoice) — report-value accuracy is not tested
+15;R25;claude-haiku-4-5-20251001;graph;R25_7;cross_module;Invoice generation rule;"Feature: End-of-rent lifecycle transition
+  Scenario: Active rent transitions to Maintenance upon end date
+    Given an authenticated user has an active rent with status 'Active'
+    And the rent has a scheduled end date of tomorrow
+    When the scheduled end date arrives
+    Then the rent status shall transition from 'Active' to 'Maintenance'
+    And the system shall record the transition timestamp";integration_miss;TRUE_MISS;Lifecycle transition to Maintenance — no invoice generation
+16;R52c;gpt-4o-mini;hybrid;R52c_7;cross_module;End-of-rent lifecycle transition;"Feature: Rent Request Approval Notifications
+  Scenario: Generate notification upon approval of rent request
+    Given a rent request is approved
+    When the approval is processed
+    Then a notification should be generated for the user";integration_miss;TRUE_MISS;Approval notification, not the end-of-rent transition
+17;R4;gpt-4o-mini;graph;R4_1;local;Multi-factor authentication (MFA) capability for login;"Feature: MFA Authentication
+  Scenario: User successfully logs in with MFA enabled
+    Given the user has MFA enabled
+    And the user enters a valid username and password
+    When the user is prompted for the second authentication factor
+    And the user provides a valid OTP code
+    Then the user should be granted access to the system";integration_miss;PARAPHRASE;Full MFA login flow (second factor + valid OTP) is tested
+18;R4;gpt-4o-mini;hybrid;R4_3;local;Multi-factor authentication (MFA) capability for login;"Feature: MFA Authentication
+  Scenario: User fails to log in with an expired OTP
+    Given the user has enabled MFA
+    And the user provides valid primary authentication
+    When the user enters an expired OTP code
+    Then the user should not be authenticated";integration_miss;PARAPHRASE;MFA login negative path (expired OTP) is tested
+19;R52c;claude-haiku-4-5-20251001;graph;R52c_6;cross_module;End-of-rent lifecycle transition;"Feature: Lifecycle Event Notification Coverage
+  Scenario: Reminder notification sent before rent end date
+    Given an active rent with an end date 2 days in the future
+    When the reminder notification trigger time is reached
+    Then a reminder notification shall be sent to authorized users
+    And the notification shall include the item identifier
+    And the notification shall include the rental period
+    And the notification shall include the rent status
+    And the notification shall remind the user of the upcoming rent end";integration_miss;TRUE_MISS;Reminder before rent end is referenced, but the end-of-rent status transition itself is not tested
+20;R44;claude-haiku-4-5-20251001;graph;R44_10;local;Real-time availability update;"Feature: Availability Calculation Excludes Inactive Rents
+  Scenario: Availability query does not count Pending or Cancelled rents
+    Given an item with 10 total units
+    And 1 rent with Pending status for 2 units
+    And 1 rent with Active status for 3 units
+    And 1 rent with Cancelled status for 2 units
+    When an availability query is executed
+    Then the query should return 7 available units
+    And only Active and Approved rents should be counted in the calculation";integration_miss;PARTIAL;Availability calculation excludes inactive rents — the real-time immediacy on change is not shown
+21;R47;claude-haiku-4-5-20251001;vector;R47_5;cross_module;Maintenance-state representation ambiguity;"Feature: Maintenance Blocking Rule
+  Scenario: Authorized user modifies maintenance period
+    Given an authorized user has permission to modify maintenance periods
+    When the user modifies the maintenance period for an item
+    Then the maintenance period is updated
+    And the blocking rule applies to the new maintenance period";integration_miss;TRUE_MISS;Modifies the maintenance period and blocking rule — the representation ambiguity is not resolved
+22;R22;claude-haiku-4-5-20251001;hybrid;R22_7;cross_module;Rent creation flow;"Feature: Sequential Rent Records
+  Scenario: System allows sequential non-overlapping rent records
+    Given an existing rent record for a rentable item ending on date B
+    When attempting to create a new rent record for the same item starting on date B or later
+    Then the rent record should be created successfully";integration_miss;PARTIAL;Exercises rent creation only in the sequential/non-overlap case
+23;R4;claude-haiku-4-5-20251001;vector;R4_8;supersede;Basic login without MFA;"Feature: MFA Capability
+  Scenario: Recovery codes generated during MFA setup
+    Given a user is setting up MFA
+    When MFA setup is completed
+    Then the system should provide recovery codes to the user";integration_miss;TRUE_MISS;About MFA recovery codes — the superseded basic-login-without-MFA behavior is absent
+24;R5;gpt-4o-mini;hybrid;R5_6;cross_module;Activation expiry / pending cleanup gap;"Given a user has clicked on a valid activation link
+When the activation is successful
+Then the system should update the account status to Active";integration_miss;TRUE_MISS;Successful activation only — no expiry or pending cleanup
+25;R93c;claude-haiku-4-5-20251001;hybrid;R93c_1;cross_module;End-of-rent lifecycle transition;"Feature: Loyalty Points Accrual
+  Scenario: Award loyalty points for completed rent with paid payment
+    Given a user has completed a rent transaction
+    And the payment status for the rent is Paid
+    When the system processes the loyalty point accrual
+    Then loyalty points shall be assigned to the user account
+    And the loyalty balance shall be updated immediately";integration_miss;TRUE_MISS;Loyalty accrual on completion — the transition itself is only assumed, not tested
+26;R72b;gpt-4o-mini;graph;R72b_1;refine;Reporting data lineage traceability;"Feature: Financial report accuracy
+  Scenario: Rounding discrepancy in exported financial reports
+    Given a financial report is generated
+    When the report is exported
+    Then the total amount should match the calculated total without rounding discrepancies";integration_miss;TRUE_MISS;Total/rounding accuracy — no data-lineage traceability
+27;R61c;gpt-4o-mini;hybrid;R61c_5;local;Mandatory notification exception handling;"Feature: Notification Logging
+  Scenario: Log notification events
+    Given the system generates a notification
+    When the notification is delivered
+    Then the system should log the generation and delivery outcomes";integration_miss;TRUE_MISS;Logs generation/delivery outcomes — no exception handling for mandatory notifications
+28;R102d;claude-haiku-4-5-20251001;vector;R102d_3;conflict;Late return penalty calculation;"Feature: Penalty Lateness Threshold Definition
+  Scenario: Penalty lateness threshold varies by machinery category
+    Given multiple machinery categories exist
+    When penalty lateness thresholds are defined
+    Then each category should have its own defined threshold
+    And Concrete Mixer threshold should differ from standard machinery threshold";integration_miss;PARTIAL;Category-specific lateness thresholds are defined — the penalty amount calculation is not tested
+29;R38;claude-haiku-4-5-20251001;hybrid;R38_6;cross_module;Rental cost calculation rule;"Feature: Backend Identifier Storage Strategy
+  Scenario: Database schema stores formal and operational identifiers
+    Given the item data model is being designed
+    When the backend engineer implements the identifier strategy
+    Then the system stores the formal specification identifier as the canonical reference
+    And the system optionally stores the warehouse-facing identifier as a secondary alias
+    And the canonical identifier is used for all downstream operations
+    And the alias is clearly marked as non-authoritative
+    And indexing and storage paths use the canonical identifier";integration_miss;TRUE_MISS;Identifier storage strategy — no rental cost calculation
+30;R63;claude-haiku-4-5-20251001;graph;R63_10;refine;Multi-currency conversion integrity;"Feature: Calculation Accuracy Audit Trail
+  Scenario: Verify audit trail captures calculation accuracy details
+    Given a calculation with fractional handling
+    When the system performs the calculation
+    Then an audit record is created
+    And the audit record includes the calculation method
+    And the audit record includes the precision/rounding rule applied
+    And the audit record includes the original and final values
+    And the audit trail is immutable and queryable";integration_miss;TRUE_MISS;Calculation audit trail — no multi-currency conversion
+31;R50;gpt-4o-mini;graph;R50_9;conflict;Maintenance period management;"Feature: Availability update on rent cancellation
+  Scenario: User cancels a rent record
+    Given an item is currently rented
+    When the user cancels the rent record
+    Then the availability status should be updated to available";integration_miss;TRUE_MISS;Availability update on cancellation — no maintenance-period management
+32;R34;gpt-4o-mini;graph;R34_3;cross_module;Identifier terminology ambiguity;"Feature: Identifier consistency rule
+  Scenario: Successful registration with unique email and phone number
+    Given no user exists with email ""unique@example.com""
+    And no user exists with phone number ""1112223333""
+    When a new user registers with email ""unique@example.com"" and phone number ""1112223333""
+    Then the registration should be successful";integration_miss;TRUE_MISS;Registration uniqueness — no identifier terminology ambiguity
+33;R103d;claude-haiku-4-5-20251001;hybrid;R103d_1;cross_module;Currency consistency gap;"Feature: Loyalty Points Accrual Consistency
+  Scenario: Award loyalty points when rent is completed and paid
+    Given a user has completed a rental transaction
+    And the rent status is ""Completed""
+    And the payment status is ""Paid""
+    When the system processes loyalty point accrual
+    Then loyalty points shall be calculated according to configured business rules
+    And the awarded points shall be stored in the user account
+    And the loyalty balance shall be updated immediately
+    And the stored balance shall match the displayed balance in the user interface";integration_miss;PARTIAL;Asserts stored loyalty balance matches the displayed balance = currency consistency, reworded
+34;R38;claude-haiku-4-5-20251001;graph;R38_5;cross_module;Item database schema (Serial ID);"Feature: Identifier Alias Consistency - Reporting for Warehouse Audience
+
+  Scenario: System outputs warehouse-facing identifier in reports for operational audience
+    Given an item has both formal specification identifier and warehouse-facing identifier
+    When a report is generated for warehouse operational audience
+    Then the report must display the warehouse-facing identifier
+    And the warehouse-facing identifier must match the stored warehouse-facing identifier
+    And the report must use warehouse-friendly terminology";integration_miss;TRUE_MISS;Warehouse-facing identifier in reports — the DB schema for the Serial ID is not tested
+35;R82b;gpt-4o-mini;vector;R82b_2;refine;Financial report accuracy rule;"Feature: Lifecycle Event Logging
+  Scenario: Logging events for a rent record
+    Given a rent record is created
+    When the system logs the lifecycle events
+    Then the log should include creation, approval, rejection, activation, completion, cancellation, and modification events";integration_miss;TRUE_MISS;Lifecycle event logging — no financial report accuracy
+36;R72b;claude-haiku-4-5-20251001;graph;R72b_9;conflict;EMAIL_DATA_Internal_Audit_Discrepancy.txt;"Feature: Financial Report Accuracy - Audit Traceability
+
+  Scenario: Financial report generation is fully auditable and traceable
+    Given a financial report generation process
+    When a report is generated
+    Then the system must log all inputs, calculations, and outputs
+    And the audit trail must be accessible to authorized reviewers
+    And the source data for each report element must be traceable
+    And any manual adjustments or overrides must be explicitly recorded
+    And the audit trail must be immutable and time-stamped";integration_miss;TRUE_MISS;Financial report audit traceability is set up — the specific internal-audit discrepancy is not exercised
+37;R25;claude-haiku-4-5-20251001;hybrid;R25_10;cross_module;Rental cost calculation rule;"Feature: End-of-rent lifecycle transition
+
+Scenario: Rent must be in Maintenance status before transitioning to Completed
+  Given a rent record with status 'Active'
+  And the rental end date has been reached
+  When the system processes the end-of-rent lifecycle event
+  Then the rent status shall be updated to 'Maintenance' first
+  And the rent shall not transition directly to 'Completed'
+  And the maintenance period must elapse before the status can change to 'Completed'";integration_miss;TRUE_MISS;End-of-rent transition — no rental cost calculation
+38;R58c;gpt-4o-mini;graph;R58c_10;refine;Mandatory notification exception handling;"Feature: Notification Delivery Timing
+  Scenario: User prefers notifications during specific hours
+    Given the user has set their notification preferences to receive notifications only during business hours
+    When the system sends notifications outside of business hours
+    Then the notifications should not be sent until the next business hour";integration_miss;TRUE_MISS;Business-hours deferral of all notifications — the mandatory-notification exception (bypass suppression) is absent
+39;R80;gpt-4o-mini;vector;R80_3;refine;Financial report accuracy rule;"Feature: Authoritative monetary source consistency
+  Scenario: International billing consistency
+    Given the authoritative monetary source is set
+    And an international billing scenario is initiated
+    When the billing is processed
+    Then the core pricing logic must not be overridden by international currency presentation";integration_miss;TRUE_MISS;Monetary source consistency (no override by presentation) — report-value accuracy is not tested
+40;R26;gpt-4o-mini;vector;R26_6;cross_module;Lifecycle event notification coverage;"Given an authorized user
+And a rent record with status Approved
+When the user attempts to modify the rent record
+Then the system should prevent the modification";integration_miss;TRUE_MISS;Modification prevention — no lifecycle-event notification
+41;R82b;gpt-4o-mini;graph;R82b_2;refine;Financial report accuracy rule;"Feature: Reporting data lineage traceability
+  Scenario: Verify completeness of audit logs
+    Given the system has recorded data lineage events
+    When the audit logs are reviewed
+    Then all data lineage events should be present in the audit logs";integration_miss;TRUE_MISS;Audit-log completeness for lineage — report-value accuracy is not tested
+42;R80;gpt-4o-mini;hybrid;R80_7;cross_module;Rounding rule consistency;"Feature: Authoritative monetary source consistency
+  Scenario: International billing consistency
+    Given the system handles international billing
+    When currency presentations are applied
+    Then they must not override core pricing logic silently";integration_miss;TRUE_MISS;Silent-override prohibition touches rounding, but rounding-rule consistency is not directly verified
+43;R62;gpt-4o-mini;graph;R62_9;cross_module;Identifier alias consistency;"Given two rentals of 30 days each at $10 per day
+When the total rental cost is calculated
+Then the total rental cost should be $600";integration_miss;TRUE_MISS;Rental cost calculation — no identifier alias consistency
+44;R33;gpt-4o-mini;hybrid;R33_5;local;Identifier format rule;"Feature: Identifier space validation
+  Scenario: Check identifier with leading and trailing spaces
+    Given I am on the item creation screen
+    When I enter an identifier with leading and trailing spaces
+    Then the identifier should be trimmed and validated accordingly";integration_miss;PARTIAL;Whitespace trimming only — the full identifier format rule (pattern/charset) is not tested
+45;R63;claude-haiku-4-5-20251001;hybrid;R63_1;refine;Monetary representation consistency;"Feature: Rental Cost Calculation Accuracy
+  Scenario: Calculate rental cost based on duration and pricing rules
+    Given a rental item with a base price of 50.00 per day
+    And a rental duration of 5 days
+    When the rental cost is calculated
+    Then the calculated cost should be 250.00
+    And the calculation should follow the pricing rules without deviation";integration_miss;TRUE_MISS;Straight cost calculation — representation consistency (stored=displayed/precision) is not tested
+46;R71b;gpt-4o-mini;vector;R71b_4;cross_module;End-of-rent lifecycle transition;"Feature: Rent Record Creation
+  Scenario: Attempt to create a rent record with the same rental period as an existing record
+    Given there is an existing rent record for item 'B' from 2023-10-01 to 2023-10-10
+    When I attempt to create a new rent record for item 'B' from 2023-10-01 to 2023-10-10
+    Then the system should prevent the creation of the new rent record
+    And an error message should be displayed indicating that overlapping rent records are not allowed.";integration_miss;TRUE_MISS;Overlap prevention on creation — no end-of-rent transition
+47;R50;claude-haiku-4-5-20251001;hybrid;R50_4;conflict;Availability query API;"Feature: Availability State Semantics Separation
+  Scenario: Availability semantics update correctly when rental completes
+    Given an item with identifier ""ITEM-005""
+    And an Active rental exists from ""2026-03-01"" to ""2026-03-10""
+    When a user queries availability for ""2026-03-05"" to ""2026-03-08""
+    Then the system returns unavailable status
+    And the response indicates the reason is ""Active Rental""
+    When the rental is marked as Completed on ""2026-03-10""
+    And the post-rental handling window expires
+    And a user queries availability for ""2026-03-05"" to ""2026-03-08""
+    Then the system returns available status
+    And the response no longer indicates rental-based unavailability";integration_miss;PARTIAL;Availability query behavior (status + reason, pre/post completion) is fully exercised
+48;R1;claude-haiku-4-5-20251001;graph;R1_3;refine;E.164 normalization + strict email validation;"Feature: Registration Form Mandatory Field Validation
+  Scenario: Submit button remains disabled when last name is empty
+    Given the registration form is displayed
+    And the first name field is filled with ""John""
+    And the email field is filled with ""user@example.com""
+    And the phone field is filled with ""1234567890""
+    And the password field is filled with ""SecurePass123""
+    And the Terms and Conditions checkbox is checked
+    When the last name field is empty
+    Then the Submit button should be disabled";integration_miss;TRUE_MISS;Mandatory last-name enforcement — E.164 phone normalization and email validation are absent
+49;R25;gpt-4o-mini;hybrid;R25_5;refine;Post-rent maintenance handling;"Feature: End-of-rent lifecycle transition
+  Scenario: Rent status remains unchanged before rental end date
+    Given the rental end date is not reached
+    When the system processes the current status
+    Then the rent status should remain unchanged";integration_miss;TRUE_MISS;Status unchanged before end date — no post-rent maintenance handling
+50;R58c;claude-haiku-4-5-20251001;hybrid;R58c_1;refine;Mandatory notification exception handling;"Feature: Notification Preference Management
+  Scenario: User toggles notification type preferences
+    Given a user is logged into the notification preferences interface
+    When the user enables notifications for rent creation events
+    And the user disables notifications for rent rejection events
+    Then the system shall store the user's notification type preferences
+    And the system shall apply these preferences when sending notifications";integration_miss;TRUE_MISS;Preference toggling — the mandatory-notification exception is absent
+51;R29;gpt-4o-mini;hybrid;R29_1;cross_module;Early completion lifecycle ambiguity;"Feature: Post-rent maintenance handling
+  Scenario: Equipment returns to rentable state after maintenance window
+    Given the maintenance window for the equipment has elapsed
+    When the system processes the equipment
+    Then the equipment should be marked as rentable again";integration_miss;TRUE_MISS;Post-maintenance return to rentable — early-completion ambiguity is not addressed
+52;R63;claude-haiku-4-5-20251001;graph;R63_1;cross_module;Financial report accuracy rule;"Feature: Calculation Accuracy Consistency
+  Scenario: Verify calculation result matches stored and displayed value
+    Given a rental calculation with base price 100.00 and duration 5 days
+    When the system calculates the total cost
+    Then the calculated value is 500.00
+    And the stored value in the database is 500.00
+    And the displayed value to the user is 500.00
+    And all three values are identical";integration_miss;PARTIAL;Calc=stored=displayed consistency — not report-level accuracy specifically
+53;R103d;claude-haiku-4-5-20251001;hybrid;R103d_8;local;Loyalty currency consistency;"Feature: Loyalty Tier Management
+  Scenario: User loyalty tier status is automatically updated based on accumulated points
+    Given a user has accumulated 500 loyalty points
+    And the configured tier threshold for the next tier is 500 points
+    When the system evaluates the user's tier status
+    Then the user's loyalty tier shall be automatically updated to the next tier
+    And the tier change shall be recorded in the user's account";integration_miss;TRUE_MISS;Loyalty tier thresholds — currency (balance stored=displayed) consistency is not tested
+54;R33;gpt-4o-mini;vector;R33_9;conflict;EMAIL_LOGISTICS_Barcode_Requirement.txt;"Given I have an identifier ""A1 B2C3D4""  
+When I validate the identifier format  
+Then the identifier should be invalid";integration_miss;TRUE_MISS;Identifier format validation (space -> invalid) touches the domain — the barcode-specific requirement is not tested
+55;R31;claude-haiku-4-5-20251001;hybrid;R31_2;refine;EMAIL_OPS_MixerSpecialRule.txt;"Feature: Maintenance Matrix Dependency - Default Category Behavior
+
+  Scenario: Standard equipment receives default 2-hour maintenance window
+    Given a non-Concrete Mixer equipment item (e.g., Jackhammer) is returned at rental end date
+    When the system processes the maintenance period
+    Then the maintenance duration shall be 120 minutes (2 hours)
+    And the status shall transition to 'Maintenance'
+    And the item shall remain unavailable for the entire 120-minute window";integration_miss;TRUE_MISS;Tests the non-mixer default (2h) branch — the mixer's special duration is not exercised
+56;R34;claude-haiku-4-5-20251001;hybrid;R34_4;cross_module;Identifier terminology ambiguity;"Feature: Legacy Identifier Representation Consistency
+  Scenario: Historical rental records use earlier identifier format
+    Given a historical rental record created in 2020 with identifier format ""RNT-20-00123""
+    And current rental records using identifier format ""RENTAL-2024-00456""
+    When the system retrieves the historical record
+    And the system retrieves a current record
+    Then both records are correctly identified despite format differences
+    And the consistency rules account for the legacy identifier representation
+    And the historical record can be linked to current system entities if needed";integration_miss;PARAPHRASE;Legacy vs current identifier representation consistency is directly tested
+57;R24;claude-haiku-4-5-20251001;vector;R24_3;cross_module;Rent creation flow;"Feature: Rent Activation Rule
+  Scenario: System prevents activation of Draft rent records
+    Given a rent record with status ""Draft""
+    And the rental start date is set to today
+    When the system processes rent activation
+    Then the rent status should remain ""Draft""
+    And an error message should indicate the record is not approved";integration_miss;TRUE_MISS;Draft activation prevention — the rent creation flow is not exercised
+58;R69;claude-haiku-4-5-20251001;hybrid;R69_7;cross_module;Price calculation logic;"Feature: Monetary Representation Consistency
+  Scenario: Rounding must not occur silently between storage and display
+    Given a stored amount of 19.995
+    When the amount is retrieved for display
+    Then the displayed amount must be 19.995 or explicitly rounded with visible indication
+    And no silent rounding to 20.00 occurs without explicit rounding rule application
+    And any rounding must be documented and consistent across all occurrences";integration_miss;TRUE_MISS;Silent-rounding prohibition between storage/display — the price calculation logic itself is not exercised
+59;R31;claude-haiku-4-5-20251001;graph;R31_9;cross_module;Missing maintenance matrix specification;"Feature: Standard Maintenance Window for Non-Concrete Mixers
+  Scenario: Non-Concrete Mixer items apply standard 2-hour maintenance window
+    Given an item that is not a Concrete Mixer
+    When a maintenance period is initiated for the item
+    Then the maintenance window duration should be 120 minutes (2 hours)
+    And the standard 2-hour rule should apply
+    And the 12-hour override should not be applied";integration_miss;PARTIAL;Defines the default maintenance window — the missing-matrix gap is only partially filled
+60;R25;gpt-4o-mini;hybrid;R25_10;cross_module;Invoice generation rule;"Feature: End-of-rent lifecycle transition
+  Scenario: Update rent status for different rental types
+    Given different types of rentals have reached their end date
+    When the system processes the end-of-rent lifecycle
+    Then all rent statuses should be updated to 'Maintenance' accordingly";integration_miss;TRUE_MISS;End-of-rent transition — no invoice generation
+61;R70;gpt-4o-mini;hybrid;R70_1;conflict;Price calculation logic;"Feature: Rounding rule consistency
+  Scenario: Verify subtotal rounding consistency
+    Given a financial transaction with a subtotal of 10.555
+    When the subtotal is rounded according to the defined rules
+    Then the rounded subtotal should be 10.56";integration_miss;PARTIAL;Concrete subtotal rounding operation — only the rounding facet of price logic
+62;R71;gpt-4o-mini;graph;R71_6;refine;Calculation accuracy rule;"Given a user makes a purchase involving USD and EUR
+When the transaction is processed
+Then the total should accurately reflect the conversion of both currencies";integration_miss;PARTIAL;Conversion-accuracy of a total is touched — the general calculation-accuracy rule is narrowly covered
+63;R70;gpt-4o-mini;hybrid;R70_4;cross_module;Authoritative monetary source consistency;"Feature: Rounding Rule Consistency
+  Scenario: Ensure rounding when tax is zero
+    Given a billing context with subtotal of 10.456
+    And a tax rate of 0.00
+    When the amounts are calculated
+    Then the subtotal should be rounded to 10.46
+    And the tax should be rounded to 0.00
+    And the final amount should be rounded to 10.46";integration_miss;TRUE_MISS;Rounding calculation — authoritative-source consistency is not tested
+64;R45;gpt-4o-mini;vector;R45_2;local;Availability query correctness;"Given the item is unavailable from 2023-10-01 to 2023-10-10
+When the user queries availability for the date range 2023-10-01 to 2023-10-05
+Then the system should return 'unavailable'";integration_miss;PARAPHRASE;Availability query correctness is directly tested
+65;R63;claude-haiku-4-5-20251001;graph;R63_3;refine;Monetary representation consistency;"Feature: Fraction Handling in Calculations
+  Scenario: Verify explicit handling of fractional amounts in calculations
+    Given a rental price of 33.33 per day
+    And a rental duration of 3 days
+    When the system calculates the total cost
+    Then the total cost is 99.99
+    And the fractional component is explicitly handled
+    And no silent rounding occurs without explicit rule application";integration_miss;PARTIAL;Fractional handling + no silent rounding — stored-vs-displayed representation consistency is not tested
+66;R5;claude-haiku-4-5-20251001;vector;R5_6;cross_module;Activation expiry / pending cleanup gap;"Feature: Activation Link Security
+  Scenario: Activation token is cryptographically secure
+    Given the system generates an activation token
+    When the token is created
+    Then the token shall be cryptographically secure
+    And the token shall not be predictable or guessable
+    And the token shall use strong cryptographic algorithms";integration_miss;TRUE_MISS;Token cryptographic security — no expiry or pending cleanup
+67;R81b;gpt-4o-mini;hybrid;R81b_2;refine;EMAIL_DATA_Internal_Audit_Discrepancy.txt;"Feature: Privacy-preserving identifiers in audit logs
+  Scenario: Using privacy-preserving identifiers
+    Given I am an authorized auditor
+    When I review the audit logs
+    Then I should see privacy-preserving identifiers instead of direct user identifiers";integration_miss;TRUE_MISS;Privacy-preserving audit identifiers — the internal-audit discrepancy content is absent
+68;R102d;gpt-4o-mini;vector;R102d_3;conflict;Late return penalty calculation;"Feature: Penalty Lateness Threshold Definition
+  Scenario: Adjust the penalty lateness threshold
+    Given the current penalty lateness threshold is 30 minutes
+    When the threshold is adjusted to 45 minutes
+    Then the new penalty lateness threshold should be 45 minutes";integration_miss;PARTIAL;Adjusts a lateness threshold — the penalty amount calculation is not tested
+69;R38;claude-haiku-4-5-20251001;vector;R38_5;cross_module;Rental cost calculation rule;"Feature: Identifier Alias Consistency
+  Scenario: Unauthorized user cannot access identity resolution
+    Given an audit view displaying privacy-preserving identifier ""PRIV-****-7890""
+    When an unauthorized user attempts to view the formal identifier mapping
+    Then the system denies access to the identity resolution
+    And the access attempt is logged for security audit";integration_miss;TRUE_MISS;Identifier access control — no rental cost calculation
+70;R25;gpt-4o-mini;graph;R25_6;cross_module;Rental cost calculation rule;"Feature: End-of-rent lifecycle transition
+  Scenario: Status does not update if rental end date is not reached
+    Given the rental end date is not reached
+    When the system processes the end-of-rent lifecycle
+    Then the status should not be updated to 'Maintenance'";integration_miss;TRUE_MISS;End-of-rent transition — no rental cost calculation
+71;R72b;claude-haiku-4-5-20251001;hybrid;R72b_4;conflict;EMAIL_DATA_Internal_Audit_Discrepancy.txt;"Feature: Financial Report Accuracy - Customer Visibility
+  Scenario: Customer-visible financial totals match underlying records
+    Given a customer views their financial summary in the billing portal
+    When the customer-visible total is compared to the underlying financial records
+    Then the displayed total must match the sum of all underlying transactions
+    And any formatting or display rounding must not alter the actual total value
+    And the source of the displayed total must be traceable to a specific record set";integration_miss;TRUE_MISS;Customer-visible total matches records (discrepancy prevention) — the specific internal-audit case is not exercised
+72;R72b;gpt-4o-mini;vector;R72b_7;conflict;EMAIL_DATA_Internal_Audit_Discrepancy.txt;"Feature: Financial Report Accuracy
+  Scenario: Check compliance of financial report format
+    Given the financial report is generated
+    When the report is reviewed for format
+    Then it should comply with the required financial reporting standards";integration_miss;TRUE_MISS;Report format compliance — the audit discrepancy content is absent
+73;R33;claude-haiku-4-5-20251001;graph;R33_2;local;Identifier format rule;"Feature: Email Format Validation
+  Scenario: Valid email format is accepted during registration
+    Given a user registration form is displayed
+    When the user enters a valid email ""user@example.com""
+    Then the email should pass format validation
+    And the registration should proceed to the next step
+  
+  Scenario: Invalid email format is rejected
+    Given a user registration form is displayed
+    When the user enters an invalid email ""notanemail""
+    Then the email should fail format validation
+    And an error message should be displayed";integration_miss;TRUE_MISS;Email format validation, not item identifier format
+74;R24;claude-haiku-4-5-20251001;hybrid;R24_2;cross_module;Rent creation flow;"Feature: Rent Activation - Manual Activation
+  Scenario: Authorized user manually activates a rent in Approved status
+    Given a rent record in Approved status
+    And the user has authorization to activate rents
+    When the authorized user requests manual activation
+    Then the rent status shall be updated to Active
+    And the activation shall be recorded with the user identifier";integration_miss;TRUE_MISS;Manual activation of an Approved rent — the creation flow is not exercised
+75;R31;claude-haiku-4-5-20251001;vector;R31_10;refine;EMAIL_OPS_MixerSpecialRule.txt;"Feature: Maintenance Status and Duration Sequencing
+  Scenario: Equipment status becomes 'Maintenance' before duration timer starts
+    Given an equipment item at rental end date
+    When the rental end date is reached
+    Then the status shall be updated to 'Maintenance'
+    And the maintenance duration shall be applied based on the equipment category";integration_miss;TRUE_MISS;Category-based maintenance duration mechanism — the mixer's special value is not specified
+76;R71;claude-haiku-4-5-20251001;vector;R71_3;refine;Calculation accuracy rule;"Feature: Multi-currency conversion integrity
+  Scenario: Price calculation remains consistent through calculation, storage, and display
+    Given a product with base price 50.00 USD and tax rate 10%
+    When the system calculates the total price through all stages
+    Then the calculation stage result shall be 55.00 USD
+    And the storage stage shall persist 55.00 USD
+    And the display stage shall show 55.00 USD
+    And all three stages shall produce identical results";integration_miss;PARTIAL;Cross-stage calc consistency (accuracy) — the broad accuracy rule is narrowly covered
+77;R58c;claude-haiku-4-5-20251001;hybrid;R58c_1;conflict;EMAIL_MARKETING_Newsletter_Force.txt;"Feature: Notification Preference Configuration
+  Scenario: User enables and disables notification types
+    Given a user is logged into the system
+    When the user navigates to notification preferences
+    And the user disables reminder notifications
+    Then reminder notifications should not be sent to the user
+    When the user enables reminder notifications
+    Then reminder notifications should be sent to the user";integration_miss;TRUE_MISS;Honors user disable of reminders — the forced-newsletter override is absent
+78;R52c;gpt-4o-mini;hybrid;R52c_3;cross_module;End-of-rent lifecycle transition;"Feature: Notification Preferences
+  Scenario: User enables specific notification types
+    Given a user has notification preferences
+    When the user enables reminder notifications
+    Then the system should send reminder notifications
+  Scenario: User disables specific notification types
+    Given a user has notification preferences
+    When the user disables reminder notifications
+    Then the system should not send reminder notifications";integration_miss;TRUE_MISS;Notification preferences — no end-of-rent transition
+79;R62;gpt-4o-mini;graph;R62_8;cross_module;Identifier alias consistency;"Given a rental period of 366 days in a leap year
+And a daily rental rate of $10
+When the rental cost is calculated
+Then the total rental cost should be $3660";integration_miss;TRUE_MISS;Rental cost calculation (leap year) — no identifier alias consistency
+80;R49;claude-haiku-4-5-20251001;hybrid;R49_8;cross_module;Requested-rent override ambiguity;"Feature: Requested-rent reservation semantics
+  Scenario: Prevent manual activation of rent not in Approved status
+    Given a rent request with status 'Requested'
+    And an authorized user with activation permissions
+    When the user attempts to manually activate the rent
+    Then the activation fails
+    And an error message indicates the rent must be in Approved status before activation";integration_miss;PARTIAL;Requested-rent cannot be activated (must be Approved) — resolves part of the override ambiguity
+81;R61;gpt-4o-mini;graph;R61_8;local;Pricing configuration rule;"Feature: Store calculated price
+  Scenario: Store calculated price with the rent record
+    Given a rentable item with a defined price
+    And a rental duration of 4 hours
+    When the system calculates the total rental cost
+    Then the calculated price should be stored with the rent record";integration_miss;TRUE_MISS;Uses a configured price and stores the calc — the pricing configuration rule itself is not tested
+82;R72b;gpt-4o-mini;hybrid;R72b_5;cross_module;Financial source-of-truth ambiguity;"Feature: Financial report accuracy
+  Scenario: Impact of rounding on totals
+    Given a financial report with multiple line items
+    When the report is calculated with rounding rules
+    Then the total must reflect accurate rounding without discrepancies";integration_miss;TRUE_MISS;Rounding accuracy of totals — the source-of-truth ambiguity is not resolved
+83;R80;gpt-4o-mini;hybrid;R80_8;refine;Financial report accuracy rule;"Feature: Authoritative monetary source consistency
+  Scenario: Discrepancy detection in financial outputs
+    Given the authoritative monetary source is set
+    When comparing financial outputs
+    Then there should be no discrepancies found";integration_miss;TRUE_MISS;Checks financial outputs for discrepancies generically — the specific accuracy rule is not detailed
+84;R72b;claude-haiku-4-5-20251001;vector;R72b_5;refine;Reporting data lineage traceability;"Feature: Financial Report Accuracy
+  Scenario: Payment status transitions are accurately reflected in reports
+    Given a transaction with initial payment status 'pending'
+    When the payment status is updated to 'completed'
+    And a financial report is generated
+    Then the report shall display the current payment status as 'completed'
+    And the status change shall be recorded with a timestamp
+    And historical status values shall be retrievable";integration_miss;PARTIAL;Payment-status history retrievable/timestamped (traceability) — full data lineage is broader
+85;R49;claude-haiku-4-5-20251001;hybrid;R49_8;refine;Overlap prevention rule;"Feature: Activation Status Validation
+  Scenario: Attempt to activate a rent record not in Approved status
+    Given an authorized user
+    And a rent record with status 'Requested'
+    When the authorized user attempts to activate the rent record
+    Then the activation is rejected
+    And an error message indicates the record must be in 'Approved' status";integration_miss;TRUE_MISS;Activation status gating — no overlap prevention
+86;R72b;gpt-4o-mini;hybrid;R72b_1;conflict;EMAIL_DATA_Internal_Audit_Discrepancy.txt;"Feature: Financial report accuracy
+  Scenario: Rounding discrepancies in exported financial reports
+    Given a financial report is generated
+    When the report is exported
+    Then the report should not contain any rounding discrepancies";integration_miss;TRUE_MISS;No rounding discrepancies on export (discrepancy prevention) — the specific internal-audit case is not exercised
+87;R69;gpt-4o-mini;vector;R69_4;refine;Calculation accuracy rule;"Feature: Monetary Representation in Calculations
+  Scenario: Ensure monetary values are represented correctly in calculations
+    Given a monetary value of $150.00
+    When I multiply it by 2
+    Then the result should be $300.00
+    And the result should be represented as a monetary value";integration_miss;PARTIAL;Simple monetary multiplication accuracy — a narrow slice of the accuracy rule
+88;R84b;gpt-4o-mini;hybrid;R84b_4;cross_module;Delivery and rent lifecycle synchronization ambiguity;"Given the user has selected delivery for the rent
+When the user confirms the rent
+Then the system should create a delivery record associated with the rent record";integration_miss;TRUE_MISS;Creates the delivery-rent association — lifecycle synchronization over time is not tested
+89;R60c;claude-haiku-4-5-20251001;hybrid;R60c_4;cross_module;Marketing vs system notification boundary ambiguity;"Feature: Reminder Notification Preference Enforcement
+  Scenario: User-disabled reminder notifications are not sent
+    Given a user has disabled ""Reminder Notifications"" in their preferences
+    And a rent is scheduled to start in 24 hours
+    When the reminder notification trigger fires
+    Then no reminder notification is sent to the user
+    And the suppression is logged with the user preference reason";integration_miss;TRUE_MISS;Suppresses reminders by preference — the marketing-vs-system boundary/classification is absent
+90;R72b;claude-haiku-4-5-20251001;graph;R72b_8;cross_module;Financial source-of-truth ambiguity;"Feature: Financial Report Accuracy - Billing Record Alignment
+
+  Scenario: Generated reports align with underlying billing records
+    Given a set of billing records in the system
+    When a financial report is generated from these records
+    Then the report totals must match the sum of underlying billing records
+    And line-item amounts must correspond to specific billing records
+    And any aggregations or transformations must be documented
+    And discrepancies must trigger an alert and prevent report finalization";integration_miss;PARTIAL;Reports must align to underlying billing records (source alignment) — addresses part of source-of-truth
+91;R29;gpt-4o-mini;hybrid;R29_7;cross_module;Early completion lifecycle ambiguity;"Feature: Manual Availability Restrictions
+  Scenario: Manual non-rentable period defined
+    Given a manual non-rentable period is set for an item
+    When a rental request is made during this period
+    Then the rental request should be denied";integration_miss;TRUE_MISS;Manual non-rentable period denial — early-completion ambiguity is not addressed
+92;R103d;claude-haiku-4-5-20251001;hybrid;R103d_1;cross_module;Currency consistency gap;"Feature: Loyalty Points Accrual
+  Scenario: User earns loyalty points when rent is completed and payment is paid
+    Given a user has completed a rent transaction
+    And the payment status for the rent is Paid
+    When the system processes the loyalty points accrual
+    Then loyalty points shall be assigned to the user account
+    And the loyalty points shall be calculated according to configured business rules";integration_miss;TRUE_MISS;Loyalty accrual only — currency/balance consistency is not tested
+93;R38;claude-haiku-4-5-20251001;graph;R38_3;cross_module;Rental cost calculation rule;"Feature: Identifier Alias Consistency - Modification Workflow
+
+  Scenario: System preserves identifier consistency when modifying item
+    Given an item exists with formal specification identifier and warehouse-facing identifier
+    When the item is modified and changes are saved
+    Then the formal specification identifier must remain unchanged
+    And the warehouse-facing identifier must remain unchanged
+    And both identifiers must be consistent with their original values
+    And the modification must not corrupt identifier aliases";integration_miss;TRUE_MISS;Identifier alias consistency on modification — no rental cost calculation
+94;R70;gpt-4o-mini;vector;R70_10;conflict;Price calculation logic;"Given a final amount of -200.1234
+When applying the rounding rule
+Then the final amount should be rounded to -200.12";integration_miss;PARTIAL;Concrete negative-amount rounding operation — only the rounding facet of price logic
+95;R33;gpt-4o-mini;vector;R33_4;supersede;Item database schema (Serial ID);"Given I have an identifier ""a1B2C3D4""  
+When I validate the identifier format  
+Then the identifier should be valid";integration_miss;PARTIAL;Serial-ID-like identifier format validation — the DB schema is not tested
+96;R31;claude-haiku-4-5-20251001;vector;R31_5;refine;EMAIL_OPS_MixerSpecialRule.txt;"Feature: Dynamic Maintenance Matrix
+  Scenario: Maintenance duration varies by equipment category
+    Given multiple equipment items of different categories
+    When each equipment item enters 'Maintenance' status
+    Then the maintenance duration for each item shall be determined by its Equipment Category";integration_miss;TRUE_MISS;Category-based maintenance duration mechanism — the mixer's special value is not specified
+97;R6;claude-haiku-4-5-20251001;hybrid;R6_5;cross_module;Activation expiry / pending cleanup gap;"Feature: Data Minimization on Cleanup
+  Scenario: Personal data is removed when Pending account is automatically deleted
+    Given a user account is in Pending status
+    And the account has been in Pending status for more than 30 days
+    When the automatic cleanup process deletes the account
+    Then all associated personal data shall be removed from the system
+    And only minimal audit logs required by retention policy shall remain";integration_miss;PARTIAL;Pending-account cleanup after the 30-day expiry is directly tested
+98;R50;gpt-4o-mini;hybrid;R50_1;conflict;Availability query API;"Given there are no active or approved rent records for item X
+When I request the availability status for item X for the period from date A to date B
+Then the system should return 'available' for item X";integration_miss;TRUE_MISS;Availability query returns 'available' when no active/approved rents exist — query behavior tested
+99;R82b;claude-haiku-4-5-20251001;graph;R82b_4;refine;Financial report accuracy rule;"Feature: Sensitive Information Protection in Audit Logs
+  Scenario: Sensitive data is not exposed in raw audit log entries
+    Given an audit log entry is created for a security-relevant event
+    When the audit log entry is stored
+    Then the system shall not expose sensitive information in raw log entries
+    And sensitive data shall be masked or redacted as appropriate
+    And authorized reviewers shall have access to controlled identity-resolution paths when needed";integration_miss;TRUE_MISS;Audit-log sensitive-data protection — financial report accuracy is absent
+100;R63;claude-haiku-4-5-20251001;graph;R63_3;refine;Monetary representation consistency;"Feature: Fraction Handling in Calculations
+  Scenario: Verify explicit handling of fractional amounts in calculations
+    Given a rental price of 33.33 per day
+    And a rental duration of 3 days
+    When the system calculates the total cost
+    Then the total cost is 99.99
+    And the fractional component is explicitly handled
+    And no silent rounding occurs without explicit rule application";integration_miss;PARTIAL;Fractional handling + no silent rounding — stored-vs-displayed representation consistency is not tested
