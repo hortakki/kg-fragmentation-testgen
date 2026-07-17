@@ -1,0 +1,176 @@
+========================================================================
+H1 CONFIRMATORY ANALYSIS PLAN — pre-run specification (review before running)
+Preregistered per-dimension mixed model; recovers the test the prereg specified
+but the implemented 07_hypothesis_analysis.py never ran.
+Status: PLAN ONLY. No analysis has been run. Local statistics on existing data;
+zero LLM/API calls. Freeze this plan (Sections 5–13) BEFORE execution.
+========================================================================
+
+0. WHY THIS PLAN EXISTS
+   - Preregistration specified six per-dimension mixed models (random intercept
+     over reqId, mandatory mode×model interaction, Holm on the primary family,
+     standardized effects + 95% CI, ordinal/non-parametric sensitivity).
+   - 07_hypothesis_analysis.py::run_h1() computes only descriptive means and raw
+     mode-minus-vector differences — no MixedLM, no CI, no p-values, no Holm.
+   - The manuscript's long-format OLS (score ~ mode × dimension_class + model,
+     cluster-robust, N=23,076) tests a DIFFERENT estimand (a class-level omnibus).
+     It is retained as an added omnibus analysis and is NOT the preregistered H1
+     test (see Section 14). This plan runs the preregistered confirmatory test.
+
+1. ANALYSIS POPULATION (exact filter)
+   - evalStatus == "ok"
+   - repeatIndex == 0            (repeat-0 is the preregistered main analysis)
+   - pipeline == "full"          (H1 compares retrieval MODES; ablations excluded)
+   - mode in {vector, graph, hybrid}
+   Expected n = 3,846 test-level rows (65 reqs × 2 generators × 3 modes, minus
+   attrition). Confirm the realized per-cell counts before modeling (they are
+   ~624–650 per mode×model; report them).
+
+2. DATA SOURCES & JOIN
+   - Subjective endpoints: h1_export.csv (six judge scores, 1–5, 3,846 rows).
+   - Objective endpoint:    h2_export.csv column coverage_score (same keys).
+   - Join key: (reqId, testId, mode, model). One-to-one; report unmatched = 0.
+   - No re-judging, no re-scoring; read-only.
+
+3. ENDPOINTS (from preregistration §8)
+   PRIMARY (confirmatory, directional graph>vector, hybrid>vector):
+     P1 target_specificity   (context dim)
+     P2 evidence_grounding   (context dim)
+     P3 coverage             (context dim)
+     P4 coverage_score       (objective reference; context construct)
+   SECONDARY:
+     S1 overall_score
+   MANIPULATION-CHECK (equivalence-style, NOT directional, NOT in Holm family):
+     M-a requirement_alignment   <-- FORMAL dim per prereg (see note)
+     M-b gherkin_quality         (formal)
+     M-c executability           (formal)
+
+   NOTE (settles the earlier "context dims" question): requirement_alignment is a
+   FORMAL / manipulation-check dimension in the preregistration, NOT a primary
+   context endpoint. Therefore the graph>vector effect on requirement_alignment
+   found in the equivalence tests (b≈+0.28, p≈.002) is an effect on a formal
+   manipulation-check dimension, reported descriptively/exploratory — it does NOT
+   confirm or threaten the H1 primary context-dimension hypotheses.
+
+4. MODEL SPECIFICATION (one model per endpoint)
+   statsmodels MixedLM, test-level observations, restricted ML (REML) default.
+   Formula:   score ~ C(mode) * C(model)
+   Random:    random intercept, groups = reqId
+   Pipeline covariate: the preregistered base was
+                score ~ C(mode)*C(model) + C(pipeline)
+     After the pipeline=="full" restriction, pipeline is constant and NOT
+     estimable; it is omitted. State verbatim in Methods:
+       "Following restriction of H1 to full-pipeline retrieval-mode conditions,
+        the preregistered pipeline covariate was constant and was therefore
+        omitted from the estimable model."
+   The mode×model interaction is retained (preregistered as mandatory); generators
+   are NOT pooled.
+
+5. REFERENCE LEVELS & CONTRAST CODING
+   - Treatment (dummy) coding.
+   - mode reference = vector          -> graph, hybrid effects are vs vector.
+   - model reference = claude-haiku   -> cosmetic; all four generator-specific
+     contrasts are recovered by linear combination regardless of reference.
+
+6. CONTRASTS OF INTEREST (per primary endpoint)
+   Generator-specific (because interaction is in the model):
+     C1 graph  - vector | Haiku
+     C2 hybrid - vector | Haiku
+     C3 graph  - vector | GPT-4o-mini
+     C4 hybrid - vector | GPT-4o-mini
+   Average-across-generator (main-effect contrasts):
+     A1 graph  - vector (averaged)
+     A2 hybrid - vector (averaged)
+   Each contrast is a linear combination a'β; SE = sqrt(a'Σa) from the model
+   covariance; 95% CI = estimate ± 1.96·SE (Wald). Report point estimate on the
+   1–5 scale, standardized effect (Section 8), CI, and p.
+   >> DECISION 1 (Section 16): is the CONFIRMATORY family the six averaged
+      contrasts (A1,A2 × P1..P3) or the twelve generator-specific ones? Default
+      proposal below.
+
+7. STANDARDIZATION
+   Standardized effect = raw contrast / SD_pooled(endpoint), where SD_pooled is the
+   within-cell pooled SD of that endpoint over the analysis population (report the
+   SD used). Report BOTH raw (points) and standardized (d-like) with 95% CI. No
+   bare p-values anywhere (prereg requirement).
+
+8. INFERENCE
+   - Wald z-based CIs and p-values from MixedLM (statsmodels MixedLM does not
+     provide Satterthwaite df; state normal-approximation as a limitation, or use
+     the OLS-cluster fallback in Section 12 for a df-based cross-check).
+   - Report effect + 95% CI + p + Holm-adjusted p for every primary contrast.
+
+9. MULTIPLICITY POLICY (single, stated — resolves review M10)
+   >> DECISION 1 default proposal: the confirmatory family = the six averaged
+      primary context contrasts:
+        {A1,A2} × {target_specificity, evidence_grounding, coverage}
+      Holm–Bonferroni across these six. The objective endpoint (coverage_score)
+      is reported in the same family as a seventh test OR as a pre-specified
+      corroborating endpoint — DECISION 2. Generator-specific contrasts (C1..C4)
+      are reported as pre-specified secondary/descriptive detail, not Holm-
+      corrected. This is ONE policy applied consistently; the ad hoc Bonferroni
+      mentions elsewhere are removed.
+
+10. FORMAL-DIMENSION (MANIPULATION-CHECK) TREATMENT
+    For requirement_alignment, gherkin_quality, executability: fit the same model,
+    report mode contrasts as effect size + 95% CI (equivalence-style, descriptive).
+    The |d|=0.2 TOST (already computed) is labeled POST-SPECIFIED (the prereg fixed
+    no SESOI/margin). Note requirement_alignment's graph>vector here as exploratory.
+
+11. ORDINAL / NON-PARAMETRIC SENSITIVITY (prereg accepts either)
+    Default: cell-median non-parametric sensitivity — compute the per-(reqId,model)
+    cell median for each endpoint, then a Wilcoxon signed-rank test on the paired
+    graph−vector and hybrid−vector cell-median differences across requirements.
+    Report concordance with the MixedLM in ONE sentence. (Proportional-odds ordinal
+    mixed models are an acceptable alternative but are not reliably available in
+    statsmodels; cell-median is the robust, reproducible choice.)
+
+12. CONVERGENCE / SINGULARITY HANDLING (fixed a priori)
+    (a) Fit MixedLM with the default optimizer; if non-convergence, retry with
+        method=['lbfgs','nm'] and reasonable start_params.
+    (b) If the reqId random-effect variance is estimated at/near 0 (singular fit),
+        report that explicitly AND fall back to OLS with requirement-cluster-robust
+        SEs (cluster=reqId, small-sample correction, df=G−1) as the estimable model,
+        clearly labeled. Do NOT silently drop the random effect.
+    (c) Log convergence status per endpoint in the output.
+
+13. RELATIONSHIP TO THE EXISTING LONG-FORMAT OLS (do not relabel)
+    The manuscript OLS (mode × dimension_class, N=23,076) stays as an added
+    class-level omnibus test answering "does the mode effect differ on average
+    between formal and context dimension classes." It is NOT the preregistered H1
+    test and must not be presented as such. This plan's per-dimension MixedLM is
+    the confirmatory H1 test.
+
+14. OUTPUTS
+    - analysis/h1_mixedlm_results.csv : one row per (endpoint, term) with coef, SE,
+      z, p, 95% CI, convergence flag, RE variance.
+    - analysis/h1_contrasts.csv : one row per (endpoint, contrast) with raw diff,
+      pooled SD, standardized effect, 95% CI, p, Holm-p, direction-vs-prereg,
+      verdict (confirmed / not confirmed / equivalence).
+    - analysis/h1_sensitivity.csv : cell-median Wilcoxon results per contrast.
+    - stdout summary table for pasting; a one-line convergence log per endpoint.
+    - Metadata JSON: input hashes (h1_export, h2_export), filter, formula, seed,
+      package versions, timestamp.
+
+15. REPRODUCIBILITY
+    Fixed RNG only used for any tie-breaking; none expected. Record statsmodels /
+    numpy / scipy versions and input file hashes in the metadata JSON. No network.
+
+16. DECISIONS REQUIRED FROM THE RESEARCHER BEFORE RUNNING
+    D1. Confirmatory Holm family = six averaged primary context contrasts (default)
+        OR twelve generator-specific contrasts? (Prereg says "family of primary
+        endpoints" without enumerating; this must be locked and stated once.)
+    D2. Is objective coverage_score inside the Holm family (7th test) or a
+        pre-specified corroborating endpoint reported separately?
+    D3. Confirm requirement_alignment is FORMAL (manipulation-check), per prereg §8
+        — plan assumes yes.
+    D4. Standardization denominator = within-cell pooled SD per endpoint (default)
+        — confirm or specify full-sample SD.
+    D5. Primary reporting = averaged contrasts with generator-specific as secondary
+        (default), consistent with D1.
+
+    Once D1–D5 are confirmed (or amended), the plan is frozen and the analysis is
+    run exactly as written; results then update Methods §3.7, Results §4.2, and
+    Appendix A row 1 (the H1 placeholder), with the deviations table noting that the
+    confirmatory MixedLM was run at revision time from preregistered specifications.
+========================================================================
