@@ -205,13 +205,15 @@ especially the distinction between per-test and suite-level measures.
 The large raw evaluation files are retained exclusively on the author's
 local computer because of upload constraints. They are not available for
 public download from GitHub or the archive. The two main repeat-0 judge CSVs
-are approximately **70 MB each**, as reported by the author. Their local
-retention is distinct from the availability of the compact public exports.
+are **207 MB** (6,444 rows) and **138 MB** (3,846 rows), measured on the
+author's copies; both exceed GitHub's 100 MB per-file limit, so neither can
+be tracked in Git without LFS. Their local retention is distinct from the
+availability of the compact public exports.
 
 | File or record | Rows | Availability in the documented snapshot |
 |---|---:|---|
-| `evaluations/llm_eval_runs_.csv_20260711_060531.csv` | 6,444 | Main judge detail file retained locally only; summary and metadata are in Git. |
-| `llm_eval_runs_.csv_20260710_172326.csv` | 3,846 | Original full-pipeline judge detail file retained locally only; summary and metadata are in Git. Its exclusion rule names the `evaluations/superseded/` location. |
+| `evaluations/llm_eval_runs_.csv_20260711_060531.csv` | 6,444 | Main judge detail file, 207 MB, retained locally only; summary and metadata are in Git. |
+| `llm_eval_runs_.csv_20260710_172326.csv` | 3,846 | Original full-pipeline judge detail file, 138 MB, retained locally only; summary and metadata are in Git. Its exclusion rule names the `evaluations/superseded/` location. |
 | `evaluations/objective_evaluation_details_runs_.csv_20260709_183209.csv` | 14,174 | Large frozen-reference detail file outside the public package; summary and metadata are in Git. |
 | `evaluations/objective/objective_evaluation_details_runs.csv_20260708_172151.csv` | 14,174 | Large draft-reference detail file outside the public package; summary and metadata are in Git. |
 | `logs/`, `cache/`, `.cache/`, `nincs_cache/` | — | Local logs and caches are excluded. An ignore rule does not establish that a particular historical console transcript was saved. |
@@ -295,9 +297,16 @@ The offline statistical entry points above do not require new model calls.
   gates are not included in the documented snapshot. The R1 pilot evaluation
   files do not themselves supply that gate report.
 * `11_sensitivity_attrition.py` uses a broad judge-file wildcard and prints to
-  the console. A historical resolved input list and separate saved transcript
-  are not archived in the documented package. A new execution should record
-  its actual input files and avoid counting overlapping judge passes twice.
+  the console, so no historical resolved input list or saved transcript is
+  archived. The reported result is nevertheless reproducible from the
+  committed `h1_export.csv`: worst-case scale-minimum imputation shifts the
+  coverage cell means by 0.000/0.000/0.033 (Haiku graph/hybrid/vector) and
+  0.020/0.015/0.054 (GPT graph/hybrid/vector), and the six-dimension cell
+  means by at most 0.104 (GPT vector). The per-cell counts match the
+  `per_cell` block of `analysis/h1_metadata.json`, which also establishes
+  that the historical run read a single judge's rows: a run that had also
+  matched the cross-judge file would have produced negative miss counts.
+  A new execution should still name its input files explicitly.
 * Separate implementations/outputs for the original main H3 regression and
   the 23,076-observation class-level omnibus remain unidentified. Available
   related models are mapped explicitly in `RESULTS_MAP.md`.
