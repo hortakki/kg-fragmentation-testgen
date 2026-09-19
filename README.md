@@ -316,8 +316,10 @@ The offline statistical entry points above do not require new model calls.
   records per annotator. Preserve the as-received files and use documented
   normalized copies for machine analysis. In `m2_annotation/A_reference.csv`,
   item 65 has no verdict: 64 of 65 exported items were answered.
-* A package-wide SHA-256 manifest, complete environment lock and complete
-  graph-reconstruction package are not included in this snapshot.
+* A complete environment lock and a complete graph-reconstruction package
+  are not included in this snapshot. Per-file checksums are not published
+  separately: the archive is a synchronized snapshot of this repository, so
+  the commit hash identifies the exact content.
 
 ## Citation and licensing
 
